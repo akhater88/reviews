@@ -201,10 +201,10 @@ class BranchResource extends Resource
             ])
             ->actions([
                 Tables\Actions\Action::make('view_report')
-                    ->label('عرض التقرير')
-                    ->icon('heroicon-o-chart-bar')
+                    ->label('عرض التفاصيل')
+                    ->icon('heroicon-o-eye')
                     ->color('info')
-                    ->url(fn (Branch $record): string => route('filament.admin.pages.branch-report', ['branch' => $record->id])),
+                    ->url(fn (Branch $record): string => static::getUrl('edit', ['record' => $record])),
                 Tables\Actions\EditAction::make()
                     ->label('تعديل'),
                 Tables\Actions\DeleteAction::make()
