@@ -20,6 +20,7 @@ class RecentReviewsWidget extends BaseWidget
         return $table
             ->query(
                 Review::query()
+                    ->whereHas('branch') // Enforce tenant scope through branch relationship
                     ->with('branch')
                     ->latest('review_date')
                     ->limit(10)

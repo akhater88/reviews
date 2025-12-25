@@ -15,9 +15,11 @@ class SentimentOverview extends ChartWidget
 
     protected function getData(): array
     {
-        $positive = Review::where('sentiment', 'positive')->count();
-        $neutral = Review::where('sentiment', 'neutral')->count();
-        $negative = Review::where('sentiment', 'negative')->count();
+        // Filter reviews through branch relationship to enforce tenant scope
+        // (Branch model has BelongsToTenant trait which applies tenant filtering)
+        $positive = Review::whereHas('branch')->where('sentiment', 'positive')->count();
+        $neutral = Review::whereHas('branch')->where('sentiment', 'neutral')->count();
+        $negative = Review::whereHas('branch')->where('sentiment', 'negative')->count();
 
         return [
             'datasets' => [

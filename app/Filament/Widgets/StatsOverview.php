@@ -15,9 +15,11 @@ class StatsOverview extends BaseWidget
     protected function getStats(): array
     {
         $totalBranches = Branch::count();
-        $totalReviews = Review::count();
-        $avgRating = Review::avg('rating') ?? 0;
-        $pendingReplies = Review::where('needs_reply', true)->count();
+        // Filter reviews through branch relationship to enforce tenant scope
+        // (Branch model has BelongsToTenant trait which applies tenant filtering)
+        $totalReviews = Review::whereHas('branch')->count();
+        $avgRating = Review::whereHas('branch')->avg('rating') ?? 0;
+        $pendingReplies = Review::whereHas('branch')->where('needs_reply', true)->count();
 
         return [
             Stat::make('إجمالي الفروع', $totalBranches)
