@@ -453,8 +453,8 @@ class GoogleSettings extends Page implements HasForms, HasTable
                 TextColumn::make('sync_status')
                     ->label('حالة المزامنة')
                     ->badge()
-                    ->formatStateUsing(fn ($state) => $state ? SyncStatus::from($state)->label() : '-')
-                    ->color(fn ($state) => $state ? SyncStatus::from($state)->color() : 'gray'),
+                    ->formatStateUsing(fn ($state) => $state instanceof SyncStatus ? $state->label() : ($state ? SyncStatus::from($state)->label() : '-'))
+                    ->color(fn ($state) => $state instanceof SyncStatus ? $state->color() : ($state ? SyncStatus::from($state)->color() : 'gray')),
 
                 TextColumn::make('last_synced_at')
                     ->label('آخر مزامنة')
