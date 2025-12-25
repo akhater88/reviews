@@ -428,14 +428,14 @@ class GoogleSettings extends Page implements HasForms, HasTable
                 TextColumn::make('source')
                     ->label('المصدر')
                     ->badge()
-                    ->formatStateUsing(fn ($state) => $state ? BranchSource::from($state)->label() : '-')
-                    ->color(fn ($state) => $state ? BranchSource::from($state)->color() : 'gray'),
+                    ->formatStateUsing(fn ($state) => $state instanceof BranchSource ? $state->label() : ($state ? BranchSource::from($state)->label() : '-'))
+                    ->color(fn ($state) => $state instanceof BranchSource ? $state->color() : ($state ? BranchSource::from($state)->color() : 'gray')),
 
                 TextColumn::make('branch_type')
                     ->label('النوع')
                     ->badge()
-                    ->formatStateUsing(fn ($state) => $state ? BranchType::from($state)->label() : '-')
-                    ->color(fn ($state) => $state ? BranchType::from($state)->color() : 'gray'),
+                    ->formatStateUsing(fn ($state) => $state instanceof BranchType ? $state->label() : ($state ? BranchType::from($state)->label() : '-'))
+                    ->color(fn ($state) => $state instanceof BranchType ? $state->color() : ($state ? BranchType::from($state)->color() : 'gray')),
 
                 TextColumn::make('linkedBranch.name')
                     ->label('مرتبط مع')
