@@ -31,9 +31,9 @@ class GoogleBusinessService
 
     public function __construct()
     {
-        $this->clientId = config('services.google.client_id');
-        $this->clientSecret = config('services.google.client_secret');
-        $this->redirectUri = config('services.google.redirect_uri');
+        $this->clientId = config('services-google.google.client_id');
+        $this->clientSecret = config('services-google.google.client_secret');
+        $this->redirectUri = config('services-google.google.redirect_uri');
     }
 
     /**
