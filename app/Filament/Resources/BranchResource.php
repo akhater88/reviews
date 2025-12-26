@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\BranchType;
 use App\Filament\Resources\BranchResource\Pages;
 use App\Jobs\SyncBranchReviewsJob;
 use App\Models\Branch;
@@ -204,6 +205,32 @@ class BranchResource extends Resource
                             ->step(0.00000001)
                             ->disabled(fn (string $operation): bool => $operation === 'create')
                             ->dehydrated(),
+                    ])->columns(2),
+
+                Forms\Components\Section::make('نوع الفرع')
+                    ->description('حدد نوع الفرع (فرعي أو منافس)')
+                    ->schema([
+                        Forms\Components\Select::make('branch_type')
+                            ->label('نوع الفرع')
+                            ->options([
+                                BranchType::OWNED->value => 'فرعي (تابع لي)',
+                                BranchType::COMPETITOR->value => 'منافس',
+                            ])
+                            ->default(BranchType::OWNED->value)
+                            ->required()
+                            ->live()
+                            ->helperText('اختر "منافس" لمتابعة مراجعات المنافسين ومقارنتها بفروعك'),
+
+                        Forms\Components\Select::make('linked_branch_id')
+                            ->label('ربط مع فرع للمقارنة')
+                            ->options(function () {
+                                return Branch::where('branch_type', BranchType::OWNED->value)
+                                    ->pluck('name', 'id')
+                                    ->toArray();
+                            })
+                            ->placeholder('اختر فرع للمقارنة')
+                            ->helperText('اختر أحد فروعك لمقارنة أداء المنافس معه')
+                            ->visible(fn (Forms\Get $get) => $get('branch_type') === BranchType::COMPETITOR->value),
                     ])->columns(2),
 
                 Forms\Components\Section::make('الإعدادات')
