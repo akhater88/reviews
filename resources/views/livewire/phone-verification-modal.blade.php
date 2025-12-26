@@ -116,58 +116,106 @@
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 text-center">
                                 رمز التحقق (6 أرقام)
                             </label>
-                            <div class="flex justify-center gap-1.5" dir="ltr" x-data="{
-                                otp: @entangle('otp'),
-                                inputs: [],
-                                focusNext(index) {
-                                    if (index < 5) {
-                                        this.$refs['otp' + (index + 1)].focus();
+                            <div
+                                class="flex justify-center gap-2"
+                                dir="ltr"
+                                x-data="{
+                                    digits: ['', '', '', '', '', ''],
+                                    init() {
+                                        this.$nextTick(() => {
+                                            if (this.$refs.digit0) {
+                                                this.$refs.digit0.focus();
+                                            }
+                                        });
+                                    },
+                                    updateOtp() {
+                                        $wire.set('otp', this.digits.join(''));
+                                    },
+                                    handleInput(index, event) {
+                                        const value = event.target.value.replace(/\D/g, '');
+                                        if (value.length > 0) {
+                                            this.digits[index] = value.charAt(0);
+                                            event.target.value = this.digits[index];
+                                            this.updateOtp();
+                                            if (index < 5) {
+                                                this.$refs['digit' + (index + 1)].focus();
+                                            }
+                                            if (this.digits.every(d => d !== '')) {
+                                                $wire.verifyOtp();
+                                            }
+                                        } else {
+                                            this.digits[index] = '';
+                                            event.target.value = '';
+                                            this.updateOtp();
+                                        }
+                                    },
+                                    handleKeydown(index, event) {
+                                        if (event.key === 'Backspace') {
+                                            if (this.digits[index] === '' && index > 0) {
+                                                this.$refs['digit' + (index - 1)].focus();
+                                            } else {
+                                                this.digits[index] = '';
+                                                event.target.value = '';
+                                                this.updateOtp();
+                                            }
+                                        } else if (event.key === 'ArrowLeft' && index > 0) {
+                                            this.$refs['digit' + (index - 1)].focus();
+                                        } else if (event.key === 'ArrowRight' && index < 5) {
+                                            this.$refs['digit' + (index + 1)].focus();
+                                        }
+                                    },
+                                    handlePaste(event) {
+                                        event.preventDefault();
+                                        const paste = event.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                                        for (let i = 0; i < 6; i++) {
+                                            this.digits[i] = paste[i] || '';
+                                            if (this.$refs['digit' + i]) {
+                                                this.$refs['digit' + i].value = this.digits[i];
+                                            }
+                                        }
+                                        this.updateOtp();
+                                        if (paste.length === 6) {
+                                            $wire.verifyOtp();
+                                        }
                                     }
-                                },
-                                focusPrev(index) {
-                                    if (index > 0) {
-                                        this.$refs['otp' + (index - 1)].focus();
-                                    }
-                                },
-                                handleInput(index, value) {
-                                    let chars = this.otp.split('');
-                                    chars[index] = value;
-                                    this.otp = chars.join('');
-                                    if (value && index < 5) {
-                                        this.focusNext(index);
-                                    }
-                                    if (this.otp.length === 6 && !this.otp.includes('')) {
-                                        $wire.verifyOtp();
-                                    }
-                                },
-                                handleKeydown(index, event) {
-                                    if (event.key === 'Backspace' && !this.otp[index]) {
-                                        this.focusPrev(index);
-                                    }
-                                },
-                                handlePaste(event) {
-                                    event.preventDefault();
-                                    const paste = event.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-                                    this.otp = paste.padEnd(6, '').slice(0, 6);
-                                    if (paste.length === 6) {
-                                        $wire.verifyOtp();
-                                    }
-                                }
-                            }">
-                                @for($i = 0; $i < 6; $i++)
-                                    <input
-                                        type="text"
-                                        maxlength="1"
-                                        x-ref="otp{{ $i }}"
-                                        :value="otp[{{ $i }}] || ''"
-                                        @input="handleInput({{ $i }}, $event.target.value.replace(/\D/g, ''))"
-                                        @keydown="handleKeydown({{ $i }}, $event)"
-                                        @paste="handlePaste($event)"
-                                        class="w-10 h-12 text-center text-xl font-bold rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                                        inputmode="numeric"
-                                        pattern="[0-9]"
-                                    />
-                                @endfor
+                                }"
+                            >
+                                <input type="text" maxlength="1" x-ref="digit0"
+                                    @input="handleInput(0, $event)"
+                                    @keydown="handleKeydown(0, $event)"
+                                    @paste="handlePaste($event)"
+                                    class="w-10 h-12 text-center text-xl font-bold rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-primary-500 focus:ring-2 focus:ring-primary-500"
+                                    inputmode="numeric" autocomplete="off" />
+                                <input type="text" maxlength="1" x-ref="digit1"
+                                    @input="handleInput(1, $event)"
+                                    @keydown="handleKeydown(1, $event)"
+                                    @paste="handlePaste($event)"
+                                    class="w-10 h-12 text-center text-xl font-bold rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-primary-500 focus:ring-2 focus:ring-primary-500"
+                                    inputmode="numeric" autocomplete="off" />
+                                <input type="text" maxlength="1" x-ref="digit2"
+                                    @input="handleInput(2, $event)"
+                                    @keydown="handleKeydown(2, $event)"
+                                    @paste="handlePaste($event)"
+                                    class="w-10 h-12 text-center text-xl font-bold rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-primary-500 focus:ring-2 focus:ring-primary-500"
+                                    inputmode="numeric" autocomplete="off" />
+                                <input type="text" maxlength="1" x-ref="digit3"
+                                    @input="handleInput(3, $event)"
+                                    @keydown="handleKeydown(3, $event)"
+                                    @paste="handlePaste($event)"
+                                    class="w-10 h-12 text-center text-xl font-bold rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-primary-500 focus:ring-2 focus:ring-primary-500"
+                                    inputmode="numeric" autocomplete="off" />
+                                <input type="text" maxlength="1" x-ref="digit4"
+                                    @input="handleInput(4, $event)"
+                                    @keydown="handleKeydown(4, $event)"
+                                    @paste="handlePaste($event)"
+                                    class="w-10 h-12 text-center text-xl font-bold rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-primary-500 focus:ring-2 focus:ring-primary-500"
+                                    inputmode="numeric" autocomplete="off" />
+                                <input type="text" maxlength="1" x-ref="digit5"
+                                    @input="handleInput(5, $event)"
+                                    @keydown="handleKeydown(5, $event)"
+                                    @paste="handlePaste($event)"
+                                    class="w-10 h-12 text-center text-xl font-bold rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-primary-500 focus:ring-2 focus:ring-primary-500"
+                                    inputmode="numeric" autocomplete="off" />
                             </div>
                             @error('otp')
                                 <p class="mt-2 text-xs text-danger-600 dark:text-danger-400 text-center">{{ $message }}</p>
