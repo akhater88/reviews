@@ -9,7 +9,7 @@ use App\Models\Branch;
 use App\Models\GoogleToken;
 use App\Models\Tenant;
 use App\Services\Google\GoogleBusinessService;
-use App\Services\Google\OutscraperService;
+use App\Services\Google\PlaceSearchService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -64,11 +64,11 @@ class GoogleSettings extends Page implements HasForms, HasTable
     }
 
     /**
-     * Get OutscraperService instance
+     * Get PlaceSearchService instance
      */
-    protected function getOutscraperService(): OutscraperService
+    protected function getPlaceSearchService(): PlaceSearchService
     {
-        return app(OutscraperService::class);
+        return app(PlaceSearchService::class);
     }
 
     /**
@@ -227,7 +227,7 @@ class GoogleSettings extends Page implements HasForms, HasTable
                             }
 
                             try {
-                                $results = $this->getOutscraperService()->searchPlace($search);
+                                $results = $this->getPlaceSearchService()->searchPlace($search);
 
                                 $options = [];
                                 foreach ($results as $place) {
