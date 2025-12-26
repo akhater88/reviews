@@ -3,9 +3,11 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\BranchResource\Pages;
+use App\Jobs\SyncBranchReviewsJob;
 use App\Models\Branch;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -175,7 +177,13 @@ class BranchResource extends Resource
                     ->label('نشط')
                     ->boolean(),
 
-                Tables\Columns\TextColumn::make('last_sync_at')
+                Tables\Columns\TextColumn::make('sync_status')
+                    ->label('حالة المزامنة')
+                    ->badge()
+                    ->formatStateUsing(fn ($state) => $state?->label() ?? 'غير محدد')
+                    ->color(fn ($state) => $state?->color() ?? 'gray'),
+
+                Tables\Columns\TextColumn::make('last_synced_at')
                     ->label('آخر مزامنة')
                     ->dateTime('Y-m-d H:i')
                     ->placeholder('لم تتم المزامنة')
@@ -200,6 +208,42 @@ class BranchResource extends Resource
                     ->falseLabel('غير نشط'),
             ])
             ->actions([
+                Tables\Actions\Action::make('syncReviews')
+                    ->label('مزامنة المراجعات')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('primary')
+                    ->requiresConfirmation()
+                    ->modalHeading('مزامنة المراجعات')
+                    ->modalDescription('سيتم جلب أحدث المراجعات من Outscraper. قد تستغرق العملية بضع دقائق.')
+                    ->modalSubmitActionLabel('بدء المزامنة')
+                    ->visible(fn (Branch $record): bool => !empty($record->google_place_id))
+                    ->action(function (Branch $record) {
+                        SyncBranchReviewsJob::dispatch($record)->onQueue('reviews');
+
+                        Notification::make()
+                            ->title('تم بدء المزامنة')
+                            ->body("جاري مزامنة مراجعات {$record->name}")
+                            ->success()
+                            ->send();
+                    }),
+                Tables\Actions\Action::make('fullSync')
+                    ->label('مزامنة كاملة')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalHeading('مزامنة كاملة')
+                    ->modalDescription('سيتم جلب جميع المراجعات من البداية. هذا قد يستهلك رصيد Outscraper.')
+                    ->modalSubmitActionLabel('بدء المزامنة الكاملة')
+                    ->visible(fn (Branch $record): bool => !empty($record->google_place_id))
+                    ->action(function (Branch $record) {
+                        SyncBranchReviewsJob::dispatch($record, fullSync: true)->onQueue('reviews');
+
+                        Notification::make()
+                            ->title('تم بدء المزامنة الكاملة')
+                            ->body("جاري مزامنة جميع مراجعات {$record->name}")
+                            ->warning()
+                            ->send();
+                    }),
                 Tables\Actions\Action::make('view_report')
                     ->label('عرض التفاصيل')
                     ->icon('heroicon-o-eye')

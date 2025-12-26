@@ -29,6 +29,7 @@ return [
 
     'outscraper' => [
         'api_key' => env('OUTSCRAPER_API_KEY'),
+        'base_url' => env('OUTSCRAPER_BASE_URL', 'https://api.outscraper.com'),
     ],
 
 ];
