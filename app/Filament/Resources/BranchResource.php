@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\BranchResource\Pages;
 use App\Jobs\SyncBranchReviewsJob;
 use App\Models\Branch;
+use App\Services\Google\OutscraperService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -18,11 +19,11 @@ class BranchResource extends Resource
     protected static ?string $model = Branch::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
-    
+
     protected static ?string $navigationLabel = 'الفروع';
-    
+
     protected static ?string $modelLabel = 'فرع';
-    
+
     protected static ?string $pluralModelLabel = 'الفروع';
 
     protected static ?int $navigationSort = 2;
@@ -31,27 +32,115 @@ class BranchResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\Section::make('البحث عن الفرع')
+                    ->description('ابحث عن المطعم في Google Places لملء البيانات تلقائياً')
+                    ->schema([
+                        Forms\Components\Select::make('selected_place')
+                            ->label('ابحث عن المطعم في Google')
+                            ->placeholder('اكتب اسم المطعم للبحث...')
+                            ->searchable()
+                            ->searchDebounce(500)
+                            ->searchPrompt('اكتب اسم المطعم أو الفرع للبحث')
+                            ->noSearchResultsMessage('لم يتم العثور على نتائج')
+                            ->loadingMessage('جاري البحث...')
+                            ->getSearchResultsUsing(function (string $search): array {
+                                if (strlen($search) < 3) {
+                                    return [];
+                                }
+
+                                try {
+                                    $outscraper = app(OutscraperService::class);
+                                    $results = $outscraper->searchPlace($search);
+
+                                    $options = [];
+                                    foreach ($results as $place) {
+                                        $placeId = $place['place_id'] ?? null;
+                                        if (!$placeId) continue;
+
+                                        $name = $place['name'] ?? 'غير معروف';
+                                        $address = $place['full_address'] ?? $place['address'] ?? '';
+                                        $rating = isset($place['rating']) ? " ★ {$place['rating']}" : '';
+
+                                        // Encode place data as JSON in the value
+                                        $placeData = json_encode([
+                                            'place_id' => $placeId,
+                                            'name' => $name,
+                                            'address' => $address,
+                                            'city' => $place['city'] ?? null,
+                                            'country' => $place['country'] ?? 'Saudi Arabia',
+                                            'lat' => $place['latitude'] ?? null,
+                                            'lng' => $place['longitude'] ?? null,
+                                            'phone' => $place['phone'] ?? null,
+                                            'website' => $place['site'] ?? $place['website'] ?? null,
+                                        ]);
+
+                                        $label = $name . $rating;
+                                        if ($address) {
+                                            $label .= "\n📍 " . mb_substr($address, 0, 60);
+                                        }
+
+                                        $options[$placeData] = $label;
+                                    }
+
+                                    return $options;
+                                } catch (\Exception $e) {
+                                    return [];
+                                }
+                            })
+                            ->live()
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                if (!$state) {
+                                    return;
+                                }
+
+                                $placeData = json_decode($state, true);
+                                if (!$placeData) return;
+
+                                $set('name', $placeData['name'] ?? null);
+                                $set('google_place_id', $placeData['place_id'] ?? null);
+                                $set('address', $placeData['address'] ?? null);
+                                $set('city', $placeData['city'] ?? null);
+                                $set('country', $placeData['country'] ?? null);
+                                $set('lat', $placeData['lat'] ?? null);
+                                $set('lng', $placeData['lng'] ?? null);
+                                $set('phone', $placeData['phone'] ?? null);
+                                $set('website', $placeData['website'] ?? null);
+                            })
+                            ->helperText('ابحث واختر المطعم من نتائج Google Places')
+                            ->columnSpanFull()
+                            ->visibleOn('create'),
+                    ])
+                    ->visibleOn('create'),
+
                 Forms\Components\Section::make('معلومات الفرع')
-                    ->description('أدخل المعلومات الأساسية للفرع')
+                    ->description('المعلومات الأساسية للفرع')
                     ->schema([
                         Forms\Components\TextInput::make('name')
-                            ->label('اسم الفرع (إنجليزي)')
+                            ->label('اسم الفرع')
                             ->required()
-                            ->maxLength(255),
-
-                        Forms\Components\TextInput::make('name_ar')
-                            ->label('اسم الفرع (عربي)')
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->disabled(fn (string $operation): bool => $operation === 'create')
+                            ->dehydrated(),
 
                         Forms\Components\TextInput::make('google_place_id')
                             ->label('معرف Google Place')
-                            ->helperText('سيتم ملؤه تلقائياً عند الربط مع Google')
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->disabled(fn (string $operation): bool => $operation === 'create')
+                            ->dehydrated(),
 
                         Forms\Components\TextInput::make('phone')
                             ->label('رقم الهاتف')
                             ->tel()
-                            ->maxLength(20),
+                            ->maxLength(20)
+                            ->disabled(fn (string $operation): bool => $operation === 'create')
+                            ->dehydrated(),
+
+                        Forms\Components\TextInput::make('website')
+                            ->label('الموقع الإلكتروني')
+                            ->url()
+                            ->maxLength(255)
+                            ->disabled(fn (string $operation): bool => $operation === 'create')
+                            ->dehydrated(),
                     ])->columns(2),
 
                 Forms\Components\Section::make('الموقع')
@@ -60,25 +149,35 @@ class BranchResource extends Resource
                         Forms\Components\Textarea::make('address')
                             ->label('العنوان')
                             ->rows(2)
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->disabled(fn (string $operation): bool => $operation === 'create')
+                            ->dehydrated(),
 
                         Forms\Components\TextInput::make('city')
                             ->label('المدينة')
-                            ->maxLength(100),
+                            ->maxLength(100)
+                            ->disabled(fn (string $operation): bool => $operation === 'create')
+                            ->dehydrated(),
 
                         Forms\Components\TextInput::make('country')
                             ->label('الدولة')
-                            ->maxLength(100),
+                            ->maxLength(100)
+                            ->disabled(fn (string $operation): bool => $operation === 'create')
+                            ->dehydrated(),
 
-                        Forms\Components\TextInput::make('latitude')
+                        Forms\Components\TextInput::make('lat')
                             ->label('خط العرض')
                             ->numeric()
-                            ->step(0.00000001),
+                            ->step(0.00000001)
+                            ->disabled(fn (string $operation): bool => $operation === 'create')
+                            ->dehydrated(),
 
-                        Forms\Components\TextInput::make('longitude')
+                        Forms\Components\TextInput::make('lng')
                             ->label('خط الطول')
                             ->numeric()
-                            ->step(0.00000001),
+                            ->step(0.00000001)
+                            ->disabled(fn (string $operation): bool => $operation === 'create')
+                            ->dehydrated(),
                     ])->columns(2),
 
                 Forms\Components\Section::make('الإعدادات')

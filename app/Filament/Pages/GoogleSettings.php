@@ -213,17 +213,133 @@ class GoogleSettings extends Page implements HasForms, HasTable
                 ->icon('heroicon-o-plus')
                 ->color('warning')
                 ->form([
+                    Select::make('selected_place')
+                        ->label('ابحث عن المطعم في Google')
+                        ->placeholder('اكتب اسم المطعم للبحث...')
+                        ->searchable()
+                        ->searchDebounce(500)
+                        ->searchPrompt('اكتب اسم المطعم أو الفرع للبحث')
+                        ->noSearchResultsMessage('لم يتم العثور على نتائج')
+                        ->loadingMessage('جاري البحث...')
+                        ->getSearchResultsUsing(function (string $search): array {
+                            if (strlen($search) < 3) {
+                                return [];
+                            }
+
+                            try {
+                                $results = $this->getOutscraperService()->searchPlace($search);
+
+                                $options = [];
+                                foreach ($results as $place) {
+                                    $placeId = $place['place_id'] ?? null;
+                                    if (!$placeId) continue;
+
+                                    $name = $place['name'] ?? 'غير معروف';
+                                    $address = $place['full_address'] ?? $place['address'] ?? '';
+                                    $rating = isset($place['rating']) ? " ★ {$place['rating']}" : '';
+
+                                    // Encode place data as JSON in the value
+                                    $placeData = json_encode([
+                                        'place_id' => $placeId,
+                                        'name' => $name,
+                                        'address' => $address,
+                                        'city' => $place['city'] ?? null,
+                                        'country' => $place['country'] ?? 'Saudi Arabia',
+                                        'lat' => $place['latitude'] ?? null,
+                                        'lng' => $place['longitude'] ?? null,
+                                        'phone' => $place['phone'] ?? null,
+                                        'website' => $place['site'] ?? $place['website'] ?? null,
+                                        'rating' => $place['rating'] ?? null,
+                                        'reviews_count' => $place['reviews'] ?? null,
+                                    ]);
+
+                                    $label = $name . $rating;
+                                    if ($address) {
+                                        $label .= "\n📍 " . mb_substr($address, 0, 60);
+                                    }
+
+                                    $options[$placeData] = $label;
+                                }
+
+                                return $options;
+                            } catch (\Exception $e) {
+                                return [];
+                            }
+                        })
+                        ->required()
+                        ->live()
+                        ->afterStateUpdated(function ($state, callable $set) {
+                            if (!$state) {
+                                $set('name', null);
+                                $set('google_place_id', null);
+                                $set('address', null);
+                                $set('city', null);
+                                $set('country', null);
+                                $set('lat', null);
+                                $set('lng', null);
+                                $set('phone', null);
+                                $set('website', null);
+                                return;
+                            }
+
+                            $placeData = json_decode($state, true);
+                            if (!$placeData) return;
+
+                            $set('name', $placeData['name'] ?? null);
+                            $set('google_place_id', $placeData['place_id'] ?? null);
+                            $set('address', $placeData['address'] ?? null);
+                            $set('city', $placeData['city'] ?? null);
+                            $set('country', $placeData['country'] ?? null);
+                            $set('lat', $placeData['lat'] ?? null);
+                            $set('lng', $placeData['lng'] ?? null);
+                            $set('phone', $placeData['phone'] ?? null);
+                            $set('website', $placeData['website'] ?? null);
+                        })
+                        ->helperText('ابحث واختر المطعم من نتائج Google Places'),
+
                     TextInput::make('name')
                         ->label('اسم الفرع')
-                        ->placeholder('مثال: مطعم البيك - فرع الرياض')
+                        ->disabled()
+                        ->dehydrated()
                         ->required(),
+
                     TextInput::make('google_place_id')
-                        ->label('Google Place ID (اختياري)')
-                        ->placeholder('ChIJ...')
-                        ->helperText('يمكنك الحصول عليه من رابط Google Maps'),
+                        ->label('Google Place ID')
+                        ->disabled()
+                        ->dehydrated(),
+
                     TextInput::make('address')
                         ->label('العنوان')
-                        ->placeholder('الرياض، حي العليا'),
+                        ->disabled()
+                        ->dehydrated(),
+
+                    TextInput::make('city')
+                        ->label('المدينة')
+                        ->disabled()
+                        ->dehydrated(),
+
+                    TextInput::make('country')
+                        ->label('الدولة')
+                        ->disabled()
+                        ->dehydrated(),
+
+                    TextInput::make('phone')
+                        ->label('الهاتف')
+                        ->disabled()
+                        ->dehydrated(),
+
+                    TextInput::make('lat')
+                        ->hidden()
+                        ->dehydrated(),
+
+                    TextInput::make('lng')
+                        ->hidden()
+                        ->dehydrated(),
+
+                    TextInput::make('website')
+                        ->hidden()
+                        ->dehydrated(),
+
                     Select::make('branch_type')
                         ->label('نوع الفرع')
                         ->options([
@@ -278,11 +394,33 @@ class GoogleSettings extends Page implements HasForms, HasTable
             return;
         }
 
+        // Check if branch with same google_place_id already exists
+        if (!empty($data['google_place_id'])) {
+            $existing = Branch::where('tenant_id', $tenantId)
+                ->where('google_place_id', $data['google_place_id'])
+                ->first();
+
+            if ($existing) {
+                Notification::make()
+                    ->title('الفرع موجود مسبقاً')
+                    ->body("الفرع '{$existing->name}' مضاف مسبقاً")
+                    ->warning()
+                    ->send();
+                return;
+            }
+        }
+
         Branch::create([
             'tenant_id' => $tenantId,
             'name' => $data['name'],
             'google_place_id' => $data['google_place_id'] ?? null,
             'address' => $data['address'] ?? null,
+            'city' => $data['city'] ?? null,
+            'country' => $data['country'] ?? null,
+            'lat' => $data['lat'] ?? null,
+            'lng' => $data['lng'] ?? null,
+            'phone' => $data['phone'] ?? null,
+            'website' => $data['website'] ?? null,
             'source' => BranchSource::MANUAL->value,
             'branch_type' => $data['branch_type'],
             'linked_branch_id' => $data['linked_branch_id'] ?? null,
@@ -293,7 +431,7 @@ class GoogleSettings extends Page implements HasForms, HasTable
 
         Notification::make()
             ->title('تمت الإضافة')
-            ->body("تم إضافة {$data['name']} بنجاح")
+            ->body("تم إضافة {$data['name']} بنجاح من Google Places")
             ->success()
             ->send();
     }
