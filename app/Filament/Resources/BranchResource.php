@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class BranchResource extends Resource
 {
@@ -224,7 +225,13 @@ class BranchResource extends Resource
                         Forms\Components\Select::make('linked_branch_id')
                             ->label('ربط مع فرع للمقارنة')
                             ->options(function () {
-                                return Branch::where('branch_type', BranchType::OWNED->value)
+                                $tenantId = Auth::user()?->tenant_id;
+                                if (!$tenantId) {
+                                    return [];
+                                }
+
+                                return Branch::where('tenant_id', $tenantId)
+                                    ->where('branch_type', BranchType::OWNED->value)
                                     ->pluck('name', 'id')
                                     ->toArray();
                             })
