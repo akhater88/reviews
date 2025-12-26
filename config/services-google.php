@@ -32,4 +32,22 @@ return [
         'base_url' => env('OUTSCRAPER_BASE_URL', 'https://api.outscraper.com'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Place Search Provider Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configure which service to use for searching Google Places.
+    | Options: 'google' (Google Places API) or 'outscraper' (Outscraper API)
+    |
+    | - google: Uses Google Places API directly (free tier available)
+    | - outscraper: Uses Outscraper API (paid per request)
+    |
+    */
+
+    'place_search' => [
+        'provider' => env('PLACE_SEARCH_PROVIDER', 'outscraper'),
+        'fallback_enabled' => env('PLACE_SEARCH_FALLBACK', false),
+    ],
+
 ];

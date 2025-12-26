@@ -5,7 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\BranchResource\Pages;
 use App\Jobs\SyncBranchReviewsJob;
 use App\Models\Branch;
-use App\Services\Google\OutscraperService;
+use App\Services\Google\PlaceSearchService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -49,8 +49,8 @@ class BranchResource extends Resource
                                 }
 
                                 try {
-                                    $outscraper = app(OutscraperService::class);
-                                    $results = $outscraper->searchPlace($search);
+                                    $placeSearch = app(PlaceSearchService::class);
+                                    $results = $placeSearch->searchPlace($search);
 
                                     $options = [];
                                     foreach ($results as $place) {
