@@ -21,6 +21,7 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'phone',
+        'phone_verified_at',
         'password',
         'role',
         'login_type',
@@ -37,6 +38,7 @@ class User extends Authenticatable implements FilamentUser
     {
         return [
             'email_verified_at' => 'datetime',
+            'phone_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
         ];
@@ -149,5 +151,39 @@ class User extends Authenticatable implements FilamentUser
         }
 
         return mb_strtoupper($initials);
+    }
+
+    /**
+     * Check if user's phone is verified.
+     */
+    public function isPhoneVerified(): bool
+    {
+        return $this->phone_verified_at !== null;
+    }
+
+    /**
+     * Get masked phone number for display.
+     * Example: +966 5** *** *89
+     */
+    public function getMaskedPhoneAttribute(): ?string
+    {
+        if (!$this->phone) {
+            return null;
+        }
+
+        $phone = $this->phone;
+        $length = strlen($phone);
+
+        if ($length < 8) {
+            return $phone;
+        }
+
+        // Show first 4 chars (country code) and last 2 chars, mask the rest
+        $prefix = substr($phone, 0, 4);
+        $suffix = substr($phone, -2);
+        $masked = str_repeat('*', $length - 6);
+
+        // Format with spaces for readability
+        return $prefix . ' ' . substr($masked, 0, 3) . ' ' . substr($masked, 3) . ' ' . $suffix;
     }
 }
