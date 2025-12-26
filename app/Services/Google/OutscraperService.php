@@ -66,8 +66,28 @@ class OutscraperService
         }
 
         $data = $response->json();
-        
-        return $data['data'][0] ?? null;
+        $place = $data['data'][0] ?? null;
+
+        if (!$place) {
+            return null;
+        }
+
+        // Transform to standard format
+        return [
+            'place_id' => $place['place_id'] ?? $placeId,
+            'name' => $place['name'] ?? null,
+            'address' => $place['full_address'] ?? $place['address'] ?? null,
+            'full_address' => $place['full_address'] ?? $place['address'] ?? null,
+            'city' => $place['city'] ?? null,
+            'country' => $place['country'] ?? null,
+            'latitude' => $place['latitude'] ?? null,
+            'longitude' => $place['longitude'] ?? null,
+            'phone' => $place['phone'] ?? null,
+            'website' => $place['site'] ?? $place['website'] ?? null,
+            'site' => $place['site'] ?? $place['website'] ?? null,
+            'rating' => $place['rating'] ?? null,
+            'reviews' => $place['reviews'] ?? $place['reviews_count'] ?? null,
+        ];
     }
 
     /**
