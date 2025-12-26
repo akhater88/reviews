@@ -96,8 +96,34 @@ class BranchResource extends Resource
                                 $placeData = json_decode($state, true);
                                 if (!$placeData) return;
 
+                                $placeId = $placeData['place_id'] ?? null;
+
+                                // Fetch full details for accurate city/country
+                                if ($placeId) {
+                                    try {
+                                        $placeSearch = app(PlaceSearchService::class);
+                                        $details = $placeSearch->getPlaceDetails($placeId);
+
+                                        if ($details) {
+                                            $set('name', $details['name'] ?? $placeData['name'] ?? null);
+                                            $set('google_place_id', $details['place_id'] ?? $placeId);
+                                            $set('address', $details['address'] ?? $placeData['address'] ?? null);
+                                            $set('city', $details['city'] ?? null);
+                                            $set('country', $details['country'] ?? null);
+                                            $set('lat', $details['latitude'] ?? null);
+                                            $set('lng', $details['longitude'] ?? null);
+                                            $set('phone', $details['phone'] ?? null);
+                                            $set('website', $details['website'] ?? $details['site'] ?? null);
+                                            return;
+                                        }
+                                    } catch (\Exception $e) {
+                                        // Fallback to search data if details fetch fails
+                                    }
+                                }
+
+                                // Fallback to search result data
                                 $set('name', $placeData['name'] ?? null);
-                                $set('google_place_id', $placeData['place_id'] ?? null);
+                                $set('google_place_id', $placeId);
                                 $set('address', $placeData['address'] ?? null);
                                 $set('city', $placeData['city'] ?? null);
                                 $set('country', $placeData['country'] ?? null);
