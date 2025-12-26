@@ -11,6 +11,19 @@ Artisan::command('inspire', function () {
 
 /*
 |--------------------------------------------------------------------------
+| Horizon Metrics
+|--------------------------------------------------------------------------
+|
+| Capture Horizon metrics every 5 minutes for the dashboard graphs.
+|
+*/
+
+Schedule::command('horizon:snapshot')
+    ->everyFiveMinutes()
+    ->onOneServer();
+
+/*
+|--------------------------------------------------------------------------
 | Review Sync Scheduler
 |--------------------------------------------------------------------------
 |
