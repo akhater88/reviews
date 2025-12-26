@@ -2,13 +2,21 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
+use App\Services\Infobip\InfobipService;
 use Illuminate\Support\Facades\Log;
 
 class OtpService
 {
+    protected InfobipService $infobipService;
+
+    public function __construct(InfobipService $infobipService)
+    {
+        $this->infobipService = $infobipService;
+    }
+
     /**
-     * Send OTP via WhatsApp.
+     * Send OTP via WhatsApp using Infobip.
+     * Falls back to SMS if WhatsApp fails.
      *
      * @param string $phone Phone number with country code (e.g., +966512345678)
      * @param string $otp The OTP code to send
@@ -16,77 +24,27 @@ class OtpService
      */
     public function sendWhatsAppOtp(string $phone, string $otp): bool
     {
-        // In development mode, just log the OTP
-        if (!app()->isProduction()) {
-            Log::info("WhatsApp OTP for {$phone}: {$otp}");
+        // Try WhatsApp first
+        $sent = $this->infobipService->sendWhatsAppOtp($phone, $otp);
+
+        if ($sent) {
             return true;
         }
 
-        try {
-            // WhatsApp Business API integration
-            // You can replace this with your actual WhatsApp API provider
-            // Common providers: Twilio, MessageBird, Vonage, etc.
-
-            $apiUrl = config('services.whatsapp.api_url');
-            $apiKey = config('services.whatsapp.api_key');
-            $templateName = config('services.whatsapp.otp_template', 'otp_verification');
-
-            if (!$apiUrl || !$apiKey) {
-                Log::warning('WhatsApp API not configured, logging OTP instead');
-                Log::info("WhatsApp OTP for {$phone}: {$otp}");
-                return true;
-            }
-
-            $response = Http::withHeaders([
-                'Authorization' => "Bearer {$apiKey}",
-                'Content-Type' => 'application/json',
-            ])->post($apiUrl, [
-                'messaging_product' => 'whatsapp',
-                'to' => $this->formatPhoneNumber($phone),
-                'type' => 'template',
-                'template' => [
-                    'name' => $templateName,
-                    'language' => [
-                        'code' => 'ar',
-                    ],
-                    'components' => [
-                        [
-                            'type' => 'body',
-                            'parameters' => [
-                                [
-                                    'type' => 'text',
-                                    'text' => $otp,
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-            ]);
-
-            if ($response->successful()) {
-                Log::info("WhatsApp OTP sent successfully to {$phone}");
-                return true;
-            }
-
-            Log::error("Failed to send WhatsApp OTP to {$phone}", [
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
-
-            return false;
-
-        } catch (\Exception $e) {
-            Log::error("WhatsApp OTP exception for {$phone}: " . $e->getMessage());
-            return false;
-        }
+        // Fallback to SMS if WhatsApp fails
+        Log::info("WhatsApp OTP failed for {$phone}, trying SMS fallback");
+        return $this->infobipService->sendSmsOtp($phone, $otp);
     }
 
     /**
-     * Format phone number for WhatsApp API.
-     * Removes + and any spaces/dashes.
+     * Send OTP via SMS only.
+     *
+     * @param string $phone Phone number with country code
+     * @param string $otp The OTP code to send
+     * @return bool True if sent successfully
      */
-    protected function formatPhoneNumber(string $phone): string
+    public function sendSmsOtp(string $phone, string $otp): bool
     {
-        return preg_replace('/[^0-9]/', '', $phone);
+        return $this->infobipService->sendSmsOtp($phone, $otp);
     }
 }
