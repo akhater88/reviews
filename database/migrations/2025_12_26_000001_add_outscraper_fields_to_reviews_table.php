@@ -2,16 +2,35 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     public function up(): void
     {
+        // Step 1: Add tenant_id as nullable first (no foreign key yet)
         Schema::table('reviews', function (Blueprint $table) {
-            // Add tenant_id for multi-tenancy
-            $table->foreignId('tenant_id')->after('id')->constrained()->cascadeOnDelete();
+            $table->unsignedBigInteger('tenant_id')->nullable()->after('id');
+        });
 
+        // Step 2: Populate tenant_id from branch relationship
+        DB::statement('
+            UPDATE reviews
+            SET tenant_id = (
+                SELECT tenant_id FROM branches WHERE branches.id = reviews.branch_id
+            )
+            WHERE tenant_id IS NULL
+        ');
+
+        // Step 3: Make tenant_id not nullable and add foreign key
+        Schema::table('reviews', function (Blueprint $table) {
+            $table->unsignedBigInteger('tenant_id')->nullable(false)->change();
+            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
+        });
+
+        // Step 4: Add other columns
+        Schema::table('reviews', function (Blueprint $table) {
             // Outscraper review ID for duplicate prevention
             $table->string('outscraper_review_id')->nullable()->after('google_review_id');
 
@@ -49,7 +68,7 @@ return new class extends Migration
             $table->string('google_review_id')->nullable()->change();
         });
 
-        // Add new unique constraints
+        // Add new unique constraints and indexes
         Schema::table('reviews', function (Blueprint $table) {
             $table->unique(['branch_id', 'google_review_id'], 'unique_google_review');
             $table->unique(['branch_id', 'outscraper_review_id'], 'unique_outscraper_review');
