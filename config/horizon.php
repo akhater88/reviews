@@ -99,6 +99,7 @@ return [
     'waits' => [
         'redis:default' => 60,
         'redis:reviews' => 120, // Reviews queue can wait longer
+        'redis:analysis' => 180, // Analysis queue for AI processing
     ],
 
     /*
@@ -228,6 +229,21 @@ return [
             'timeout' => 600, // 10 minutes for large review syncs
             'nice' => 0,
         ],
+
+        // Analysis queue supervisor for long-running AI jobs
+        'supervisor-analysis' => [
+            'connection' => 'redis',
+            'queue' => ['analysis'],
+            'balance' => 'auto',
+            'autoScalingStrategy' => 'time',
+            'maxProcesses' => 1,
+            'maxTime' => 0,
+            'maxJobs' => 0,
+            'memory' => 256, // Higher memory for AI processing
+            'tries' => 2,
+            'timeout' => 300, // 5 minutes for AI calls
+            'nice' => 0,
+        ],
     ],
 
     'environments' => [
@@ -242,6 +258,12 @@ return [
                 'balanceMaxShift' => 1,
                 'balanceCooldown' => 3,
             ],
+            // Analysis supervisor for AI-powered analysis jobs
+            'supervisor-analysis' => [
+                'maxProcesses' => 3, // Limit concurrent AI analysis jobs
+                'balanceMaxShift' => 1,
+                'balanceCooldown' => 3,
+            ],
         ],
 
         'local' => [
@@ -249,6 +271,9 @@ return [
                 'maxProcesses' => 3,
             ],
             'supervisor-reviews' => [
+                'maxProcesses' => 2,
+            ],
+            'supervisor-analysis' => [
                 'maxProcesses' => 2,
             ],
         ],
