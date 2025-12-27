@@ -8,12 +8,9 @@ use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/google-oauth.php';
 
-// Root Landing Page (Competition)
-Route::get('/', [CompetitionController::class, 'landing'])->name('home');
-
 // Competition Public Routes
 Route::prefix('competition')->name('competition.')->group(function () {
-    // Landing Page (also accessible at /competition)
+    // Landing Page
     Route::get('/', [CompetitionController::class, 'landing'])->name('landing');
 
     // Public API endpoints
