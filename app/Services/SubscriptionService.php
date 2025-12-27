@@ -502,11 +502,13 @@ class SubscriptionService
 
     /**
      * Calculate expiry date based on billing cycle.
+     * Returns null for lifetime/free plans (never expires).
      */
-    protected function calculateExpiryDate(BillingCycle $cycle, bool $isTrial, bool $isFree): Carbon
+    protected function calculateExpiryDate(BillingCycle $cycle, bool $isTrial, bool $isFree): ?Carbon
     {
-        if ($isFree) {
-            return now()->addYears(10); // Essentially no expiry
+        // Free and lifetime plans never expire
+        if ($isFree || $cycle === BillingCycle::LIFETIME) {
+            return null;
         }
 
         if ($isTrial) {
@@ -516,7 +518,7 @@ class SubscriptionService
         return match ($cycle) {
             BillingCycle::MONTHLY => now()->addMonth(),
             BillingCycle::YEARLY => now()->addYear(),
-            BillingCycle::LIFETIME => now()->setYear(2099)->endOfYear(),
+            default => null,
         };
     }
 
