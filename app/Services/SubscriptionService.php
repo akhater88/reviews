@@ -516,7 +516,7 @@ class SubscriptionService
         return match ($cycle) {
             BillingCycle::MONTHLY => now()->addMonth(),
             BillingCycle::YEARLY => now()->addYear(),
-            BillingCycle::LIFETIME => now()->addYears(100),
+            BillingCycle::LIFETIME => now()->setYear(2099)->endOfYear(),
         };
     }
 
