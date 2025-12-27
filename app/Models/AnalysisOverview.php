@@ -129,7 +129,7 @@ class AnalysisOverview extends Model
             'progress' => 100,
             'completed_at' => now(),
             'total_processing_time' => $this->started_at
-                ? now()->diffInSeconds($this->started_at)
+                ? abs((int) now()->diffInSeconds($this->started_at))
                 : null,
         ]);
     }
