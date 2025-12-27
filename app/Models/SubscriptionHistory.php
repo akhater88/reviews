@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\SubscriptionAction;
+use App\Enums\SubscriptionStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -27,6 +28,8 @@ class SubscriptionHistory extends Model
 
     protected $casts = [
         'action' => SubscriptionAction::class,
+        'old_status' => SubscriptionStatus::class,
+        'new_status' => SubscriptionStatus::class,
         'metadata' => 'array',
         'created_at' => 'datetime',
     ];
