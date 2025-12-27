@@ -102,7 +102,7 @@ abstract class BaseAnalysisJob implements ShouldQueue
 
         $result = $this->getAIService()->complete($prompt, $options);
 
-        $processingTime = (int) now()->diffInSeconds($startTime);
+        $processingTime = abs((int) now()->diffInSeconds($startTime));
 
         return [
             'result' => $result['content'],
