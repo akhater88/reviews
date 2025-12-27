@@ -192,4 +192,58 @@ PROMPT;
 
         return $response->json('content.0.text', '');
     }
+
+    /**
+     * Complete a prompt and return structured response.
+     * Used for analysis pipeline jobs.
+     */
+    public function complete(string $prompt, array $options = []): array
+    {
+        $timeout = $options['timeout'] ?? config('ai.analysis.timeout', 180);
+        $maxTokens = $options['max_tokens'] ?? config('ai.analysis.max_tokens', 4000);
+        $systemMessage = $options['system_message'] ?? 'أنت محلل متخصص في تحليل مراجعات المطاعم. أجب بـ JSON صالح فقط، بدون أي نص إضافي.';
+
+        $response = Http::timeout($timeout)
+            ->withHeaders([
+                'x-api-key' => $this->apiKey,
+                'anthropic-version' => '2023-06-01',
+                'Content-Type' => 'application/json',
+            ])
+            ->post("{$this->baseUrl}/messages", [
+                'model' => $this->model,
+                'max_tokens' => $maxTokens,
+                'system' => $systemMessage,
+                'messages' => [
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+            ]);
+
+        if (!$response->successful()) {
+            throw new Exception('Anthropic API error: ' . $response->body());
+        }
+
+        $content = $response->json('content.0.text', '');
+        $content = $this->cleanJsonResponse($content);
+
+        return [
+            'content' => json_decode($content, true) ?? [],
+            'usage' => [
+                'input_tokens' => $response->json('usage.input_tokens', 0),
+                'output_tokens' => $response->json('usage.output_tokens', 0),
+                'total_tokens' => $response->json('usage.input_tokens', 0) + $response->json('usage.output_tokens', 0),
+            ],
+            'model' => $this->model,
+            'provider' => 'anthropic',
+        ];
+    }
+
+    /**
+     * Clean JSON response from markdown formatting.
+     */
+    private function cleanJsonResponse(string $content): string
+    {
+        $content = preg_replace('/```json\s*/i', '', $content);
+        $content = preg_replace('/```\s*/', '', $content);
+        return trim($content);
+    }
 }

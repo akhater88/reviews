@@ -49,8 +49,18 @@ interface AIServiceInterface
 
     /**
      * Get the provider name.
-     * 
+     *
      * @return string 'openai' or 'anthropic'
      */
     public function getProviderName(): string;
+
+    /**
+     * Complete a prompt and return structured response.
+     * Used for analysis pipeline jobs.
+     *
+     * @param string $prompt The prompt to send
+     * @param array $options Options: timeout, max_tokens, temperature, system_message
+     * @return array{content: array, usage: array, model: string, provider: string}
+     */
+    public function complete(string $prompt, array $options = []): array;
 }

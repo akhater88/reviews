@@ -69,4 +69,21 @@ return [
         'staff' => 'الموظفين',
         'quality' => 'الجودة',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Analysis Pipeline Settings
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for the 9-step review analysis pipeline that processes
+    | restaurant reviews and generates actionable insights.
+    |
+    */
+    'analysis' => [
+        'timeout' => env('AI_ANALYSIS_TIMEOUT', 180),
+        'max_tokens' => env('AI_ANALYSIS_MAX_TOKENS', 4000),
+        'temperature' => env('AI_ANALYSIS_TEMPERATURE', 0.3),
+        'queue' => env('AI_ANALYSIS_QUEUE', 'analysis'),
+        'connection' => env('AI_ANALYSIS_CONNECTION', 'redis'),
+    ],
 ];

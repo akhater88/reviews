@@ -189,4 +189,55 @@ PROMPT;
 
         return $response->json('choices.0.message.content', '');
     }
+
+    /**
+     * Complete a prompt and return structured response.
+     * Used for analysis pipeline jobs.
+     */
+    public function complete(string $prompt, array $options = []): array
+    {
+        $timeout = $options['timeout'] ?? config('ai.analysis.timeout', 180);
+        $maxTokens = $options['max_tokens'] ?? config('ai.analysis.max_tokens', 4000);
+        $temperature = $options['temperature'] ?? config('ai.analysis.temperature', 0.3);
+        $systemMessage = $options['system_message'] ?? 'أنت محلل متخصص في تحليل مراجعات المطاعم. أجب بـ JSON صالح فقط، بدون أي نص إضافي.';
+
+        $response = Http::timeout($timeout)
+            ->withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Content-Type' => 'application/json',
+            ])
+            ->post("{$this->baseUrl}/chat/completions", [
+                'model' => $this->model,
+                'messages' => [
+                    ['role' => 'system', 'content' => $systemMessage],
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+                'temperature' => $temperature,
+                'max_tokens' => $maxTokens,
+            ]);
+
+        if (!$response->successful()) {
+            throw new Exception('OpenAI API error: ' . $response->body());
+        }
+
+        $content = $response->json('choices.0.message.content', '');
+        $content = $this->cleanJsonResponse($content);
+
+        return [
+            'content' => json_decode($content, true) ?? [],
+            'usage' => $response->json('usage', []),
+            'model' => $this->model,
+            'provider' => 'openai',
+        ];
+    }
+
+    /**
+     * Clean JSON response from markdown formatting.
+     */
+    private function cleanJsonResponse(string $content): string
+    {
+        $content = preg_replace('/```json\s*/i', '', $content);
+        $content = preg_replace('/```\s*/', '', $content);
+        return trim($content);
+    }
 }
