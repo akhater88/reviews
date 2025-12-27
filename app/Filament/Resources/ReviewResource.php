@@ -11,6 +11,7 @@ use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 
 class ReviewResource extends Resource
@@ -194,6 +195,15 @@ class ReviewResource extends Resource
                     ->query(fn (Builder $query): Builder => $query->where('review_date', '>=', now()->subDays(30))),
             ])
             ->actions([
+                // Reply Action - Opens Modal
+                Action::make('reply')
+                    ->label(fn (Review $record): string => $record->hasOwnerReply() ? 'عرض الرد' : 'رد')
+                    ->icon(fn (Review $record): string => $record->hasOwnerReply() ? 'heroicon-o-eye' : 'heroicon-o-chat-bubble-left-ellipsis')
+                    ->color(fn (Review $record): string => $record->hasOwnerReply() ? 'success' : 'primary')
+                    ->action(function (Review $record, $livewire) {
+                        $livewire->dispatch('openReplyModal', reviewId: $record->id);
+                    }),
+
                 Tables\Actions\ViewAction::make()
                     ->label('عرض'),
             ])

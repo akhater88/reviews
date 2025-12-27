@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\ReplyStatus;
+use App\Enums\ReplyTone;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,15 +19,21 @@ class ReviewReply extends Model
         'is_ai_generated',
         'ai_tone',
         'ai_provider',
+        'ai_model',
+        'status',
         'is_published',
         'published_at',
         'google_reply_id',
+        'error_message',
+        'tokens_used',
     ];
 
     protected $casts = [
         'is_ai_generated' => 'boolean',
         'is_published' => 'boolean',
         'published_at' => 'datetime',
+        'status' => ReplyStatus::class,
+        'tokens_used' => 'integer',
     ];
 
     /**
@@ -60,6 +68,55 @@ class ReviewReply extends Model
     }
 
     /**
+     * Get the tone enum if valid.
+     */
+    public function getToneEnumAttribute(): ?ReplyTone
+    {
+        return ReplyTone::tryFrom($this->ai_tone);
+    }
+
+    /**
+     * Check if reply is published.
+     */
+    public function isPublished(): bool
+    {
+        return $this->status === ReplyStatus::PUBLISHED || $this->is_published;
+    }
+
+    /**
+     * Check if reply is draft.
+     */
+    public function isDraft(): bool
+    {
+        return $this->status === ReplyStatus::DRAFT;
+    }
+
+    /**
+     * Check if reply failed to publish.
+     */
+    public function isFailed(): bool
+    {
+        return $this->status === ReplyStatus::FAILED;
+    }
+
+    /**
+     * Check if reply can be published.
+     */
+    public function canPublish(): bool
+    {
+        return in_array($this->status, [ReplyStatus::DRAFT, ReplyStatus::FAILED])
+            && !empty($this->reply_text);
+    }
+
+    /**
+     * Check if reply can be edited.
+     */
+    public function canEdit(): bool
+    {
+        return $this->status !== ReplyStatus::PUBLISHED && !$this->is_published;
+    }
+
+    /**
      * Mark as published.
      */
     public function markAsPublished(?string $googleReplyId = null): void
@@ -68,6 +125,8 @@ class ReviewReply extends Model
             'is_published' => true,
             'published_at' => now(),
             'google_reply_id' => $googleReplyId,
+            'status' => ReplyStatus::PUBLISHED,
+            'error_message' => null,
         ]);
 
         // Also mark the review as replied
@@ -75,11 +134,41 @@ class ReviewReply extends Model
     }
 
     /**
+     * Mark as failed.
+     */
+    public function markAsFailed(string $errorMessage): void
+    {
+        $this->update([
+            'status' => ReplyStatus::FAILED,
+            'error_message' => $errorMessage,
+        ]);
+    }
+
+    /**
      * Scope for published replies.
      */
     public function scopePublished($query)
     {
-        return $query->where('is_published', true);
+        return $query->where(function ($q) {
+            $q->where('is_published', true)
+              ->orWhere('status', ReplyStatus::PUBLISHED);
+        });
+    }
+
+    /**
+     * Scope for draft replies.
+     */
+    public function scopeDraft($query)
+    {
+        return $query->where('status', ReplyStatus::DRAFT);
+    }
+
+    /**
+     * Scope for failed replies.
+     */
+    public function scopeFailed($query)
+    {
+        return $query->where('status', ReplyStatus::FAILED);
     }
 
     /**
