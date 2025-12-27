@@ -62,6 +62,12 @@ class EditBranch extends EditRecord
                             ->send();
                     }
                 }),
+            Actions\Action::make('viewReport')
+                ->label('عرض التقرير')
+                ->icon('heroicon-o-document-chart-bar')
+                ->color('info')
+                ->url(fn () => \App\Filament\Pages\BranchReportPage::getUrl(['branch' => $this->record]))
+                ->visible(fn (): bool => $this->record->reviews()->exists()),
             Actions\DeleteAction::make()
                 ->label('حذف'),
         ];
