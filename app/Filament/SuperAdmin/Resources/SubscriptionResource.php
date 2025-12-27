@@ -71,7 +71,9 @@ class SubscriptionResource extends Resource
                             ]))
                             ->required()
                             ->native(false)
-                            ->disabled(fn ($operation) => $operation === 'create'),
+                            ->default(SubscriptionStatus::TRIAL->value)
+                            ->disabled(fn ($operation) => $operation === 'create')
+                            ->dehydrated(true),
 
                         Forms\Components\Select::make('billing_cycle')
                             ->label('دورة الفوترة')
