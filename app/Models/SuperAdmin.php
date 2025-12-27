@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
-class SuperAdmin extends Authenticatable implements FilamentUser
+class SuperAdmin extends Authenticatable implements FilamentUser, HasAvatar
 {
     use Notifiable;
 
@@ -39,7 +41,14 @@ class SuperAdmin extends Authenticatable implements FilamentUser
 
     public function getFilamentAvatarUrl(): ?string
     {
-        return $this->avatar;
+        if ($this->avatar) {
+            return Storage::url($this->avatar);
+        }
+
+        // Return gravatar as fallback
+        $hash = md5(strtolower(trim($this->email)));
+
+        return "https://www.gravatar.com/avatar/{$hash}?d=mp&s=200";
     }
 
     public function getFilamentName(): string
@@ -58,5 +67,31 @@ class SuperAdmin extends Authenticatable implements FilamentUser
     public function grantedOverrides()
     {
         return $this->hasMany(TenantOverride::class, 'granted_by');
+    }
+
+    /**
+     * Grant a tenant override.
+     */
+    public function grantOverride(
+        int $tenantId,
+        string $type,
+        string $key,
+        string $value,
+        ?\DateTime $expiresAt = null,
+        ?string $reason = null
+    ): TenantOverride {
+        return TenantOverride::updateOrCreate(
+            [
+                'tenant_id' => $tenantId,
+                'override_type' => $type,
+                'key' => $key,
+            ],
+            [
+                'value' => $value,
+                'expires_at' => $expiresAt,
+                'granted_by' => $this->id,
+                'reason' => $reason,
+            ]
+        );
     }
 }
