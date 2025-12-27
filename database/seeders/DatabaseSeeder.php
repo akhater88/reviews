@@ -13,6 +13,13 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // Run subscription system seeders first
+        $this->call([
+            SuperAdminSeeder::class,
+            PlanSeeder::class,
+            FeatureSeeder::class,
+        ]);
+
         // Create a demo tenant
         $tenant = Tenant::create([
             'name' => 'Taboor Restaurant',
@@ -132,7 +139,9 @@ class DatabaseSeeder extends Seeder
         $manager->branches()->attach([1, 2]);
 
         $this->command->info('Demo data created successfully!');
-        $this->command->info('Admin login: admin@taboor.com / password');
+        $this->command->info('');
+        $this->command->info('Super Admin login: super@tabsense.com / password');
+        $this->command->info('Tenant Admin login: admin@taboor.com / password');
         $this->command->info('Manager login: manager@taboor.com / password');
     }
 
