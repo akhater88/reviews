@@ -124,11 +124,17 @@ class Subscription extends Model
         return $this->status === SubscriptionStatus::SUSPENDED;
     }
 
+    public function isLifetime(): bool
+    {
+        return $this->billing_cycle === BillingCycle::LIFETIME || $this->expires_at === null;
+    }
+
     // Date Checks
     public function daysUntilExpiry(): int
     {
+        // Lifetime/never-expiring subscriptions
         if (! $this->expires_at) {
-            return 0;
+            return PHP_INT_MAX;
         }
 
         return max(0, (int) now()->diffInDays($this->expires_at, false));
@@ -145,6 +151,11 @@ class Subscription extends Model
 
     public function isExpiringSoon(int $days = 7): bool
     {
+        // Lifetime subscriptions never expire
+        if ($this->isLifetime()) {
+            return false;
+        }
+
         return $this->daysUntilExpiry() <= $days && $this->daysUntilExpiry() > 0;
     }
 
