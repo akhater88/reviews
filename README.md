@@ -201,3 +201,11 @@ After installation, you should:
 2. Implement the **Branch Report Page** for analysis display
 3. Add **scheduled sync** using Laravel Scheduler
 4. Build the **AI analysis pipeline** integration
+
+## Next 
+
+php artisan tinker
+
+$branch = \App\Models\Branch::first();
+$service = app(\App\Services\Analysis\AnalysisPipelineService::class);
+$overview = $service->startAnalysis($branch);
