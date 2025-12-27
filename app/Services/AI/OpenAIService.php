@@ -196,9 +196,9 @@ PROMPT;
      */
     public function complete(string $prompt, array $options = []): array
     {
-        $timeout = $options['timeout'] ?? config('ai.analysis.timeout', 180);
-        $maxTokens = $options['max_tokens'] ?? config('ai.analysis.max_tokens', 4000);
-        $temperature = $options['temperature'] ?? config('ai.analysis.temperature', 0.3);
+        $timeout = (int) ($options['timeout'] ?? config('ai.analysis.timeout', 180));
+        $maxTokens = (int) ($options['max_tokens'] ?? config('ai.analysis.max_tokens', 4000));
+        $temperature = (float) ($options['temperature'] ?? config('ai.analysis.temperature', 0.3));
         $systemMessage = $options['system_message'] ?? 'أنت محلل متخصص في تحليل مراجعات المطاعم. أجب بـ JSON صالح فقط، بدون أي نص إضافي.';
 
         $response = Http::timeout($timeout)
