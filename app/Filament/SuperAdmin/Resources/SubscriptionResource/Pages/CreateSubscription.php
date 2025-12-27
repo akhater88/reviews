@@ -3,6 +3,7 @@
 namespace App\Filament\SuperAdmin\Resources\SubscriptionResource\Pages;
 
 use App\Enums\BillingCycle;
+use App\Enums\SubscriptionStatus;
 use App\Filament\SuperAdmin\Resources\SubscriptionResource;
 use App\Models\Plan;
 use App\Models\Tenant;
@@ -19,14 +20,23 @@ class CreateSubscription extends CreateRecord
         $tenant = Tenant::find($data['tenant_id']);
         $plan = Plan::find($data['plan_id']);
         $billingCycle = BillingCycle::from($data['billing_cycle']);
+        $status = SubscriptionStatus::from($data['status']);
+
+        // Determine if this is a trial based on selected status
+        $startTrial = $status === SubscriptionStatus::TRIAL;
 
         $subscription = app(SubscriptionService::class)->create(
             $tenant,
             $plan,
             $billingCycle,
-            startTrial: false,
+            startTrial: $startTrial,
             currency: $data['currency']
         );
+
+        // If admin selected a different status, update it
+        if ($subscription->status !== $status) {
+            $subscription->update(['status' => $status]);
+        }
 
         Notification::make()
             ->title('تم إنشاء الاشتراك')
