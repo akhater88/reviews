@@ -13,6 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'super_admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
+            'subscription' => \App\Http\Middleware\CheckSubscription::class,
+            'feature' => \App\Http\Middleware\CheckFeature::class,
+            'feature_all' => \App\Http\Middleware\CheckFeatureAll::class,
+            'usage_limit' => \App\Http\Middleware\CheckUsageLimit::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
