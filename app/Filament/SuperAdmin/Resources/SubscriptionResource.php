@@ -179,12 +179,15 @@ class SubscriptionResource extends Resource
 
                 Tables\Columns\TextColumn::make('expires_at')
                     ->label('الانتهاء')
-                    ->date('Y-m-d')
+                    ->formatStateUsing(fn ($state, $record) => $record->isLifetime()
+                        ? 'مدى الحياة'
+                        : ($state?->format('Y-m-d') ?? '-')
+                    )
                     ->sortable()
                     ->color(fn ($record) => $record->isExpiringSoon() ? 'warning' : null)
-                    ->description(fn ($record) => $record->daysUntilExpiry() > 0
-                        ? $record->daysUntilExpiry() . ' يوم'
-                        : 'منتهي'
+                    ->description(fn ($record) => $record->isLifetime()
+                        ? '∞'
+                        : ($record->daysUntilExpiry() > 0 ? $record->daysUntilExpiry() . ' يوم' : 'منتهي')
                     ),
 
                 Tables\Columns\IconColumn::make('is_current')
@@ -509,31 +512,34 @@ class SubscriptionResource extends Resource
 
                             Infolists\Components\TextEntry::make('trial_ends_at')
                                 ->label('انتهاء التجربة')
-                                ->dateTime('Y-m-d H:i')
-                                ->default('-')
+                                ->formatStateUsing(fn ($state) => $state?->format('Y-m-d H:i') ?? '-')
                                 ->visible(fn ($record) => $record->trial_ends_at),
 
                             Infolists\Components\TextEntry::make('expires_at')
                                 ->label('تاريخ الانتهاء')
-                                ->dateTime('Y-m-d H:i')
+                                ->formatStateUsing(fn ($state, $record) => $record->isLifetime()
+                                    ? 'مدى الحياة'
+                                    : ($state?->format('Y-m-d H:i') ?? '-')
+                                )
                                 ->color(fn ($record) => $record->isExpiringSoon() ? 'warning' : null),
 
                             Infolists\Components\TextEntry::make('days_remaining')
                                 ->label('الأيام المتبقية')
-                                ->state(fn ($record) => $record->daysUntilExpiry())
-                                ->suffix(' يوم')
+                                ->state(fn ($record) => $record->isLifetime() ? '∞' : $record->daysUntilExpiry())
+                                ->suffix(fn ($record) => $record->isLifetime() ? '' : ' يوم')
                                 ->badge()
-                                ->color(fn ($state) => $state <= 7 ? 'warning' : 'success'),
+                                ->color(fn ($record) => $record->isLifetime() ? 'success' : ($record->daysUntilExpiry() <= 7 ? 'warning' : 'success')),
 
                             Infolists\Components\TextEntry::make('next_billing_date')
                                 ->label('الفوترة القادمة')
-                                ->dateTime('Y-m-d')
-                                ->default('-'),
+                                ->formatStateUsing(fn ($state, $record) => $record->isLifetime()
+                                    ? 'لا يوجد'
+                                    : ($state?->format('Y-m-d') ?? '-')
+                                ),
 
                             Infolists\Components\TextEntry::make('renewed_at')
                                 ->label('آخر تجديد')
-                                ->dateTime('Y-m-d H:i')
-                                ->default('-'),
+                                ->formatStateUsing(fn ($state) => $state?->format('Y-m-d H:i') ?? '-'),
                         ])
                         ->columns(3),
 

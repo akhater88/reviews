@@ -31,14 +31,24 @@
                     <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <p class="text-sm text-gray-500 dark:text-gray-400">تاريخ الانتهاء</p>
                         <p class="text-xl font-bold text-gray-900 dark:text-white">
-                            {{ $this->getCurrentSubscription()->expires_at?->format('Y-m-d') ?? 'غير محدد' }}
+                            @if($this->getCurrentSubscription()->isLifetime())
+                                مدى الحياة
+                            @else
+                                {{ $this->getCurrentSubscription()->expires_at?->format('Y-m-d') ?? 'غير محدد' }}
+                            @endif
                         </p>
                     </div>
 
                     <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <p class="text-sm text-gray-500 dark:text-gray-400">الأيام المتبقية</p>
-                        <p class="text-xl font-bold {{ $this->getCurrentSubscription()->daysUntilExpiry() <= 7 ? 'text-warning-500' : 'text-success-500' }}">
-                            {{ $this->getCurrentSubscription()->daysUntilExpiry() }} يوم
+                        <p class="text-xl font-bold text-success-500">
+                            @if($this->getCurrentSubscription()->isLifetime())
+                                &infin;
+                            @else
+                                <span class="{{ $this->getCurrentSubscription()->daysUntilExpiry() <= 7 ? 'text-warning-500' : 'text-success-500' }}">
+                                    {{ $this->getCurrentSubscription()->daysUntilExpiry() }} يوم
+                                </span>
+                            @endif
                         </p>
                     </div>
                 </div>
