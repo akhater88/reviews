@@ -437,11 +437,12 @@ class BranchResource extends Resource
                                 ->send();
                         }
                     }),
-                Tables\Actions\Action::make('view_report')
-                    ->label('عرض التفاصيل')
-                    ->icon('heroicon-o-eye')
-                    ->color('info')
-                    ->url(fn (Branch $record): string => static::getUrl('edit', ['record' => $record])),
+                Tables\Actions\Action::make('viewReport')
+                    ->label('عرض التقرير')
+                    ->icon('heroicon-o-document-chart-bar')
+                    ->color('success')
+                    ->url(fn (Branch $record): string => \App\Filament\Pages\BranchReportPage::getUrl(['branch' => $record]))
+                    ->visible(fn (Branch $record): bool => $record->reviews()->exists()),
                 Tables\Actions\EditAction::make()
                     ->label('تعديل'),
                 Tables\Actions\DeleteAction::make()
