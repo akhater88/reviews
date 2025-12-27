@@ -35,6 +35,10 @@ class Branch extends Model
         'can_reply',
         'last_synced_at',
         'sync_status',
+        'current_rating',
+        'total_reviews',
+        'performance_score',
+        'status',
     ];
 
     protected $casts = [

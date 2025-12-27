@@ -7,6 +7,9 @@ use App\Enums\AnalysisStep;
 use App\Enums\AnalysisType;
 use App\Models\AnalysisOverview;
 use App\Models\AnalysisResult;
+use App\Models\Branch;
+use App\Services\PerformanceScoreService;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -81,6 +84,9 @@ class CreateOverviewCardsJob implements ShouldQueue
 
             // Mark analysis as completed
             $overview->markAsCompleted();
+
+            // Update branch performance score and status
+            $this->updateBranchPerformance($overview);
 
             Log::info("Analysis Pipeline Completed", [
                 'restaurant_id' => $this->restaurantId,
@@ -168,5 +174,53 @@ class CreateOverviewCardsJob implements ShouldQueue
                 'worstCategory' => $categories['worstCategory'] ?? null,
             ],
         ];
+    }
+
+    /**
+     * Update branch performance score and status after analysis
+     */
+    private function updateBranchPerformance(AnalysisOverview $overview): void
+    {
+        $branch = Branch::find($overview->branch_id);
+        if (!$branch) {
+            return;
+        }
+
+        $performanceService = app(PerformanceScoreService::class);
+
+        // Ensure dates are Carbon instances
+        $periodStart = $overview->period_start instanceof Carbon
+            ? $overview->period_start
+            : Carbon::parse($overview->period_start ?? now()->startOfMonth());
+        $periodEnd = $overview->period_end instanceof Carbon
+            ? $overview->period_end
+            : Carbon::parse($overview->period_end ?? now()->endOfMonth());
+
+        $scoreData = $performanceService->calculateBranchScore(
+            $branch,
+            $periodStart,
+            $periodEnd
+        );
+
+        $performanceScore = (int) round($scoreData['performance_score']);
+
+        // Determine status based on performance score
+        $status = match (true) {
+            $performanceScore >= 85 => 'excellent',
+            $performanceScore >= 70 => 'good',
+            $performanceScore >= 50 => 'average',
+            default => 'needs_improvement',
+        };
+
+        $branch->update([
+            'performance_score' => $performanceScore,
+            'status' => $status,
+        ]);
+
+        Log::info("Branch performance updated", [
+            'branch_id' => $branch->id,
+            'performance_score' => $performanceScore,
+            'status' => $status,
+        ]);
     }
 }

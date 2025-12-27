@@ -49,6 +49,9 @@ class ReviewSyncService
             // Store reviews with duplicate prevention
             $stats = $this->storeReviews($branch, $reviews);
 
+            // Update branch statistics
+            $this->updateBranchStatistics($branch);
+
             // Update branch sync status
             $branch->update([
                 'sync_status' => SyncStatus::COMPLETED,
@@ -206,5 +209,28 @@ class ReviewSyncService
         }
 
         return $results;
+    }
+
+    /**
+     * Update branch statistics after sync (total_reviews, current_rating)
+     */
+    private function updateBranchStatistics(Branch $branch): void
+    {
+        $reviews = Review::withoutGlobalScopes()
+            ->where('branch_id', $branch->id);
+
+        $totalReviews = $reviews->count();
+        $avgRating = $reviews->avg('rating');
+
+        $branch->update([
+            'total_reviews' => $totalReviews,
+            'current_rating' => $avgRating ? round($avgRating, 1) : null,
+        ]);
+
+        Log::info('ReviewSync: Branch statistics updated', [
+            'branch_id' => $branch->id,
+            'total_reviews' => $totalReviews,
+            'current_rating' => $avgRating,
+        ]);
     }
 }
