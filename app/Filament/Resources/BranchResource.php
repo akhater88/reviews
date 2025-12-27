@@ -6,6 +6,7 @@ use App\Enums\BranchType;
 use App\Filament\Resources\BranchResource\Pages;
 use App\Jobs\SyncBranchReviewsJob;
 use App\Models\Branch;
+use App\Services\Analysis\AnalysisPipelineService;
 use App\Services\Google\PlaceSearchService;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -407,6 +408,34 @@ class BranchResource extends Resource
                             ->body("جاري مزامنة جميع مراجعات {$record->name}")
                             ->warning()
                             ->send();
+                    }),
+                Tables\Actions\Action::make('analyzeReviews')
+                    ->label('تحليل المراجعات')
+                    ->icon('heroicon-o-sparkles')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->modalHeading('تحليل المراجعات بالذكاء الاصطناعي')
+                    ->modalDescription('سيتم تحليل المراجعات باستخدام الذكاء الاصطناعي لاستخراج رؤى وتوصيات. قد تستغرق العملية عدة دقائق.')
+                    ->modalSubmitActionLabel('بدء التحليل')
+                    ->visible(fn (Branch $record): bool => $record->reviews()->exists())
+                    ->disabled(fn (Branch $record): bool => app(AnalysisPipelineService::class)->hasActiveAnalysis($record))
+                    ->action(function (Branch $record) {
+                        try {
+                            $service = app(AnalysisPipelineService::class);
+                            $overview = $service->startAnalysis($record);
+
+                            Notification::make()
+                                ->title('تم بدء التحليل')
+                                ->body("جاري تحليل مراجعات {$record->name} - سيتم إشعارك عند الانتهاء")
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('فشل بدء التحليل')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
                     }),
                 Tables\Actions\Action::make('view_report')
                     ->label('عرض التفاصيل')
