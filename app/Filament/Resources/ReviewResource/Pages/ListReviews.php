@@ -7,6 +7,7 @@ use Filament\Actions;
 use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\On;
 
 class ListReviews extends ListRecords
 {
@@ -15,7 +16,16 @@ class ListReviews extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            // No create action - reviews are synced from external sources
+            Actions\Action::make('sync')
+                ->label('مزامنة المراجعات')
+                ->icon('heroicon-o-arrow-path')
+                ->color('gray')
+                ->action(function () {
+                    $this->dispatch('notify', [
+                        'type' => 'info',
+                        'message' => 'جاري مزامنة المراجعات...',
+                    ]);
+                }),
         ];
     }
 
@@ -47,5 +57,16 @@ class ListReviews extends ListRecords
                 }))
                 ->badgeColor('warning'),
         ];
+    }
+
+    #[On('refreshReviews')]
+    public function refreshList(): void
+    {
+        $this->resetTable();
+    }
+
+    public function getFooter(): ?\Illuminate\Contracts\View\View
+    {
+        return view('filament.resources.reviews.footer');
     }
 }

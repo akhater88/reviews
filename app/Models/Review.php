@@ -102,6 +102,30 @@ class Review extends Model
         return $this->hasOne(ReviewReply::class)->where('is_published', true);
     }
 
+    /**
+     * Get the single reply (alias for latestReply for convenience).
+     */
+    public function reply(): HasOne
+    {
+        return $this->hasOne(ReviewReply::class)->latestOfMany();
+    }
+
+    /**
+     * Check if review has a reply (draft or published).
+     */
+    public function hasReply(): bool
+    {
+        return $this->replies()->exists();
+    }
+
+    /**
+     * Check if review has a published reply.
+     */
+    public function hasPublishedReply(): bool
+    {
+        return $this->publishedReply()->exists();
+    }
+
     // Scopes
 
     /**
