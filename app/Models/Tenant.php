@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\SubscriptionStatus;
+use App\Traits\HasSubscription;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Tenant extends Model
 {
     use HasFactory;
+    use HasSubscription;
 
     protected $fillable = [
         'name',
