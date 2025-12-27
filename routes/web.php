@@ -1,9 +1,24 @@
 <?php
 
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\Webhooks\PaymentWebhookController;
 use App\Models\SuperAdmin;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/google-oauth.php';
+
+// Payment Webhooks (no CSRF, no auth)
+Route::post('/webhooks/payment/{gateway}', [PaymentWebhookController::class, 'handle'])
+    ->name('webhooks.payment')
+    ->withoutMiddleware(['web', \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+
+// Checkout routes (requires auth)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/checkout/{invoice}', [CheckoutController::class, 'show'])->name('checkout.show');
+    Route::post('/checkout/{invoice}', [CheckoutController::class, 'process'])->name('checkout.process');
+    Route::get('/payment/success/{invoice}', [CheckoutController::class, 'success'])->name('payment.success');
+    Route::get('/payment/cancel/{invoice}', [CheckoutController::class, 'cancel'])->name('payment.cancel');
+});
 
 // Super Admin return from impersonation
 Route::get('/super-admin/return', function () {
