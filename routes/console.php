@@ -46,3 +46,42 @@ Schedule::job(new SyncAllBranchesJob(sourceFilter: 'manual', typeFilter: 'compet
     ->withoutOverlapping()
     ->name('sync-competitor-branches')
     ->onOneServer();
+
+/*
+|--------------------------------------------------------------------------
+| Subscription Management Scheduler
+|--------------------------------------------------------------------------
+|
+| Run subscription-related scheduled tasks:
+| - Expiry notifications: Daily at 9 AM (7, 3, and 1 day reminders)
+| - Process expired subscriptions: Hourly
+|
+*/
+
+// Send expiry notifications (7 days before)
+Schedule::command('subscriptions:notify-expiring --days=7')
+    ->dailyAt('09:00')
+    ->withoutOverlapping()
+    ->name('subscription-notify-7-days')
+    ->onOneServer();
+
+// Send expiry notifications (3 days before)
+Schedule::command('subscriptions:notify-expiring --days=3')
+    ->dailyAt('09:00')
+    ->withoutOverlapping()
+    ->name('subscription-notify-3-days')
+    ->onOneServer();
+
+// Send expiry notifications (1 day before)
+Schedule::command('subscriptions:notify-expiring --days=1')
+    ->dailyAt('09:00')
+    ->withoutOverlapping()
+    ->name('subscription-notify-1-day')
+    ->onOneServer();
+
+// Process expired subscriptions every hour
+Schedule::command('subscriptions:process-expired')
+    ->hourly()
+    ->withoutOverlapping()
+    ->name('process-expired-subscriptions')
+    ->onOneServer();

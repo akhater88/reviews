@@ -18,13 +18,22 @@ class Subscription extends Model
         'billing_cycle',
         'currency',
         'amount_paid',
+        'price_at_renewal',
+        'proration_credit',
         'started_at',
         'expires_at',
         'trial_ends_at',
         'grace_ends_at',
         'cancelled_at',
         'cancellation_reason',
+        'next_billing_date',
+        'renewed_at',
+        'last_expiry_notification_at',
         'auto_renew',
+        'cancel_at_period_end',
+        'scheduled_plan_id',
+        'scheduled_change_date',
+        'notes',
         'gateway_subscription_id',
         'gateway_customer_id',
     ];
@@ -33,12 +42,19 @@ class Subscription extends Model
         'status' => SubscriptionStatus::class,
         'billing_cycle' => BillingCycle::class,
         'amount_paid' => 'decimal:2',
+        'price_at_renewal' => 'decimal:2',
+        'proration_credit' => 'decimal:2',
         'started_at' => 'datetime',
         'expires_at' => 'datetime',
         'trial_ends_at' => 'datetime',
         'grace_ends_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'next_billing_date' => 'datetime',
+        'renewed_at' => 'datetime',
+        'last_expiry_notification_at' => 'datetime',
+        'scheduled_change_date' => 'datetime',
         'auto_renew' => 'boolean',
+        'cancel_at_period_end' => 'boolean',
     ];
 
     // Relationships
@@ -50,6 +66,11 @@ class Subscription extends Model
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
+    }
+
+    public function scheduledPlan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class, 'scheduled_plan_id');
     }
 
     public function history(): HasMany

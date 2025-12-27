@@ -8,6 +8,7 @@ enum SubscriptionAction: string
     case UPGRADED = 'upgraded';
     case DOWNGRADED = 'downgraded';
     case RENEWED = 'renewed';
+    case EXTENDED = 'extended';
     case CANCELLED = 'cancelled';
     case EXPIRED = 'expired';
     case REACTIVATED = 'reactivated';
@@ -15,6 +16,8 @@ enum SubscriptionAction: string
     case TRIAL_ENDED = 'trial_ended';
     case TRIAL_CONVERTED = 'trial_converted';
     case GRACE_STARTED = 'grace_started';
+    case GRACE_PERIOD_STARTED = 'grace_period_started';
+    case PLAN_CHANGE_SCHEDULED = 'plan_change_scheduled';
     case SUSPENDED = 'suspended';
     case PAYMENT_FAILED = 'payment_failed';
     case PAYMENT_SUCCEEDED = 'payment_succeeded';
@@ -26,6 +29,7 @@ enum SubscriptionAction: string
             self::UPGRADED => 'تمت الترقية',
             self::DOWNGRADED => 'تم التخفيض',
             self::RENEWED => 'تم التجديد',
+            self::EXTENDED => 'تم التمديد',
             self::CANCELLED => 'تم الإلغاء',
             self::EXPIRED => 'انتهى',
             self::REACTIVATED => 'تم إعادة التفعيل',
@@ -33,6 +37,8 @@ enum SubscriptionAction: string
             self::TRIAL_ENDED => 'انتهت الفترة التجريبية',
             self::TRIAL_CONVERTED => 'تحويل من تجريبي',
             self::GRACE_STARTED => 'بدأت فترة السماح',
+            self::GRACE_PERIOD_STARTED => 'بدأت فترة السماح',
+            self::PLAN_CHANGE_SCHEDULED => 'تغيير مجدول',
             self::SUSPENDED => 'تم الإيقاف',
             self::PAYMENT_FAILED => 'فشل الدفع',
             self::PAYMENT_SUCCEEDED => 'نجح الدفع',
@@ -46,6 +52,7 @@ enum SubscriptionAction: string
             self::UPGRADED => 'Upgraded',
             self::DOWNGRADED => 'Downgraded',
             self::RENEWED => 'Renewed',
+            self::EXTENDED => 'Extended',
             self::CANCELLED => 'Cancelled',
             self::EXPIRED => 'Expired',
             self::REACTIVATED => 'Reactivated',
@@ -53,6 +60,8 @@ enum SubscriptionAction: string
             self::TRIAL_ENDED => 'Trial Ended',
             self::TRIAL_CONVERTED => 'Trial Converted',
             self::GRACE_STARTED => 'Grace Period Started',
+            self::GRACE_PERIOD_STARTED => 'Grace Period Started',
+            self::PLAN_CHANGE_SCHEDULED => 'Plan Change Scheduled',
             self::SUSPENDED => 'Suspended',
             self::PAYMENT_FAILED => 'Payment Failed',
             self::PAYMENT_SUCCEEDED => 'Payment Succeeded',
@@ -62,8 +71,8 @@ enum SubscriptionAction: string
     public function color(): string
     {
         return match ($this) {
-            self::CREATED, self::UPGRADED, self::RENEWED, self::REACTIVATED, self::TRIAL_CONVERTED, self::PAYMENT_SUCCEEDED => 'success',
-            self::DOWNGRADED, self::TRIAL_STARTED, self::TRIAL_ENDED, self::GRACE_STARTED => 'warning',
+            self::CREATED, self::UPGRADED, self::RENEWED, self::EXTENDED, self::REACTIVATED, self::TRIAL_CONVERTED, self::PAYMENT_SUCCEEDED => 'success',
+            self::DOWNGRADED, self::TRIAL_STARTED, self::TRIAL_ENDED, self::GRACE_STARTED, self::GRACE_PERIOD_STARTED, self::PLAN_CHANGE_SCHEDULED => 'warning',
             self::CANCELLED, self::EXPIRED, self::SUSPENDED, self::PAYMENT_FAILED => 'danger',
         };
     }
@@ -75,6 +84,7 @@ enum SubscriptionAction: string
             self::UPGRADED => 'heroicon-o-arrow-trending-up',
             self::DOWNGRADED => 'heroicon-o-arrow-trending-down',
             self::RENEWED => 'heroicon-o-arrow-path',
+            self::EXTENDED => 'heroicon-o-calendar-days',
             self::CANCELLED => 'heroicon-o-x-circle',
             self::EXPIRED => 'heroicon-o-clock',
             self::REACTIVATED => 'heroicon-o-arrow-uturn-up',
@@ -82,6 +92,8 @@ enum SubscriptionAction: string
             self::TRIAL_ENDED => 'heroicon-o-stop',
             self::TRIAL_CONVERTED => 'heroicon-o-check-badge',
             self::GRACE_STARTED => 'heroicon-o-exclamation-triangle',
+            self::GRACE_PERIOD_STARTED => 'heroicon-o-exclamation-triangle',
+            self::PLAN_CHANGE_SCHEDULED => 'heroicon-o-calendar',
             self::SUSPENDED => 'heroicon-o-pause-circle',
             self::PAYMENT_FAILED => 'heroicon-o-credit-card',
             self::PAYMENT_SUCCEEDED => 'heroicon-o-banknotes',
@@ -94,6 +106,7 @@ enum SubscriptionAction: string
             self::CREATED,
             self::UPGRADED,
             self::RENEWED,
+            self::EXTENDED,
             self::REACTIVATED,
             self::TRIAL_CONVERTED,
             self::PAYMENT_SUCCEEDED,

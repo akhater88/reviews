@@ -25,6 +25,7 @@ class Invoice extends Model
         'period_end',
         'due_date',
         'paid_at',
+        'payment_reference',
         'items',
         'billing_details',
         'notes',
