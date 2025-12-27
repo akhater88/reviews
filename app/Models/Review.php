@@ -301,10 +301,7 @@ class Review extends Model
      */
     public function getSourceDisplayAttribute(): string
     {
-        return match ($this->source) {
-            'google_business' => 'Google Business',
-            'outscraper' => 'Outscraper',
-            default => 'غير معروف',
-        };
+        // Hide the actual data source from users - show generic message
+        return 'مراجعات Google';
     }
 }
