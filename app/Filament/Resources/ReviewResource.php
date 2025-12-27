@@ -152,15 +152,6 @@ class ReviewResource extends Resource
                     ->falseColor('gray')
                     ->getStateUsing(fn ($record) => !empty($record->owner_reply)),
 
-                Tables\Columns\TextColumn::make('source')
-                    ->label('المصدر')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'google_business' => 'success',
-                        'outscraper' => 'warning',
-                        default => 'gray',
-                    }),
-
                 Tables\Columns\TextColumn::make('review_date')
                     ->label('التاريخ')
                     ->dateTime('Y-m-d')
@@ -198,13 +189,6 @@ class ReviewResource extends Resource
                         }),
                     ),
 
-                Tables\Filters\SelectFilter::make('source')
-                    ->label('المصدر')
-                    ->options([
-                        'google_business' => 'Google Business',
-                        'outscraper' => 'Outscraper',
-                    ]),
-
                 Tables\Filters\Filter::make('recent')
                     ->label('آخر 30 يوم')
                     ->query(fn (Builder $query): Builder => $query->where('review_date', '>=', now()->subDays(30))),
@@ -241,15 +225,6 @@ class ReviewResource extends Resource
                         Infolists\Components\TextEntry::make('review_date')
                             ->label('تاريخ المراجعة')
                             ->dateTime('Y-m-d H:i'),
-
-                        Infolists\Components\TextEntry::make('source')
-                            ->label('المصدر')
-                            ->badge()
-                            ->color(fn (string $state): string => match ($state) {
-                                'google_business' => 'success',
-                                'outscraper' => 'warning',
-                                default => 'gray',
-                            }),
 
                         Infolists\Components\TextEntry::make('language')
                             ->label('اللغة')
@@ -337,12 +312,8 @@ class ReviewResource extends Resource
                             ->label('مخفي')
                             ->boolean(),
 
-                        Infolists\Components\TextEntry::make('outscraper_review_id')
-                            ->label('معرف Outscraper')
-                            ->placeholder('-'),
-
                         Infolists\Components\TextEntry::make('google_review_id')
-                            ->label('معرف Google')
+                            ->label('معرف المراجعة')
                             ->placeholder('-'),
                     ])->columns(3)
                     ->collapsed(),
