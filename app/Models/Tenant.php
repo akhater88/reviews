@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Tenant extends Model
@@ -55,6 +56,22 @@ class Tenant extends Model
     public function branches(): HasMany
     {
         return $this->hasMany(Branch::class);
+    }
+
+    /**
+     * Get all reviews through branches.
+     */
+    public function reviews(): HasManyThrough
+    {
+        return $this->hasManyThrough(Review::class, Branch::class);
+    }
+
+    /**
+     * Get the admin user for this tenant.
+     */
+    public function getAdminUser(): ?User
+    {
+        return $this->users()->where('role', 'admin')->first();
     }
 
     /**
