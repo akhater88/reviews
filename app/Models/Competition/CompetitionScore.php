@@ -4,6 +4,7 @@ namespace App\Models\Competition;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CompetitionScore extends Model
 {
@@ -11,6 +12,7 @@ class CompetitionScore extends Model
 
     protected $casts = [
         'overall_rating' => 'decimal:2',
+        'rating_score' => 'decimal:2',
         'sentiment_score' => 'decimal:2',
         'response_rate' => 'decimal:2',
         'review_volume_score' => 'decimal:2',
@@ -32,6 +34,11 @@ class CompetitionScore extends Model
     public function competitionBranch(): BelongsTo
     {
         return $this->belongsTo(CompetitionBranch::class, 'competition_branch_id');
+    }
+
+    public function history(): HasMany
+    {
+        return $this->hasMany(CompetitionScoreHistory::class, 'competition_score_id');
     }
 
     public function scopeForPeriod($query, int $periodId)

@@ -42,6 +42,11 @@ class CompetitionBranch extends Model
         return $this->hasMany(CompetitionScore::class, 'competition_branch_id');
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(CompetitionReview::class, 'competition_branch_id');
+    }
+
     public function wins(): HasMany
     {
         return $this->hasMany(CompetitionWinner::class, 'competition_branch_id');
