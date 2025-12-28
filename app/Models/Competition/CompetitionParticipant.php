@@ -76,4 +76,16 @@ class CompetitionParticipant extends Model
     {
         return $this->name ?? $this->masked_phone;
     }
+
+    /**
+     * Generate a unique referral code for this participant
+     */
+    public function generateReferralCode(): void
+    {
+        do {
+            $code = strtoupper(substr(md5(uniqid((string) $this->id, true)), 0, 8));
+        } while (self::where('referral_code', $code)->exists());
+
+        $this->update(['referral_code' => $code]);
+    }
 }

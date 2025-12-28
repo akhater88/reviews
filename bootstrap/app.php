@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'feature' => \App\Http\Middleware\CheckFeature::class,
             'feature_all' => \App\Http\Middleware\CheckFeatureAll::class,
             'usage_limit' => \App\Http\Middleware\CheckUsageLimit::class,
+            'competition.auth' => \App\Http\Middleware\CompetitionAuthMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
