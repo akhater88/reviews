@@ -23,6 +23,7 @@ class BranchReportPage extends Page
 
     public Branch $branch;
     public ?AnalysisOverview $latestAnalysis = null;
+    public string $activeTab = 'overview';
     public array $analysisData = [];
 
     public function mount(Branch $branch): void
@@ -74,6 +75,11 @@ class BranchReportPage extends Page
     public function hasAnalysisData(): bool
     {
         return $this->latestAnalysis !== null && !empty($this->analysisData);
+    }
+
+    public function setActiveTab(string $tab): void
+    {
+        $this->activeTab = $tab;
     }
 
     /**
@@ -197,6 +203,7 @@ class BranchReportPage extends Page
             'branch' => $this->branch,
             'latestAnalysis' => $this->latestAnalysis,
             'hasData' => $this->hasAnalysisData(),
+            'activeTab' => $this->activeTab,
         ];
     }
 }

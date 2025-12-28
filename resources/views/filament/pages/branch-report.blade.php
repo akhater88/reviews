@@ -22,14 +22,51 @@
                 {{-- Restaurant Header --}}
                 @include('filament.pages.branch-report.partials.restaurant-header')
 
-                {{-- Section 1: Overview --}}
-                @include('filament.pages.branch-report.partials.overview-section')
+                {{-- Tabs Navigation --}}
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <nav class="flex overflow-x-auto">
+                        @php
+                            $tabs = [
+                                'overview' => ['label' => 'نظرة عامة', 'icon' => 'heroicon-o-chart-pie'],
+                                'categories' => ['label' => 'الفئات', 'icon' => 'heroicon-o-tag'],
+                                'demographics' => ['label' => 'الديموغرافيا', 'icon' => 'heroicon-o-users'],
+                                'employees' => ['label' => 'الموظفين', 'icon' => 'heroicon-o-user-group'],
+                                'items' => ['label' => 'العناصر', 'icon' => 'heroicon-o-squares-2x2'],
+                                'recommendations' => ['label' => 'التوصيات', 'icon' => 'heroicon-o-light-bulb'],
+                            ];
+                        @endphp
 
-                {{-- Section 2: Keywords --}}
-                @include('filament.pages.branch-report.partials.keywords-section')
+                        @foreach($tabs as $key => $tab)
+                            <button
+                                wire:click="setActiveTab('{{ $key }}')"
+                                class="flex items-center gap-2 px-5 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-colors flex-1 justify-center
+                                    {{ $activeTab === $key
+                                        ? 'border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/20'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50' }}"
+                            >
+                                <x-dynamic-component :component="$tab['icon']" class="w-5 h-5" />
+                                <span class="hidden sm:inline">{{ $tab['label'] }}</span>
+                            </button>
+                        @endforeach
+                    </nav>
+                </div>
 
-                {{-- Section 3: Recommendations --}}
-                @include('filament.pages.branch-report.partials.recommendations-section')
+                {{-- Tab Content --}}
+                <div class="space-y-6">
+                    @if($activeTab === 'overview')
+                        @include('filament.pages.branch-report.partials.overview-section')
+                    @elseif($activeTab === 'categories')
+                        @livewire('branch-report.categories-tab', ['branch' => $branch, 'data' => $this->getCategoryData()], key('categories-tab'))
+                    @elseif($activeTab === 'demographics')
+                        @livewire('branch-report.demographics-tab', ['branch' => $branch, 'data' => $this->getGenderData()], key('demographics-tab'))
+                    @elseif($activeTab === 'employees')
+                        @livewire('branch-report.employees-tab', ['branch' => $branch, 'data' => $this->getEmployeesData()], key('employees-tab'))
+                    @elseif($activeTab === 'items')
+                        @include('filament.pages.branch-report.partials.keywords-section')
+                    @elseif($activeTab === 'recommendations')
+                        @include('filament.pages.branch-report.partials.recommendations-section')
+                    @endif
+                </div>
 
                 {{-- Footer --}}
                 <div class="text-center text-sm text-gray-500 dark:text-gray-400 py-6">
