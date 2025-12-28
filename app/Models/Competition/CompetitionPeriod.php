@@ -17,11 +17,18 @@ class CompetitionPeriod extends Model
         'analysis_started_at' => 'datetime',
         'analysis_completed_at' => 'datetime',
         'winners_announced_at' => 'datetime',
+        'winners_selected' => 'boolean',
+        'winners_selected_at' => 'datetime',
+        'winners_announced' => 'boolean',
         'status' => CompetitionPeriodStatus::class,
         'prizes' => 'array',
         'score_weights' => 'array',
         'settings' => 'array',
         'winning_score' => 'decimal:2',
+        'first_prize' => 'decimal:2',
+        'second_prize' => 'decimal:2',
+        'third_prize' => 'decimal:2',
+        'nominator_prize' => 'decimal:2',
     ];
 
     public function winningBranch(): BelongsTo

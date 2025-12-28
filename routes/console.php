@@ -120,25 +120,35 @@ Schedule::command('competition:process-scores')
     ->name('competition-process-scores')
     ->onOneServer();
 
-// Competition: Check for period transitions daily at midnight
+// Competition: Check for periods to close and select winners daily at midnight
 Schedule::call(function () {
-    // End expired periods
-    \App\Models\Competition\CompetitionPeriod::where('status', 'active')
+    $expiredPeriods = \App\Models\Competition\CompetitionPeriod::where('status', 'active')
         ->where('ends_at', '<', now())
-        ->each(function ($period) {
-            $period->update(['status' => 'completed']);
+        ->get();
 
-            // Dispatch winner selection job
+    foreach ($expiredPeriods as $period) {
+        $period->update(['status' => \App\Enums\CompetitionPeriodStatus::COMPLETED]);
+
+        // Only dispatch winner selection if not already selected
+        if (!$period->winners_selected) {
             dispatch(new \App\Jobs\Competition\SelectWinnersJob($period))
                 ->onQueue('competition');
-        });
+        }
+    }
 
     // Activate upcoming periods
-    \App\Models\Competition\CompetitionPeriod::where('status', 'upcoming')
+    \App\Models\Competition\CompetitionPeriod::where('status', 'draft')
         ->where('starts_at', '<=', now())
         ->where('ends_at', '>', now())
-        ->update(['status' => 'active']);
+        ->update(['status' => \App\Enums\CompetitionPeriodStatus::ACTIVE]);
 })
-    ->daily()
+    ->dailyAt('00:05')
     ->name('competition-period-transitions')
+    ->onOneServer();
+
+// Competition: Send claim reminders weekly on Mondays at 10 AM
+Schedule::job(new \App\Jobs\Competition\SendClaimRemindersJob)
+    ->weeklyOn(1, '10:00')
+    ->withoutOverlapping()
+    ->name('competition-claim-reminders')
     ->onOneServer();
