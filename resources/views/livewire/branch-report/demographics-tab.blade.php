@@ -1,125 +1,157 @@
 <div class="space-y-6" dir="rtl">
-    {{-- Summary Cards --}}
-    @if(!empty($data['summary']))
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                <p class="text-sm text-gray-500 dark:text-gray-400">إجمالي المحللين</p>
-                <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ $data['summary']['totalAnalyzed'] ?? 0 }}</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                <p class="text-sm text-gray-500 dark:text-gray-400">الفئة الأكثر</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white mt-1">{{ $data['summary']['dominantGender'] ?? '-' }}</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                <p class="text-sm text-gray-500 dark:text-gray-400">الأعلى تقييماً</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white mt-1">{{ $data['summary']['highestRatedGender'] ?? '-' }}</p>
-            </div>
+    {{-- Section Header --}}
+    <div class="rounded-xl shadow-sm border border-pink-100 dark:border-pink-800" style="background: linear-gradient(to right, rgb(253 242 248), rgb(252 231 243));">
+        <div class="px-5 py-4 flex items-center justify-between">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white">البيانات الديموغرافية</h2>
+            @if(!empty($data['summary']['totalAnalyzed']))
+                <span class="px-3 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium border border-gray-200 dark:border-gray-600">
+                    {{ number_format($data['summary']['totalAnalyzed']) }} مراجعة إجمالية
+                </span>
+            @endif
         </div>
-    @endif
+    </div>
 
-    {{-- Gender Categories --}}
+    {{-- Gender Cards --}}
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         @foreach(($data['categories'] ?? []) as $category)
             @php
-                $icon = match($category['category'] ?? '') {
-                    'ذكور' => 'heroicon-o-user',
-                    'إناث' => 'heroicon-o-user',
-                    default => 'heroicon-o-question-mark-circle',
+                $genderName = $category['category'] ?? '';
+                $percentage = $category['percentage'] ?? 0;
+                $totalReviews = $category['totalReviews'] ?? 0;
+                $avgRating = $category['averageRating'] ?? 0;
+                $positiveCount = $category['positiveCount'] ?? 0;
+                $negativeCount = $category['negativeCount'] ?? 0;
+                $totalAnalyzed = $data['summary']['totalAnalyzed'] ?? 300;
+
+                // Colors based on gender
+                $colors = match($genderName) {
+                    'ذكور' => [
+                        'border' => 'border-blue-200 dark:border-blue-700',
+                        'percentBg' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300',
+                        'progressBg' => 'bg-blue-500',
+                        'headerBg' => 'bg-blue-50 dark:bg-blue-900/20',
+                    ],
+                    'إناث' => [
+                        'border' => 'border-pink-200 dark:border-pink-700',
+                        'percentBg' => 'bg-pink-100 text-pink-700 dark:bg-pink-900/50 dark:text-pink-300',
+                        'progressBg' => 'bg-pink-500',
+                        'headerBg' => 'bg-pink-50 dark:bg-pink-900/20',
+                    ],
+                    default => [
+                        'border' => 'border-gray-200 dark:border-gray-700',
+                        'percentBg' => 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+                        'progressBg' => 'bg-gray-400',
+                        'headerBg' => 'bg-gray-50 dark:bg-gray-700/50',
+                    ],
                 };
-                $bgColor = match($category['category'] ?? '') {
-                    'ذكور' => 'bg-blue-100 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700',
-                    'إناث' => 'bg-pink-100 dark:bg-pink-900/30 border-pink-200 dark:border-pink-700',
-                    default => 'bg-gray-100 dark:bg-gray-900/30 border-gray-200 dark:border-gray-700',
-                };
-                $iconColor = match($category['category'] ?? '') {
-                    'ذكور' => 'text-blue-600 dark:text-blue-400',
-                    'إناث' => 'text-pink-600 dark:text-pink-400',
-                    default => 'text-gray-600 dark:text-gray-400',
-                };
+
+                // Progress bar width (percentage of total)
+                $progressWidth = min(100, max(0, $percentage));
             @endphp
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                {{-- Header --}}
-                <div class="p-6 {{ $bgColor }}">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 bg-white dark:bg-gray-800 rounded-xl flex items-center justify-center">
-                                <x-dynamic-component :component="$icon" class="w-6 h-6 {{ $iconColor }}" />
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $category['category'] }}</h3>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">{{ $category['totalReviews'] ?? 0 }} مراجعة</p>
-                            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl border {{ $colors['border'] }} overflow-hidden shadow-sm {{ $expandedCategory === $genderName ? 'ring-2 ring-blue-500 dark:ring-blue-400' : '' }}">
+                {{-- Card Header --}}
+                <div class="p-5">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $genderName }}</h3>
                         </div>
-                        <div class="text-left">
-                            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($category['percentage'] ?? 0, 1) }}%</p>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Stats --}}
-                <div class="p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="text-sm text-gray-500 dark:text-gray-400">متوسط التقييم</span>
-                        <div class="flex items-center gap-2">
-                            <div class="flex text-yellow-400">
-                                @for($i = 1; $i <= 5; $i++)
-                                    <x-heroicon-s-star class="w-4 h-4 {{ $i <= round($category['averageRating'] ?? 0) ? 'text-yellow-400' : 'text-gray-300' }}" />
-                                @endfor
-                            </div>
-                            <span class="font-bold text-gray-900 dark:text-white">{{ number_format($category['averageRating'] ?? 0, 1) }}</span>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="text-sm text-gray-500 dark:text-gray-400">إيجابي / سلبي</span>
-                        <span class="text-sm font-medium">
-                            <span class="text-green-600">{{ $category['positiveCount'] ?? 0 }}</span>
-                            /
-                            <span class="text-red-600">{{ $category['negativeCount'] ?? 0 }}</span>
+                        <span class="px-2 py-1 text-xs font-semibold rounded-lg {{ $colors['percentBg'] }}">
+                            {{ number_format($percentage, 2) }}%
                         </span>
                     </div>
 
-                    {{-- Toggle Details --}}
+                    {{-- Main Stats --}}
+                    <div class="text-center mb-4">
+                        <div class="text-4xl font-bold text-gray-900 dark:text-white mb-1">{{ number_format($totalReviews) }}</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">من أصل {{ number_format($totalAnalyzed) }} مراجعة</div>
+                    </div>
+
+                    {{-- Rating --}}
+                    <div class="flex items-center justify-center gap-2 mb-4">
+                        <span class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($avgRating, 1) }}</span>
+                        <x-heroicon-s-star class="w-5 h-5 text-yellow-400" />
+                    </div>
+
+                    {{-- Progress Bar --}}
+                    <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mb-4">
+                        <div class="h-full {{ $colors['progressBg'] }} rounded-full" style="width: {{ $progressWidth }}%"></div>
+                    </div>
+
+                    {{-- Expand Button --}}
                     <button
-                        wire:click="toggleCategory('{{ $category['category'] }}')"
-                        class="w-full flex items-center justify-center gap-2 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400"
+                        wire:click="toggleCategory('{{ $genderName }}')"
+                        class="w-full text-center text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
                     >
-                        <span>{{ $expandedCategory === $category['category'] ? 'إخفاء التفاصيل' : 'عرض التفاصيل' }}</span>
-                        <x-heroicon-o-chevron-down class="w-4 h-4 transition-transform {{ $expandedCategory === $category['category'] ? 'rotate-180' : '' }}" />
+                        {{ $expandedCategory === $genderName ? 'إخفاء التفاصيل' : 'اضغط لعرض التفاصيل' }}
                     </button>
                 </div>
 
                 {{-- Expanded Details --}}
-                @if($expandedCategory === $category['category'])
-                    <div class="border-t border-gray-200 dark:border-gray-700 p-6 space-y-4">
-                        {{-- Positive Quotes --}}
-                        @if(!empty($category['topPositives']))
-                            <div>
-                                <h4 class="text-sm font-medium text-green-600 dark:text-green-400 mb-2">أبرز التعليقات الإيجابية</h4>
-                                <div class="space-y-2">
-                                    @foreach($category['topPositives'] as $quote)
-                                        <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-                                            <p class="text-sm text-gray-700 dark:text-gray-300">"{{ $quote }}"</p>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
+                @if($expandedCategory === $genderName)
+                    <div class="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 p-5">
+                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">تفاصيل فئة: {{ $genderName }}</h4>
 
-                        {{-- Negative Quotes --}}
-                        @if(!empty($category['topNegatives']))
-                            <div>
-                                <h4 class="text-sm font-medium text-red-600 dark:text-red-400 mb-2">أبرز التعليقات السلبية</h4>
-                                <div class="space-y-2">
-                                    @foreach($category['topNegatives'] as $quote)
-                                        <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-3">
-                                            <p class="text-sm text-gray-700 dark:text-gray-300">"{{ $quote }}"</p>
-                                        </div>
-                                    @endforeach
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                            {{-- Positive Highlights --}}
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <x-heroicon-o-hand-thumb-up class="w-5 h-5 text-green-500" />
+                                    <span class="text-sm font-semibold text-green-600 dark:text-green-400">أبرز الإيجابيات</span>
                                 </div>
+                                @if(!empty($category['topPositives']))
+                                    <div class="space-y-2">
+                                        @foreach(array_slice($category['topPositives'], 0, 3) as $quote)
+                                            <div class="flex items-start gap-2">
+                                                <span class="w-2 h-2 mt-2 bg-green-500 rounded-full flex-shrink-0"></span>
+                                                <p class="text-sm text-gray-700 dark:text-gray-300">"{{ $quote }}"</p>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <p class="text-sm text-gray-500">لا توجد تعليقات إيجابية</p>
+                                @endif
                             </div>
-                        @endif
+
+                            {{-- Negative Highlights --}}
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <x-heroicon-o-hand-thumb-down class="w-5 h-5 text-red-500" />
+                                    <span class="text-sm font-semibold text-red-600 dark:text-red-400">أبرز السلبيات</span>
+                                </div>
+                                @if(!empty($category['topNegatives']))
+                                    <div class="space-y-2">
+                                        @foreach(array_slice($category['topNegatives'], 0, 3) as $quote)
+                                            <div class="flex items-start gap-2">
+                                                <span class="w-2 h-2 mt-2 bg-red-500 rounded-full flex-shrink-0"></span>
+                                                <p class="text-sm text-gray-700 dark:text-gray-300">"{{ $quote }}"</p>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <p class="text-sm text-gray-500">لا توجد تعليقات سلبية</p>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- Stats Row --}}
+                        <div class="grid grid-cols-3 gap-3 bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
+                            <div class="text-center">
+                                <div class="text-xl font-bold text-green-600 dark:text-green-400">{{ number_format($positiveCount) }}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">إيجابيات</div>
+                            </div>
+                            <div class="text-center border-x border-gray-200 dark:border-gray-600">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span class="text-xl font-bold text-gray-900 dark:text-white">{{ number_format($avgRating, 1) }}</span>
+                                    <x-heroicon-s-star class="w-4 h-4 text-yellow-400" />
+                                </div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">التقييم</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-xl font-bold text-blue-600 dark:text-blue-400">{{ number_format($percentage, 2) }}%</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">النسبة</div>
+                            </div>
+                        </div>
                     </div>
                 @endif
             </div>

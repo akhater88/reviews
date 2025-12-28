@@ -8,7 +8,7 @@
     {{-- Section Header --}}
     <div class="rounded-xl shadow-sm border border-teal-100 dark:border-teal-800" style="background: linear-gradient(to right, rgb(240 253 250), rgb(236 254 255));">
         <div class="px-5 py-4">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white">الكلمات المفتاحية</h2>
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white">الكلمات المفتاحية والعناصر الغذائية</h2>
         </div>
     </div>
 
