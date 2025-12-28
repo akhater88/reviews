@@ -4,11 +4,14 @@ namespace App\Providers\Filament;
 
 use App\Filament\SuperAdmin\Pages\Auth\Login;
 use App\Filament\SuperAdmin\Pages\Dashboard;
+use App\Filament\SuperAdmin\Widgets\CompetitionChartWidget;
+use App\Filament\SuperAdmin\Widgets\CompetitionStatsWidget;
 use App\Filament\SuperAdmin\Widgets\ExpiringSoonWidget;
 use App\Filament\SuperAdmin\Widgets\PlanDistributionChart;
 use App\Filament\SuperAdmin\Widgets\RecentActivityWidget;
 use App\Filament\SuperAdmin\Widgets\RevenueChart;
 use App\Filament\SuperAdmin\Widgets\StatsOverviewWidget;
+use App\Filament\SuperAdmin\Widgets\TopBranchesWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -63,6 +66,10 @@ class SuperAdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-credit-card')
                     ->collapsed(false),
                 NavigationGroup::make()
+                    ->label('المسابقة')
+                    ->icon('heroicon-o-trophy')
+                    ->collapsed(false),
+                NavigationGroup::make()
                     ->label('الإعدادات')
                     ->icon('heroicon-o-cog-6-tooth')
                     ->collapsed(true),
@@ -79,6 +86,9 @@ class SuperAdminPanelProvider extends PanelProvider
                 PlanDistributionChart::class,
                 ExpiringSoonWidget::class,
                 RecentActivityWidget::class,
+                CompetitionStatsWidget::class,
+                TopBranchesWidget::class,
+                CompetitionChartWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
