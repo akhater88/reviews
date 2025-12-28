@@ -37,6 +37,7 @@ class CompetitionPeriod extends Model
         parent::boot();
 
         static::creating(function (CompetitionPeriod $period) {
+            // Auto-generate slug from name
             if (empty($period->slug)) {
                 $baseSlug = Str::slug($period->name);
                 $slug = $baseSlug;
@@ -49,6 +50,21 @@ class CompetitionPeriod extends Model
                 }
 
                 $period->slug = $slug;
+            }
+
+            // Auto-generate year and month from starts_at
+            if ($period->starts_at) {
+                $startsAt = $period->starts_at instanceof \Carbon\Carbon
+                    ? $period->starts_at
+                    : \Carbon\Carbon::parse($period->starts_at);
+
+                if (empty($period->year)) {
+                    $period->year = $startsAt->year;
+                }
+
+                if (empty($period->month)) {
+                    $period->month = $startsAt->month;
+                }
             }
         });
     }
