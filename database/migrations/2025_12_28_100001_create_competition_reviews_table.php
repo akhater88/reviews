@@ -30,9 +30,9 @@ return new class extends Migration
             $table->timestamp('analyzed_at')->nullable();
             $table->timestamps();
 
-            $table->index(['competition_branch_id', 'review_date']);
-            $table->index('sentiment_score');
-            $table->index('analyzed_at');
+            $table->index(['competition_branch_id', 'review_date'], 'comp_reviews_branch_date_idx');
+            $table->index('sentiment_score', 'comp_reviews_sentiment_idx');
+            $table->index('analyzed_at', 'comp_reviews_analyzed_idx');
         });
     }
 
