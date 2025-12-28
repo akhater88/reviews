@@ -52,4 +52,17 @@ return [
         'otp_template' => env('WHATSAPP_OTP_TEMPLATE', 'otp_verification'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Google API Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for Google APIs including Places API.
+    |
+    */
+
+    'google' => [
+        'places_api_key' => env('GOOGLE_PLACES_API_KEY'),
+    ],
+
 ];

@@ -3,6 +3,7 @@
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Competition\CompetitionAuthController;
 use App\Http\Controllers\Competition\CompetitionController;
+use App\Http\Controllers\Competition\CompetitionNominationController;
 use App\Http\Controllers\Webhooks\PaymentWebhookController;
 use App\Models\SuperAdmin;
 use Illuminate\Support\Facades\Route;
@@ -51,7 +52,22 @@ Route::prefix('competition')->name('competition.')->group(function () {
 
     // Protected routes (require verified participant)
     Route::middleware('competition.auth')->group(function () {
-        // Dashboard and nomination routes will be added in Prompt 11
+        // Google Places Search
+        Route::get('/places/search', [CompetitionNominationController::class, 'searchPlaces'])
+            ->name('places.search')
+            ->middleware('throttle:30,1'); // 30 searches per minute
+
+        Route::get('/places/{placeId}', [CompetitionNominationController::class, 'getPlaceDetails'])
+            ->name('places.details')
+            ->middleware('throttle:20,1');
+
+        // Nomination
+        Route::post('/nominate', [CompetitionNominationController::class, 'nominate'])
+            ->name('nominate')
+            ->middleware('throttle:5,1'); // 5 nomination attempts per minute
+
+        Route::get('/my-nomination', [CompetitionNominationController::class, 'myNomination'])
+            ->name('my-nomination');
     });
 });
 
