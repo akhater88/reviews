@@ -6,6 +6,7 @@ use App\Enums\CompetitionPeriodStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class CompetitionPeriod extends Model
 {
@@ -30,6 +31,27 @@ class CompetitionPeriod extends Model
         'third_prize' => 'decimal:2',
         'nominator_prize' => 'decimal:2',
     ];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (CompetitionPeriod $period) {
+            if (empty($period->slug)) {
+                $baseSlug = Str::slug($period->name);
+                $slug = $baseSlug;
+                $counter = 1;
+
+                // Ensure unique slug
+                while (static::where('slug', $slug)->exists()) {
+                    $slug = $baseSlug . '-' . $counter;
+                    $counter++;
+                }
+
+                $period->slug = $slug;
+            }
+        });
+    }
 
     public function winningBranch(): BelongsTo
     {
