@@ -23,7 +23,6 @@ class BranchReportPage extends Page
 
     public Branch $branch;
     public ?AnalysisOverview $latestAnalysis = null;
-    public string $activeTab = 'overview';
     public array $analysisData = [];
 
     public function mount(Branch $branch): void
@@ -72,16 +71,35 @@ class BranchReportPage extends Page
         }
     }
 
-    public function setActiveTab(string $tab): void
-    {
-        $this->activeTab = $tab;
-    }
-
     public function hasAnalysisData(): bool
     {
         return $this->latestAnalysis !== null && !empty($this->analysisData);
     }
 
+    /**
+     * Get restaurant information for the header
+     */
+    public function getRestaurantInfo(): array
+    {
+        return [
+            'name' => $this->branch->name,
+            'location' => $this->branch->full_address ?? "{$this->branch->city}, {$this->branch->country}",
+            'photoUrl' => $this->branch->photo_url ?? null,
+            'placeId' => $this->branch->google_place_id,
+        ];
+    }
+
+    /**
+     * Get overview cards from analysis data
+     */
+    public function getOverviewCards(): array
+    {
+        return $this->analysisData[AnalysisType::OVERVIEW_CARDS->value]['cards'] ?? [];
+    }
+
+    /**
+     * Get raw overview data
+     */
     public function getOverviewData(): array
     {
         return $this->analysisData[AnalysisType::OVERVIEW_CARDS->value] ?? [];
@@ -92,8 +110,21 @@ class BranchReportPage extends Page
         return $this->analysisData[AnalysisType::SENTIMENT->value] ?? [];
     }
 
+    /**
+     * Get category data from overview cards
+     */
     public function getCategoryData(): array
     {
+        $overviewCards = $this->getOverviewCards();
+        foreach ($overviewCards as $card) {
+            if (($card['type'] ?? '') === 'category_analysis') {
+                return $card['data']['dynamicCategories']
+                    ?? $card['data']['organicCategories']
+                    ?? $card['data']['categories']
+                    ?? [];
+            }
+        }
+        // Fallback to category_insights data
         return $this->analysisData[AnalysisType::CATEGORY_INSIGHTS->value] ?? [];
     }
 
@@ -117,9 +148,14 @@ class BranchReportPage extends Page
         return $this->analysisData[AnalysisType::RECOMMENDATIONS->value] ?? [];
     }
 
+    /**
+     * Get operational data with fallback to recommendations
+     */
     public function getOperationalData(): array
     {
-        return $this->analysisData[AnalysisType::OPERATIONAL_INTELLIGENCE->value] ?? [];
+        return $this->analysisData[AnalysisType::OPERATIONAL_INTELLIGENCE->value]
+            ?? $this->analysisData[AnalysisType::RECOMMENDATIONS->value]
+            ?? [];
     }
 
     public function startNewAnalysis(): void
@@ -160,7 +196,6 @@ class BranchReportPage extends Page
             'branch' => $this->branch,
             'latestAnalysis' => $this->latestAnalysis,
             'hasData' => $this->hasAnalysisData(),
-            'activeTab' => $this->activeTab,
         ];
     }
 }
