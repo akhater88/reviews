@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\Competition\CompetitionAuthController;
 use App\Http\Controllers\Competition\CompetitionController;
 use App\Http\Controllers\Webhooks\PaymentWebhookController;
 use App\Models\SuperAdmin;
@@ -24,6 +25,34 @@ Route::prefix('competition')->name('competition.')->group(function () {
     // Winners Page (public)
     Route::get('/winners', [CompetitionController::class, 'winners'])->name('winners');
     Route::get('/winners/{period:slug}', [CompetitionController::class, 'periodWinners'])->name('winners.period');
+
+    // Authentication Routes
+    Route::post('/send-otp', [CompetitionAuthController::class, 'sendOtp'])
+        ->name('send-otp')
+        ->middleware('throttle:5,1'); // 5 attempts per minute
+
+    Route::post('/verify-otp', [CompetitionAuthController::class, 'verifyOtp'])
+        ->name('verify-otp')
+        ->middleware('throttle:10,1'); // 10 attempts per minute
+
+    Route::post('/register', [CompetitionAuthController::class, 'register'])
+        ->name('register');
+
+    Route::post('/resend-otp', [CompetitionAuthController::class, 'resendOtp'])
+        ->name('resend-otp')
+        ->middleware('throttle:3,1'); // 3 attempts per minute
+
+    Route::post('/logout', [CompetitionAuthController::class, 'logout'])
+        ->name('logout');
+
+    // Check auth status (for frontend)
+    Route::get('/auth-status', [CompetitionAuthController::class, 'status'])
+        ->name('auth-status');
+
+    // Protected routes (require verified participant)
+    Route::middleware('competition.auth')->group(function () {
+        // Dashboard and nomination routes will be added in Prompt 11
+    });
 });
 
 // Payment Webhooks (no CSRF, no auth)
