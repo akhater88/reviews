@@ -111,6 +111,102 @@ class InfobipService
     }
 
     /**
+     * Send generic WhatsApp message (for notifications, reminders, etc.)
+     */
+    public function sendWhatsAppMessage(string $phone, string $message): bool
+    {
+        // In development, just log the message
+        if (!app()->isProduction()) {
+            Log::info('WhatsApp Message (Dev Mode)', [
+                'phone' => $phone,
+                'message' => $message,
+            ]);
+
+            return true;
+        }
+
+        try {
+            $request = new InfobipWhatsAppRequest(
+                phone: $this->formatPhoneNumber($phone),
+                message: $message
+            );
+
+            $response = $this->connector->send($request);
+
+            if ($response->successful()) {
+                Log::info('WhatsApp message sent successfully', [
+                    'phone' => $phone,
+                ]);
+
+                return true;
+            }
+
+            Log::error('WhatsApp message failed', [
+                'phone' => $phone,
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
+            return false;
+
+        } catch (Exception $e) {
+            Log::error('WhatsApp message exception', [
+                'phone' => $phone,
+                'error' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
+    }
+
+    /**
+     * Send generic SMS message
+     */
+    public function sendSmsMessage(string $phone, string $message): bool
+    {
+        // In development, just log the message
+        if (!app()->isProduction()) {
+            Log::info('SMS Message (Dev Mode)', [
+                'phone' => $phone,
+                'message' => $message,
+            ]);
+
+            return true;
+        }
+
+        try {
+            $request = new InfobipSmsRequest(
+                phone: $this->formatPhoneNumber($phone),
+                message: $message
+            );
+
+            $response = $this->connector->send($request);
+
+            if ($response->successful()) {
+                Log::info('SMS message sent successfully', ['phone' => $phone]);
+
+                return true;
+            }
+
+            Log::error('SMS message failed', [
+                'phone' => $phone,
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
+            return false;
+
+        } catch (Exception $e) {
+            Log::error('SMS message exception', [
+                'phone' => $phone,
+                'error' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
+    }
+
+    /**
      * Format phone number for Infobip (must include country code, no + sign)
      * Example: +966512345678 -> 966512345678
      */

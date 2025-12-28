@@ -8,6 +8,7 @@ use App\Filament\SuperAdmin\Resources\CompetitionPeriodResource\RelationManagers
 use App\Jobs\Competition\SelectWinnersJob;
 use App\Jobs\Competition\UpdateRankingsJob;
 use App\Models\Competition\CompetitionPeriod;
+use App\Services\Competition\WinnerSelectionService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -72,18 +73,39 @@ class CompetitionPeriodResource extends Resource
 
                 Forms\Components\Section::make('إعدادات الجوائز')
                     ->schema([
+                        Forms\Components\TextInput::make('first_prize')
+                            ->label('جائزة المركز الأول (ر.س)')
+                            ->numeric()
+                            ->default(2000),
+
+                        Forms\Components\TextInput::make('second_prize')
+                            ->label('جائزة المركز الثاني (ر.س)')
+                            ->numeric()
+                            ->default(1500),
+
+                        Forms\Components\TextInput::make('third_prize')
+                            ->label('جائزة المركز الثالث (ر.س)')
+                            ->numeric()
+                            ->default(1000),
+
+                        Forms\Components\TextInput::make('nominator_winners_count')
+                            ->label('عدد الفائزين بالسحب')
+                            ->numeric()
+                            ->default(5)
+                            ->helperText('عدد المرشحين الذين سيفوزون بالسحب العشوائي'),
+
+                        Forms\Components\TextInput::make('nominator_prize')
+                            ->label('جائزة كل فائز بالسحب (ر.س)')
+                            ->numeric()
+                            ->default(500),
+
                         Forms\Components\KeyValue::make('prizes')
-                            ->label('الجوائز')
+                            ->label('جوائز إضافية (اختياري)')
                             ->keyLabel('المركز')
                             ->valueLabel('المبلغ (ر.س)')
                             ->addActionLabel('إضافة جائزة')
-                            ->default([
-                                '1' => '2000',
-                                '2' => '1500',
-                                '3' => '1000',
-                            ])
                             ->columnSpanFull(),
-                    ]),
+                    ])->columns(2),
 
                 Forms\Components\Section::make('أوزان النقاط')
                     ->schema([
@@ -144,6 +166,22 @@ class CompetitionPeriodResource extends Resource
                     ->label('الترشيحات')
                     ->numeric()
                     ->sortable(),
+
+                Tables\Columns\IconColumn::make('winners_selected')
+                    ->label('الفائزين')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-clock')
+                    ->trueColor('success')
+                    ->falseColor('gray'),
+
+                Tables\Columns\IconColumn::make('winners_announced')
+                    ->label('معلن')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-megaphone')
+                    ->falseIcon('heroicon-o-eye-slash')
+                    ->trueColor('warning')
+                    ->falseColor('gray'),
             ])
             ->defaultSort('starts_at', 'desc')
             ->filters([
@@ -191,15 +229,39 @@ class CompetitionPeriodResource extends Resource
                         ->color('success')
                         ->requiresConfirmation()
                         ->modalHeading('اختيار الفائزين')
-                        ->modalDescription('سيتم اختيار الفائزين بناءً على الترتيب الحالي. هل أنت متأكد؟')
-                        ->visible(fn (CompetitionPeriod $record) => $record->status === CompetitionPeriodStatus::COMPLETED && $record->winners()->count() === 0)
+                        ->modalDescription('سيتم اختيار أفضل 3 مطاعم + سحب عشوائي للمرشحين. سيتم إشعار الفائزين تلقائياً. هل أنت متأكد؟')
+                        ->visible(fn (CompetitionPeriod $record) => $record->status === CompetitionPeriodStatus::COMPLETED && !$record->winners_selected)
                         ->action(function (CompetitionPeriod $record) {
                             dispatch(new SelectWinnersJob($record));
                             Notification::make()
                                 ->success()
                                 ->title('تم جدولة اختيار الفائزين')
+                                ->body('سيتم إشعار الفائزين تلقائياً')
                                 ->send();
                         }),
+
+                    Tables\Actions\Action::make('announceWinners')
+                        ->label('إعلان الفائزين')
+                        ->icon('heroicon-o-megaphone')
+                        ->color('warning')
+                        ->requiresConfirmation()
+                        ->modalHeading('إعلان الفائزين')
+                        ->modalDescription('سيتم نشر قائمة الفائزين للعموم. هل أنت متأكد؟')
+                        ->visible(fn (CompetitionPeriod $record) => $record->winners_selected && !$record->winners_announced)
+                        ->action(function (CompetitionPeriod $record) {
+                            app(WinnerSelectionService::class)->announceWinners($record);
+                            Notification::make()
+                                ->success()
+                                ->title('تم إعلان الفائزين')
+                                ->send();
+                        }),
+
+                    Tables\Actions\Action::make('viewWinners')
+                        ->label('عرض الفائزين')
+                        ->icon('heroicon-o-eye')
+                        ->url(fn (CompetitionPeriod $record) => route('competition.winners.period', $record))
+                        ->openUrlInNewTab()
+                        ->visible(fn (CompetitionPeriod $record) => $record->winners_announced),
                 ]),
             ])
             ->bulkActions([

@@ -5,6 +5,7 @@ use App\Http\Controllers\Competition\CompetitionAuthController;
 use App\Http\Controllers\Competition\CompetitionController;
 use App\Http\Controllers\Competition\CompetitionDashboardController;
 use App\Http\Controllers\Competition\CompetitionNominationController;
+use App\Http\Controllers\Competition\PrizeClaimController;
 use App\Http\Controllers\Webhooks\PaymentWebhookController;
 use App\Models\SuperAdmin;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,14 @@ Route::prefix('competition')->name('competition.')->group(function () {
     // Winners Page (public)
     Route::get('/winners', [CompetitionController::class, 'winners'])->name('winners');
     Route::get('/winners/{period:slug}', [CompetitionController::class, 'periodWinners'])->name('winners.period');
+
+    // Prize claim routes (public with code verification)
+    Route::get('/claim/{code}', [PrizeClaimController::class, 'show'])
+        ->name('claim');
+    Route::post('/claim/{code}', [PrizeClaimController::class, 'submit'])
+        ->name('claim.submit');
+    Route::get('/claim/{code}/success', [PrizeClaimController::class, 'success'])
+        ->name('claim.success');
 
     // Authentication Routes
     Route::post('/send-otp', [CompetitionAuthController::class, 'sendOtp'])
