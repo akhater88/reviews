@@ -21,7 +21,7 @@ return new class extends Migration
             $table->decimal('keyword_score', 8, 2)->nullable();
             $table->timestamp('recorded_at');
 
-            $table->index(['competition_score_id', 'recorded_at']);
+            $table->index(['competition_score_id', 'recorded_at'], 'score_history_score_recorded_idx');
         });
     }
 
