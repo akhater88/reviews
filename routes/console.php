@@ -85,3 +85,60 @@ Schedule::command('subscriptions:process-expired')
     ->withoutOverlapping()
     ->name('process-expired-subscriptions')
     ->onOneServer();
+
+/*
+|--------------------------------------------------------------------------
+| Competition Management Scheduler
+|--------------------------------------------------------------------------
+|
+| Run competition-related scheduled tasks:
+| - Sync reviews: Every 4 hours for stale branches
+| - Update rankings: Hourly
+| - Full score recalculation: Daily at 3 AM
+| - Period transitions: Daily
+|
+*/
+
+// Competition: Sync reviews every 4 hours for branches not synced in 6 hours
+Schedule::command('competition:sync-reviews --stale-hours=6')
+    ->everyFourHours()
+    ->withoutOverlapping()
+    ->name('competition-sync-reviews')
+    ->onOneServer();
+
+// Competition: Update rankings hourly
+Schedule::command('competition:update-rankings')
+    ->hourly()
+    ->withoutOverlapping()
+    ->name('competition-update-rankings')
+    ->onOneServer();
+
+// Competition: Full score recalculation daily at 3 AM
+Schedule::command('competition:process-scores')
+    ->dailyAt('03:00')
+    ->withoutOverlapping()
+    ->name('competition-process-scores')
+    ->onOneServer();
+
+// Competition: Check for period transitions daily at midnight
+Schedule::call(function () {
+    // End expired periods
+    \App\Models\Competition\CompetitionPeriod::where('status', 'active')
+        ->where('ends_at', '<', now())
+        ->each(function ($period) {
+            $period->update(['status' => 'completed']);
+
+            // Dispatch winner selection job
+            dispatch(new \App\Jobs\Competition\SelectWinnersJob($period))
+                ->onQueue('competition');
+        });
+
+    // Activate upcoming periods
+    \App\Models\Competition\CompetitionPeriod::where('status', 'upcoming')
+        ->where('starts_at', '<=', now())
+        ->where('ends_at', '>', now())
+        ->update(['status' => 'active']);
+})
+    ->daily()
+    ->name('competition-period-transitions')
+    ->onOneServer();
