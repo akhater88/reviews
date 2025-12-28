@@ -76,4 +76,15 @@ class CompetitionBranch extends Model
     {
         return $this->nominations()->where('competition_period_id', $periodId)->count();
     }
+
+    /**
+     * Update the sync status of this branch
+     */
+    public function updateSyncStatus(string $status, ?string $error = null): void
+    {
+        $this->update([
+            'sync_status' => $status,
+            'sync_error' => $error,
+        ]);
+    }
 }

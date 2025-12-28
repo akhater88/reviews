@@ -316,17 +316,203 @@
                     </form>
                 </div>
 
-                <!-- Step 4: Search (Placeholder - Prompt 11) -->
+                <!-- Step 4: Search -->
                 <div x-show="currentStep === 'search'" x-cloak>
-                    <div class="text-center py-8">
+                    <div class="text-center mb-6">
                         <div class="text-5xl mb-4">&#128269;</div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">ابحث عن مطعمك</h3>
-                        <p class="text-gray-500">سيتم تنفيذ هذه الخطوة في Prompt 11</p>
+                        <h3 class="text-xl font-bold text-gray-900">ابحث عن مطعمك المفضل</h3>
+                        <p class="text-gray-500 text-sm mt-2">ابحث باسم المطعم أو المنطقة</p>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="mb-4">
+                        <div class="relative">
+                            <input
+                                type="text"
+                                x-model="searchQuery"
+                                @input.debounce.500ms="searchPlaces()"
+                                placeholder="مثال: مطعم البيك، الرياض"
+                                class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                            >
+                            <div class="absolute right-3 top-1/2 -translate-y-1/2">
+                                <template x-if="!searchLoading">
+                                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                </template>
+                                <template x-if="searchLoading">
+                                    <svg class="animate-spin w-6 h-6 text-orange-500" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                    </svg>
+                                </template>
+                            </div>
+                        </div>
+                        <p x-show="searchError" x-text="searchError" class="text-red-500 text-sm mt-2"></p>
+                    </div>
+
+                    <!-- Search Results -->
+                    <div x-show="searchResults.length > 0" class="space-y-3 max-h-64 overflow-y-auto">
+                        <template x-for="place in searchResults" :key="place.place_id">
+                            <button
+                                @click="selectPlace(place)"
+                                class="w-full flex items-start gap-3 p-3 border border-gray-200 rounded-xl hover:border-orange-500 hover:bg-orange-50 transition-colors text-right"
+                            >
+                                <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                    <template x-if="place.photo_url">
+                                        <img :src="place.photo_url" class="w-full h-full object-cover" alt="">
+                                    </template>
+                                    <template x-if="!place.photo_url">
+                                        <div class="w-full h-full flex items-center justify-center text-2xl">&#127869;</div>
+                                    </template>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-bold text-gray-900 truncate" x-text="place.name"></h4>
+                                    <p class="text-gray-500 text-sm truncate" x-text="place.address"></p>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <span class="text-sm">&#11088; <span x-text="place.rating"></span></span>
+                                        <span class="text-gray-400 text-sm">(<span x-text="place.reviews_count"></span> تقييم)</span>
+                                    </div>
+                                </div>
+                            </button>
+                        </template>
+                    </div>
+
+                    <!-- No Results -->
+                    <div x-show="searchQuery.length >= 2 && !searchLoading && searchResults.length === 0 && searchPerformed" class="text-center py-8 text-gray-500">
+                        <div class="text-4xl mb-2">&#128533;</div>
+                        <p>لم يتم العثور على نتائج</p>
+                        <p class="text-sm mt-1">جرب البحث باسم مختلف</p>
+                    </div>
+
+                    <!-- Initial State -->
+                    <div x-show="searchQuery.length < 2 && searchResults.length === 0" class="text-center py-8 text-gray-400">
+                        <p class="text-sm">اكتب اسم المطعم للبحث</p>
+                    </div>
+                </div>
+
+                <!-- Step 5: Confirm -->
+                <div x-show="currentStep === 'confirm'" x-cloak>
+                    <div class="text-center mb-6">
+                        <div class="text-5xl mb-4">&#9989;</div>
+                        <h3 class="text-xl font-bold text-gray-900">تأكيد الترشيح</h3>
+                        <p class="text-gray-500 text-sm mt-2">هل هذا هو المطعم الذي تريد ترشيحه؟</p>
+                    </div>
+
+                    <!-- Selected Place Card -->
+                    <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                        <div class="flex items-start gap-4">
+                            <div class="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                                <template x-if="selectedPlace?.photo_url">
+                                    <img :src="selectedPlace?.photo_url" class="w-full h-full object-cover" alt="">
+                                </template>
+                                <template x-if="!selectedPlace?.photo_url">
+                                    <div class="w-full h-full flex items-center justify-center text-3xl">&#127869;</div>
+                                </template>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-lg text-gray-900" x-text="selectedPlace?.name"></h4>
+                                <p class="text-gray-500 text-sm" x-text="selectedPlace?.address"></p>
+                                <div class="flex items-center gap-2 mt-2">
+                                    <span>&#11088; <span x-text="selectedPlace?.rating"></span></span>
+                                    <span class="text-gray-400 text-sm">(<span x-text="selectedPlace?.reviews_count"></span> تقييم)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Warning -->
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                        <p class="text-amber-800 text-sm flex items-center gap-2">
+                            <span>&#9888;&#65039;</span>
+                            <span>لا يمكن تغيير المطعم بعد التأكيد!</span>
+                        </p>
+                    </div>
+
+                    <p x-show="nominationError" x-text="nominationError" class="text-red-500 text-sm text-center mb-4"></p>
+
+                    <div class="flex gap-3">
                         <button
-                            @click="goToStep('phone')"
-                            class="mt-4 text-orange-600 hover:text-orange-700 text-sm"
+                            @click="goToStep('search')"
+                            :disabled="loading"
+                            class="flex-1 border border-gray-300 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
                         >
-                            &#8594; العودة للبداية
+                            تغيير
+                        </button>
+                        <button
+                            @click="submitNomination()"
+                            :disabled="loading"
+                            class="flex-1 bg-orange-500 text-white py-3 rounded-lg font-bold hover:bg-orange-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                        >
+                            <template x-if="!loading">
+                                <span>تأكيد &#127881;</span>
+                            </template>
+                            <template x-if="loading">
+                                <span class="flex items-center gap-2">
+                                    <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    جاري التأكيد...
+                                </span>
+                            </template>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 6: Success -->
+                <div x-show="currentStep === 'success'" x-cloak>
+                    <div class="text-center">
+                        <div class="text-6xl mb-4 animate-bounce">&#127881;</div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">تم الترشيح بنجاح!</h3>
+                        <p class="text-gray-500 mb-6">شكراً لمشاركتك في المسابقة</p>
+
+                        <!-- Branch Info -->
+                        <div class="bg-orange-50 rounded-xl p-4 mb-6">
+                            <div class="flex items-center justify-center gap-3 mb-2">
+                                <template x-if="nominationResult?.branch?.photo_url">
+                                    <img :src="nominationResult?.branch?.photo_url" class="w-12 h-12 rounded-lg object-cover" alt="">
+                                </template>
+                                <div>
+                                    <h4 class="font-bold text-gray-900" x-text="nominationResult?.branch?.name"></h4>
+                                    <p class="text-gray-500 text-sm" x-text="nominationResult?.branch?.city"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Share Section -->
+                        <p class="text-gray-600 text-sm mb-3">شارك مع أصدقائك</p>
+                        <div class="flex justify-center gap-3 mb-6">
+                            <button
+                                @click="shareWhatsApp()"
+                                class="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center hover:bg-green-600 transition-colors text-xl"
+                                title="مشاركة عبر واتساب"
+                            >
+                                &#128172;
+                            </button>
+                            <button
+                                @click="shareTwitter()"
+                                class="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors font-bold"
+                                title="مشاركة عبر تويتر"
+                            >
+                                &#120143;
+                            </button>
+                            <button
+                                @click="copyLink()"
+                                class="w-12 h-12 bg-gray-500 text-white rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors text-xl"
+                                title="نسخ الرابط"
+                            >
+                                &#128279;
+                            </button>
+                        </div>
+
+                        <p x-show="linkCopied" class="text-green-600 text-sm mb-4">تم نسخ الرابط!</p>
+
+                        <button
+                            @click="closeNominationModal()"
+                            class="w-full bg-orange-500 text-white py-3 rounded-lg font-bold hover:bg-orange-600 transition-colors"
+                        >
+                            إغلاق
                         </button>
                     </div>
                 </div>
@@ -386,6 +572,19 @@ function nominationFlow() {
 
         // Participant data
         participant: null,
+
+        // Search step
+        searchQuery: '',
+        searchResults: [],
+        searchLoading: false,
+        searchError: '',
+        searchPerformed: false,
+        selectedPlace: null,
+
+        // Nomination
+        nominationError: '',
+        nominationResult: null,
+        linkCopied: false,
 
         // Initialize
         init() {
@@ -690,6 +889,127 @@ function nominationFlow() {
             } finally {
                 this.loading = false;
             }
+        },
+
+        // Search for places
+        async searchPlaces() {
+            if (this.searchQuery.length < 2) {
+                this.searchResults = [];
+                this.searchPerformed = false;
+                return;
+            }
+
+            this.searchLoading = true;
+            this.searchError = '';
+
+            try {
+                const response = await fetch(`{{ route("competition.places.search") }}?query=${encodeURIComponent(this.searchQuery)}`, {
+                    headers: {
+                        'Accept': 'application/json',
+                    },
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    this.searchResults = data.results;
+                } else {
+                    this.searchError = data.message || 'فشل في البحث';
+                    this.searchResults = [];
+                }
+
+                this.searchPerformed = true;
+            } catch (e) {
+                this.searchError = 'حدث خطأ في البحث. يرجى المحاولة مرة أخرى.';
+                console.error('Search error:', e);
+            } finally {
+                this.searchLoading = false;
+            }
+        },
+
+        // Select a place
+        selectPlace(place) {
+            this.selectedPlace = place;
+            this.nominationError = '';
+            this.goToStep('confirm');
+        },
+
+        // Submit nomination
+        async submitNomination() {
+            if (this.loading || !this.selectedPlace) return;
+
+            this.loading = true;
+            this.nominationError = '';
+
+            try {
+                const response = await fetch('{{ route("competition.nominate") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        place_id: this.selectedPlace.place_id,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    this.nominationResult = data.data;
+                    this.goToStep('success');
+                } else {
+                    if (data.already_nominated) {
+                        this.goToStep('already_nominated');
+                    } else {
+                        this.nominationError = data.message;
+                    }
+                }
+            } catch (e) {
+                this.nominationError = 'حدث خطأ أثناء تسجيل الترشيح. يرجى المحاولة مرة أخرى.';
+                console.error('Nomination error:', e);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        // Share on WhatsApp
+        shareWhatsApp() {
+            const branchName = this.nominationResult?.branch?.name || 'مطعمي المفضل';
+            const text = `🏆 رشّحت ${branchName} في مسابقة أفضل مطعم!\n\nشارك وادعم مطعمك المفضل:\n${window.location.origin}/competition`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+        },
+
+        // Share on Twitter
+        shareTwitter() {
+            const branchName = this.nominationResult?.branch?.name || 'مطعمي المفضل';
+            const text = `🏆 شاركت في مسابقة أفضل مطعم ورشّحت ${branchName}!\n\nشارك وادعم مطعمك المفضل:`;
+            const url = `${window.location.origin}/competition`;
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+        },
+
+        // Copy link
+        async copyLink() {
+            try {
+                await navigator.clipboard.writeText(`${window.location.origin}/competition`);
+                this.linkCopied = true;
+                setTimeout(() => {
+                    this.linkCopied = false;
+                }, 3000);
+            } catch (e) {
+                console.error('Copy failed:', e);
+            }
+        },
+
+        // Reset search
+        resetSearch() {
+            this.searchQuery = '';
+            this.searchResults = [];
+            this.searchError = '';
+            this.searchPerformed = false;
+            this.selectedPlace = null;
+            this.nominationError = '';
         },
 
         // Cleanup
