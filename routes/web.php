@@ -3,6 +3,7 @@
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Competition\CompetitionAuthController;
 use App\Http\Controllers\Competition\CompetitionController;
+use App\Http\Controllers\Competition\CompetitionDashboardController;
 use App\Http\Controllers\Competition\CompetitionNominationController;
 use App\Http\Controllers\Webhooks\PaymentWebhookController;
 use App\Models\SuperAdmin;
@@ -68,6 +69,27 @@ Route::prefix('competition')->name('competition.')->group(function () {
 
         Route::get('/my-nomination', [CompetitionNominationController::class, 'myNomination'])
             ->name('my-nomination');
+
+        // Dashboard
+        Route::get('/dashboard', [CompetitionDashboardController::class, 'index'])
+            ->name('dashboard');
+
+        // Dashboard API endpoints
+        Route::get('/dashboard/score', [CompetitionDashboardController::class, 'getScore'])
+            ->name('dashboard.score');
+
+        Route::get('/dashboard/leaderboard', [CompetitionDashboardController::class, 'getLeaderboard'])
+            ->name('dashboard.leaderboard');
+
+        Route::get('/dashboard/history', [CompetitionDashboardController::class, 'getHistory'])
+            ->name('dashboard.history');
+
+        // Share
+        Route::get('/share/{nominationId}', [CompetitionDashboardController::class, 'shareCard'])
+            ->name('share.card');
+
+        Route::get('/share/{nominationId}/image', [CompetitionDashboardController::class, 'shareImage'])
+            ->name('share.image');
     });
 });
 

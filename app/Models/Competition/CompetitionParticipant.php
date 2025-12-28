@@ -67,6 +67,24 @@ class CompetitionParticipant extends Model
         return $this->nominations()->where('competition_period_id', $periodId)->exists();
     }
 
+    /**
+     * Get nomination for a specific period
+     */
+    public function getNominationForPeriod(int $periodId): ?CompetitionNomination
+    {
+        return $this->nominations()
+            ->where('competition_period_id', $periodId)
+            ->first();
+    }
+
+    /**
+     * Get referral count
+     */
+    public function getReferralCountAttribute(): int
+    {
+        return self::where('referred_by_id', $this->id)->count();
+    }
+
     public function getMaskedPhoneAttribute(): string
     {
         return substr($this->phone, 0, 4) . '****' . substr($this->phone, -2);
