@@ -40,18 +40,18 @@ Route::prefix('competition')->name('competition.')->group(function () {
     // Authentication Routes
     Route::post('/send-otp', [CompetitionAuthController::class, 'sendOtp'])
         ->name('send-otp')
-        ->middleware('throttle:5,1'); // 5 attempts per minute
+        ->middleware('throttle:competition-otp');
 
     Route::post('/verify-otp', [CompetitionAuthController::class, 'verifyOtp'])
         ->name('verify-otp')
-        ->middleware('throttle:10,1'); // 10 attempts per minute
+        ->middleware('throttle:competition-verify-otp');
 
     Route::post('/register', [CompetitionAuthController::class, 'register'])
         ->name('register');
 
     Route::post('/resend-otp', [CompetitionAuthController::class, 'resendOtp'])
         ->name('resend-otp')
-        ->middleware('throttle:3,1'); // 3 attempts per minute
+        ->middleware('throttle:competition-resend-otp');
 
     Route::post('/logout', [CompetitionAuthController::class, 'logout'])
         ->name('logout');
@@ -65,16 +65,16 @@ Route::prefix('competition')->name('competition.')->group(function () {
         // Google Places Search
         Route::get('/places/search', [CompetitionNominationController::class, 'searchPlaces'])
             ->name('places.search')
-            ->middleware('throttle:30,1'); // 30 searches per minute
+            ->middleware('throttle:competition-places-search');
 
         Route::get('/places/{placeId}', [CompetitionNominationController::class, 'getPlaceDetails'])
             ->name('places.details')
-            ->middleware('throttle:20,1');
+            ->middleware('throttle:competition-place-details');
 
         // Nomination
         Route::post('/nominate', [CompetitionNominationController::class, 'nominate'])
             ->name('nominate')
-            ->middleware('throttle:5,1'); // 5 nomination attempts per minute
+            ->middleware('throttle:competition-nominate');
 
         Route::get('/my-nomination', [CompetitionNominationController::class, 'myNomination'])
             ->name('my-nomination');
