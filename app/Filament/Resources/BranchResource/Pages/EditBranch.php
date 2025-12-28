@@ -22,7 +22,7 @@ class EditBranch extends EditRecord
                 ->color('primary')
                 ->requiresConfirmation()
                 ->modalHeading('مزامنة المراجعات')
-                ->modalDescription('سيتم جلب أحدث المراجعات من Outscraper. قد تستغرق العملية بضع دقائق.')
+                ->modalDescription('سيتم جلب أحدث المراجعات. قد تستغرق العملية بضع دقائق.')
                 ->modalSubmitActionLabel('بدء المزامنة')
                 ->visible(fn (): bool => !empty($this->record->google_place_id))
                 ->action(function () {

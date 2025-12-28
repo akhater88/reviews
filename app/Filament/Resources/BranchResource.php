@@ -379,7 +379,7 @@ class BranchResource extends Resource
                     ->color('primary')
                     ->requiresConfirmation()
                     ->modalHeading('مزامنة المراجعات')
-                    ->modalDescription('سيتم جلب أحدث المراجعات من Outscraper. قد تستغرق العملية بضع دقائق.')
+                    ->modalDescription('سيتم جلب أحدث المراجعات. قد تستغرق العملية بضع دقائق.')
                     ->modalSubmitActionLabel('بدء المزامنة')
                     ->visible(fn (Branch $record): bool => !empty($record->google_place_id))
                     ->action(function (Branch $record) {
@@ -389,24 +389,6 @@ class BranchResource extends Resource
                             ->title('تم بدء المزامنة')
                             ->body("جاري مزامنة مراجعات {$record->name}")
                             ->success()
-                            ->send();
-                    }),
-                Tables\Actions\Action::make('fullSync')
-                    ->label('مزامنة كاملة')
-                    ->icon('heroicon-o-arrow-path')
-                    ->color('warning')
-                    ->requiresConfirmation()
-                    ->modalHeading('مزامنة كاملة')
-                    ->modalDescription('سيتم جلب جميع المراجعات من البداية. هذا قد يستهلك رصيد Outscraper.')
-                    ->modalSubmitActionLabel('بدء المزامنة الكاملة')
-                    ->visible(fn (Branch $record): bool => !empty($record->google_place_id))
-                    ->action(function (Branch $record) {
-                        SyncBranchReviewsJob::dispatch($record, fullSync: true)->onQueue('reviews');
-
-                        Notification::make()
-                            ->title('تم بدء المزامنة الكاملة')
-                            ->body("جاري مزامنة جميع مراجعات {$record->name}")
-                            ->warning()
                             ->send();
                     }),
                 Tables\Actions\Action::make('analyzeReviews')
