@@ -94,7 +94,7 @@ class BranchReportPage extends Page
      */
     public function getOverviewCards(): array
     {
-        return $this->analysisData[AnalysisType::OVERVIEW_CARDS->value]['cards'] ?? [];
+        return $this->analysisData[AnalysisType::OVERVIEW_CARDS->value] ?? [];
     }
 
     /**
@@ -118,14 +118,15 @@ class BranchReportPage extends Page
         $overviewCards = $this->getOverviewCards();
         foreach ($overviewCards as $card) {
             if (($card['type'] ?? '') === 'category_analysis') {
-                return $card['data']['dynamicCategories']
+                return $card['data']['categories']
+                    ?? $card['data']['dynamicCategories']
                     ?? $card['data']['organicCategories']
-                    ?? $card['data']['categories']
                     ?? [];
             }
         }
         // Fallback to category_insights data
-        return $this->analysisData[AnalysisType::CATEGORY_INSIGHTS->value] ?? [];
+        $categoryInsights = $this->analysisData[AnalysisType::CATEGORY_INSIGHTS->value] ?? [];
+        return $categoryInsights['categories'] ?? $categoryInsights;
     }
 
     public function getGenderData(): array

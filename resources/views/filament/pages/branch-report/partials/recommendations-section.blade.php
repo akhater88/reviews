@@ -6,7 +6,7 @@
 
 @if(!empty($operationalCategories) || !empty($aiInsights))
     {{-- Section Header --}}
-    <div class="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 border border-purple-100 dark:border-purple-800 rounded-xl shadow-sm">
+    <div class="rounded-xl shadow-sm border border-purple-100 dark:border-purple-800" style="background: linear-gradient(to right, rgb(250 245 255), rgb(245 243 255));">
         <div class="px-5 py-4">
             <h2 class="text-xl font-bold text-gray-900 dark:text-white">التوصيات</h2>
         </div>

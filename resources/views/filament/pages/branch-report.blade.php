@@ -1,6 +1,6 @@
 <x-filament-panels::page>
     {{-- Main Container with Gradient Background --}}
-    <div class="min-h-screen -m-6 p-6 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800" dir="rtl">
+    <div class="min-h-screen -mx-4 -my-4 sm:-mx-6 sm:-my-6 lg:-mx-8 px-4 py-6 sm:px-6 lg:px-8" style="background: linear-gradient(to bottom right, rgb(239 246 255), rgb(224 231 255));" dir="rtl">
 
         @if(!$this->hasAnalysisData())
             {{-- No Data State --}}
