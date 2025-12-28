@@ -2,7 +2,6 @@
     $overviewCards = $this->getOverviewCards();
     $ratingsCard = collect($overviewCards)->firstWhere('type', 'ratings_reviews');
     $sentimentCard = collect($overviewCards)->firstWhere('type', 'general_sentiment');
-    $categoryCard = collect($overviewCards)->firstWhere('type', 'category_analysis');
 @endphp
 
 {{-- Section Header --}}
@@ -14,7 +13,7 @@
 
 {{-- Content Card --}}
 <div class="bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 rounded-xl">
-    <div class="p-5 sm:p-6 space-y-8">
+    <div class="p-6 space-y-8">
 
         {{-- 1. Ratings & Reviews Cards --}}
         @if($ratingsCard)
@@ -25,33 +24,39 @@
                 <div class="border-b border-gray-100 dark:border-gray-700 pb-3">
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white">التقييمات والمراجعات</h3>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     {{-- Total Reviews --}}
-                    <div class="rounded-2xl p-5 sm:p-6 border border-indigo-100 dark:border-indigo-800" style="background: linear-gradient(to bottom right, rgb(238 242 255), rgba(199 210 254, 0.5));">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: rgb(99 102 241);">
-                                <x-heroicon-o-chat-bubble-left-right class="h-5 w-5 text-white" />
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex items-center gap-4 mb-5">
+                                <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background: rgb(99 102 241);">
+                                    <x-heroicon-o-chat-bubble-left-right class="h-6 w-6 text-white" />
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium text-gray-500 dark:text-gray-400">إجمالي المراجعات</div>
+                                    <div class="text-xs text-gray-400 dark:text-gray-500">من Google Places</div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="space-y-1">
-                            <div class="text-3xl sm:text-4xl font-bold text-indigo-900 dark:text-indigo-100">
+                            <div class="text-4xl font-bold" style="color: rgb(99 102 241);">
                                 {{ number_format($this->branch->total_reviews ?? 0) }}
                             </div>
-                            <div class="text-sm font-medium text-indigo-700 dark:text-indigo-300">إجمالي المراجعات</div>
                         </div>
                     </div>
                     {{-- Average Rating --}}
-                    <div class="rounded-2xl p-5 sm:p-6 border border-blue-100 dark:border-blue-800" style="background: linear-gradient(to bottom right, rgb(239 246 255), rgba(191 219 254, 0.5));">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: rgb(59 130 246);">
-                                <x-heroicon-s-star class="h-5 w-5 text-white" />
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex items-center gap-4 mb-5">
+                                <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background: rgb(59 130 246);">
+                                    <x-heroicon-s-star class="h-6 w-6 text-white" />
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium text-gray-500 dark:text-gray-400">متوسط التقييم</div>
+                                    <div class="text-xs text-gray-400 dark:text-gray-500">كل الفترة</div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="space-y-1">
-                            <div class="text-3xl sm:text-4xl font-bold text-blue-900 dark:text-blue-100">
+                            <div class="text-4xl font-bold" style="color: rgb(59 130 246);">
                                 {{ number_format($this->branch->current_rating ?? 0, 1) }}/5
                             </div>
-                            <div class="text-sm font-medium text-blue-700 dark:text-blue-300">متوسط التقييم</div>
                         </div>
                     </div>
                 </div>
@@ -61,11 +66,6 @@
         {{-- 2. Sentiment Distribution --}}
         @if($sentimentCard)
             @include('filament.pages.branch-report.partials.sentiment-card', ['card' => $sentimentCard])
-        @endif
-
-        {{-- 3. Category Analysis --}}
-        @if($categoryCard)
-            @include('filament.pages.branch-report.partials.category-analysis-card', ['card' => $categoryCard])
         @endif
 
     </div>

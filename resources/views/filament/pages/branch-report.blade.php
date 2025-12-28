@@ -39,13 +39,13 @@
                         @foreach($tabs as $key => $tab)
                             <button
                                 wire:click="setActiveTab('{{ $key }}')"
-                                class="flex items-center gap-2 px-5 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-colors flex-1 justify-center
+                                class="flex items-center gap-2 px-4 sm:px-5 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-colors flex-1 justify-center
                                     {{ $activeTab === $key
                                         ? 'border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/20'
                                         : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50' }}"
                             >
-                                <x-dynamic-component :component="$tab['icon']" class="w-5 h-5" />
-                                <span class="hidden sm:inline">{{ $tab['label'] }}</span>
+                                <x-dynamic-component :component="$tab['icon']" class="w-5 h-5 flex-shrink-0" />
+                                <span>{{ $tab['label'] }}</span>
                             </button>
                         @endforeach
                     </nav>
