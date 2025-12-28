@@ -9,11 +9,11 @@
     {{-- Main Content Card --}}
     <div class="bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 rounded-xl overflow-hidden">
         {{-- Header with Icon and Badge --}}
-        <div class="p-5 border-b border-gray-100 dark:border-gray-700">
+        <div class="p-6 border-b border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: rgb(99 102 241);">
-                        <x-heroicon-o-user-group class="w-5 h-5 text-white" />
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgb(99 102 241);">
+                        <x-heroicon-o-user-group class="w-6 h-6 text-white" />
                     </div>
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white">الموظفين</h3>
                 </div>
@@ -21,7 +21,7 @@
                     $employeeCount = count($data['performance'] ?? []);
                 @endphp
                 @if($employeeCount > 0)
-                    <span class="px-3 py-1 text-sm font-medium rounded-full" style="background: rgb(238 242 255); color: rgb(99 102 241);">
+                    <span class="px-3 py-1.5 text-sm font-medium rounded-full" style="background: rgb(238 242 255); color: rgb(99 102 241);">
                         {{ $employeeCount }} موظفين
                     </span>
                 @endif
@@ -33,13 +33,13 @@
             <div class="grid grid-cols-2">
                 <button
                     wire:click="setActiveView('performance')"
-                    class="py-3 text-center text-sm font-medium transition-colors {{ $activeView === 'performance' ? 'text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50' }}"
+                    class="py-4 text-center text-sm font-medium transition-colors {{ $activeView === 'performance' ? 'text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50' }}"
                 >
                     الأداء
                 </button>
                 <button
                     wire:click="setActiveView('overview')"
-                    class="py-3 text-center text-sm font-medium transition-colors {{ $activeView === 'overview' ? 'text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50' }}"
+                    class="py-4 text-center text-sm font-medium transition-colors {{ $activeView === 'overview' ? 'text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50' }}"
                 >
                     نظرة عامة
                 </button>
@@ -47,28 +47,28 @@
         </div>
 
         {{-- Content --}}
-        <div class="p-5">
+        <div class="p-6">
             @if($activeView === 'overview')
                 {{-- Overview Cards --}}
                 @if(!empty($data['overview']))
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                         {{-- Most Positive Employee --}}
                         @if(!empty($data['overview']['mostPositiveEmployee']))
                             @php $employee = $data['overview']['mostPositiveEmployee']; @endphp
                             <div class="rounded-xl overflow-hidden {{ $expandedEmployee === $employee['name'] ? 'ring-2 ring-blue-500' : '' }}" style="border: 2px solid rgb(34 197 94); background: white;">
-                                <div class="p-4">
+                                <div class="p-5">
                                     {{-- Header Row --}}
-                                    <div class="flex items-start justify-between mb-4">
+                                    <div class="flex items-start justify-between mb-5">
                                         <div class="flex items-center gap-2">
                                             <x-heroicon-o-arrow-trending-up class="w-5 h-5" style="color: rgb(34 197 94);" />
                                             <x-heroicon-o-chevron-left class="w-4 h-4 text-gray-400" />
                                         </div>
-                                        <div class="flex items-center gap-3">
+                                        <div class="flex items-center gap-4">
                                             <div class="text-left">
-                                                <h4 class="font-bold text-gray-900">{{ $employee['name'] }}</h4>
+                                                <h4 class="font-bold text-gray-900 text-base">{{ $employee['name'] }}</h4>
                                                 <span class="text-xs" style="color: rgb(34 197 94);">الموظف الأكثر إيجابية</span>
                                             </div>
-                                            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold" style="background: rgb(59 130 246);">
+                                            <div class="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold flex-shrink-0" style="background: rgb(59 130 246);">
                                                 {{ mb_substr($employee['name'], 0, 1) }}
                                             </div>
                                         </div>
@@ -78,25 +78,25 @@
                                     <div class="space-y-3">
                                         <div class="flex items-center justify-between">
                                             <span class="text-sm text-gray-500">عدد مرات الذكر</span>
-                                            <span class="px-3 py-1 bg-gray-100 rounded-lg text-sm font-bold text-gray-700">{{ $employee['totalMentions'] ?? 0 }}</span>
+                                            <span class="px-3 py-1.5 rounded-lg text-sm font-bold" style="background-color: rgb(243 244 246); color: rgb(55 65 81);">{{ $employee['totalMentions'] ?? 0 }}</span>
                                         </div>
                                         <div class="flex items-center justify-between">
                                             <span class="text-sm text-gray-500">التقييم</span>
                                             <div class="flex items-center gap-1">
                                                 <span class="font-bold text-gray-900">{{ number_format($employee['averageRating'] ?? 5, 0) }}</span>
-                                                <x-heroicon-s-star class="w-4 h-4 text-yellow-400" />
+                                                <x-heroicon-s-star class="w-5 h-5 text-yellow-400" />
                                             </div>
                                         </div>
                                     </div>
 
                                     {{-- Progress Bar --}}
-                                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden mt-4 mb-3">
+                                    <div class="h-2.5 rounded-full overflow-hidden mt-5 mb-4" style="background-color: rgb(229 231 235);">
                                         <div class="h-full rounded-full" style="width: {{ min(100, ($employee['averageRating'] ?? 5) * 20) }}%; background: rgb(34 197 94);"></div>
                                     </div>
 
                                     <button
                                         wire:click="toggleEmployee('{{ $employee['name'] }}')"
-                                        class="w-full text-center text-sm text-gray-500 hover:text-gray-700 font-medium"
+                                        class="w-full text-center text-sm text-gray-500 hover:text-gray-700 font-medium py-1"
                                     >
                                         {{ $expandedEmployee === $employee['name'] ? 'إخفاء التفاصيل' : 'اضغط لعرض التفاصيل' }}
                                     </button>
@@ -108,18 +108,18 @@
                         @if(!empty($data['overview']['mostMentionedEmployee']))
                             @php $employee = $data['overview']['mostMentionedEmployee']; @endphp
                             <div class="rounded-xl overflow-hidden {{ $expandedEmployee === $employee['name'] ? 'ring-2 ring-blue-500' : '' }}" style="border: 2px solid rgb(168 85 247); background: white;">
-                                <div class="p-4">
-                                    <div class="flex items-start justify-between mb-4">
+                                <div class="p-5">
+                                    <div class="flex items-start justify-between mb-5">
                                         <div class="flex items-center gap-2">
                                             <x-heroicon-o-arrow-trending-up class="w-5 h-5" style="color: rgb(34 197 94);" />
                                             <x-heroicon-o-chevron-left class="w-4 h-4 text-gray-400" />
                                         </div>
-                                        <div class="flex items-center gap-3">
+                                        <div class="flex items-center gap-4">
                                             <div class="text-left">
-                                                <h4 class="font-bold text-gray-900">{{ $employee['name'] }}</h4>
+                                                <h4 class="font-bold text-gray-900 text-base">{{ $employee['name'] }}</h4>
                                                 <span class="text-xs" style="color: rgb(168 85 247);">الموظف الأكثر ذكراً</span>
                                             </div>
-                                            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold" style="background: rgb(168 85 247);">
+                                            <div class="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold flex-shrink-0" style="background: rgb(168 85 247);">
                                                 {{ mb_substr($employee['name'], 0, 1) }}
                                             </div>
                                         </div>
@@ -128,24 +128,24 @@
                                     <div class="space-y-3">
                                         <div class="flex items-center justify-between">
                                             <span class="text-sm text-gray-500">عدد مرات الذكر</span>
-                                            <span class="px-3 py-1 bg-gray-100 rounded-lg text-sm font-bold text-gray-700">{{ $employee['totalMentions'] ?? 0 }}</span>
+                                            <span class="px-3 py-1.5 rounded-lg text-sm font-bold" style="background-color: rgb(243 244 246); color: rgb(55 65 81);">{{ $employee['totalMentions'] ?? 0 }}</span>
                                         </div>
                                         <div class="flex items-center justify-between">
                                             <span class="text-sm text-gray-500">التقييم</span>
                                             <div class="flex items-center gap-1">
                                                 <span class="font-bold text-gray-900">{{ number_format($employee['averageRating'] ?? 5, 0) }}</span>
-                                                <x-heroicon-s-star class="w-4 h-4 text-yellow-400" />
+                                                <x-heroicon-s-star class="w-5 h-5 text-yellow-400" />
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden mt-4 mb-3">
+                                    <div class="h-2.5 rounded-full overflow-hidden mt-5 mb-4" style="background-color: rgb(229 231 235);">
                                         <div class="h-full rounded-full" style="width: {{ min(100, ($employee['averageRating'] ?? 5) * 20) }}%; background: rgb(34 197 94);"></div>
                                     </div>
 
                                     <button
                                         wire:click="toggleEmployee('{{ $employee['name'] }}')"
-                                        class="w-full text-center text-sm text-gray-500 hover:text-gray-700 font-medium"
+                                        class="w-full text-center text-sm text-gray-500 hover:text-gray-700 font-medium py-1"
                                     >
                                         {{ $expandedEmployee === $employee['name'] ? 'إخفاء التفاصيل' : 'اضغط لعرض التفاصيل' }}
                                     </button>
@@ -157,18 +157,18 @@
                         @if(!empty($data['overview']['mostNegativeEmployee']))
                             @php $employee = $data['overview']['mostNegativeEmployee']; @endphp
                             <div class="rounded-xl overflow-hidden {{ $expandedEmployee === $employee['name'] ? 'ring-2 ring-blue-500' : '' }}" style="border: 2px solid rgb(244 63 94); background: white;">
-                                <div class="p-4">
-                                    <div class="flex items-start justify-between mb-4">
+                                <div class="p-5">
+                                    <div class="flex items-start justify-between mb-5">
                                         <div class="flex items-center gap-2">
                                             <x-heroicon-o-arrow-trending-down class="w-5 h-5" style="color: rgb(244 63 94);" />
                                             <x-heroicon-o-chevron-left class="w-4 h-4 text-gray-400" />
                                         </div>
-                                        <div class="flex items-center gap-3">
+                                        <div class="flex items-center gap-4">
                                             <div class="text-left">
-                                                <h4 class="font-bold text-gray-900">{{ $employee['name'] }}</h4>
+                                                <h4 class="font-bold text-gray-900 text-base">{{ $employee['name'] }}</h4>
                                                 <span class="text-xs" style="color: rgb(244 63 94);">يحتاج تطوير</span>
                                             </div>
-                                            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold" style="background: rgb(244 63 94);">
+                                            <div class="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold flex-shrink-0" style="background: rgb(244 63 94);">
                                                 {{ mb_substr($employee['name'], 0, 1) }}
                                             </div>
                                         </div>
@@ -177,24 +177,24 @@
                                     <div class="space-y-3">
                                         <div class="flex items-center justify-between">
                                             <span class="text-sm text-gray-500">عدد مرات الذكر</span>
-                                            <span class="px-3 py-1 bg-gray-100 rounded-lg text-sm font-bold text-gray-700">{{ $employee['totalMentions'] ?? 0 }}</span>
+                                            <span class="px-3 py-1.5 rounded-lg text-sm font-bold" style="background-color: rgb(243 244 246); color: rgb(55 65 81);">{{ $employee['totalMentions'] ?? 0 }}</span>
                                         </div>
                                         <div class="flex items-center justify-between">
                                             <span class="text-sm text-gray-500">التقييم</span>
                                             <div class="flex items-center gap-1">
                                                 <span class="font-bold" style="color: rgb(244 63 94);">{{ number_format($employee['averageRating'] ?? 0, 2) }}</span>
-                                                <x-heroicon-s-star class="w-4 h-4 text-yellow-400" />
+                                                <x-heroicon-s-star class="w-5 h-5 text-yellow-400" />
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden mt-4 mb-3">
+                                    <div class="h-2.5 rounded-full overflow-hidden mt-5 mb-4" style="background-color: rgb(229 231 235);">
                                         <div class="h-full rounded-full" style="width: {{ min(100, ($employee['averageRating'] ?? 0) * 20) }}%; background: rgb(244 63 94);"></div>
                                     </div>
 
                                     <button
                                         wire:click="toggleEmployee('{{ $employee['name'] }}')"
-                                        class="w-full text-center text-sm text-gray-500 hover:text-gray-700 font-medium"
+                                        class="w-full text-center text-sm text-gray-500 hover:text-gray-700 font-medium py-1"
                                     >
                                         {{ $expandedEmployee === $employee['name'] ? 'إخفاء التفاصيل' : 'اضغط لعرض التفاصيل' }}
                                     </button>
