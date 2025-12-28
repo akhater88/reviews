@@ -17,35 +17,35 @@
     {{-- Sentiment Counter Cards --}}
     <div class="grid grid-cols-3 gap-3 sm:gap-5">
         {{-- Positive --}}
-        <div class="p-4 sm:p-5 bg-green-50 dark:bg-green-900/20 rounded-xl border-2 {{ $positive >= 50 ? 'border-green-300 dark:border-green-600 shadow-md' : 'border-green-200 dark:border-green-800' }} text-center transition-all">
-            <div class="text-2xl sm:text-3xl font-bold text-green-700 dark:text-green-300 mb-1 sm:mb-2">
+        <div class="p-4 sm:p-5 rounded-xl text-center transition-all {{ $positive >= 50 ? 'shadow-md' : '' }}" style="background-color: rgb(240 253 244); border: 2px solid {{ $positive >= 50 ? 'rgb(134 239 172)' : 'rgb(187 247 208)' }};">
+            <div class="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2" style="color: rgb(21 128 61);">
                 {{ $positive }}%
             </div>
-            <div class="text-xs sm:text-sm font-medium text-green-600 dark:text-green-400">إيجابي</div>
+            <div class="text-xs sm:text-sm font-medium" style="color: rgb(22 163 74);">إيجابي</div>
             @if($positive >= 50)
-                <div class="text-xs text-green-500 dark:text-green-400 mt-1 font-medium">مهيمن</div>
+                <div class="text-xs mt-1 font-medium" style="color: rgb(34 197 94);">مهيمن</div>
             @endif
         </div>
 
         {{-- Neutral --}}
-        <div class="p-4 sm:p-5 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border-2 {{ $neutral >= 50 ? 'border-yellow-300 dark:border-yellow-600 shadow-md' : 'border-yellow-200 dark:border-yellow-800' }} text-center transition-all">
-            <div class="text-2xl sm:text-3xl font-bold text-yellow-700 dark:text-yellow-300 mb-1 sm:mb-2">
+        <div class="p-4 sm:p-5 rounded-xl text-center transition-all {{ $neutral >= 50 ? 'shadow-md' : '' }}" style="background-color: rgb(254 252 232); border: 2px solid {{ $neutral >= 50 ? 'rgb(250 204 21)' : 'rgb(253 224 71)' }};">
+            <div class="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2" style="color: rgb(161 98 7);">
                 {{ $neutral }}%
             </div>
-            <div class="text-xs sm:text-sm font-medium text-yellow-600 dark:text-yellow-400">محايد</div>
+            <div class="text-xs sm:text-sm font-medium" style="color: rgb(202 138 4);">محايد</div>
             @if($neutral >= 50)
-                <div class="text-xs text-yellow-500 dark:text-yellow-400 mt-1 font-medium">مهيمن</div>
+                <div class="text-xs mt-1 font-medium" style="color: rgb(234 179 8);">مهيمن</div>
             @endif
         </div>
 
         {{-- Negative --}}
-        <div class="p-4 sm:p-5 bg-red-50 dark:bg-red-900/20 rounded-xl border-2 {{ $negative >= 50 ? 'border-red-300 dark:border-red-600 shadow-md' : 'border-red-200 dark:border-red-800' }} text-center transition-all">
-            <div class="text-2xl sm:text-3xl font-bold text-red-700 dark:text-red-300 mb-1 sm:mb-2">
+        <div class="p-4 sm:p-5 rounded-xl text-center transition-all {{ $negative >= 50 ? 'shadow-md' : '' }}" style="background-color: rgb(254 242 242); border: 2px solid {{ $negative >= 50 ? 'rgb(252 165 165)' : 'rgb(254 202 202)' }};">
+            <div class="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2" style="color: rgb(185 28 28);">
                 {{ $negative }}%
             </div>
-            <div class="text-xs sm:text-sm font-medium text-red-600 dark:text-red-400">سلبي</div>
+            <div class="text-xs sm:text-sm font-medium" style="color: rgb(220 38 38);">سلبي</div>
             @if($negative >= 50)
-                <div class="text-xs text-red-500 dark:text-red-400 mt-1 font-medium">مهيمن</div>
+                <div class="text-xs mt-1 font-medium" style="color: rgb(239 68 68);">مهيمن</div>
             @endif
         </div>
     </div>

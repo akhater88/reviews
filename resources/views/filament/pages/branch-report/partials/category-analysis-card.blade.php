@@ -54,13 +54,13 @@
             {{-- Feedback Count Split --}}
             @if($positiveCount > 0 || $negativeCount > 0)
                 <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div class="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                        <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $positiveCount }}</div>
-                        <div class="text-sm text-green-700 dark:text-green-300">تعليقات إيجابية</div>
+                    <div class="text-center p-3 rounded-lg" style="background-color: rgb(240 253 244);">
+                        <div class="text-2xl font-bold" style="color: rgb(22 163 74);">{{ $positiveCount }}</div>
+                        <div class="text-sm" style="color: rgb(21 128 61);">تعليقات إيجابية</div>
                     </div>
-                    <div class="text-center p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                        <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ $negativeCount }}</div>
-                        <div class="text-sm text-red-700 dark:text-red-300">تعليقات سلبية</div>
+                    <div class="text-center p-3 rounded-lg" style="background-color: rgb(254 242 242);">
+                        <div class="text-2xl font-bold" style="color: rgb(220 38 38);">{{ $negativeCount }}</div>
+                        <div class="text-sm" style="color: rgb(185 28 28);">تعليقات سلبية</div>
                     </div>
                 </div>
             @endif
@@ -68,16 +68,16 @@
             {{-- Quote Examples --}}
             <div class="space-y-3">
                 @if(!empty($positiveQuotes) && count($positiveQuotes) > 0)
-                    <div class="bg-green-50 dark:bg-green-900/20 border-r-4 border-green-400 dark:border-green-600 p-3 rounded">
-                        <div class="text-xs text-green-600 dark:text-green-400 font-medium mb-1">مثال إيجابي:</div>
-                        <p class="text-sm text-green-800 dark:text-green-200">"{{ is_array($positiveQuotes) ? $positiveQuotes[0] : $positiveQuotes }}"</p>
+                    <div class="p-3 rounded" style="background-color: rgb(240 253 244); border-right: 4px solid rgb(74 222 128);">
+                        <div class="text-xs font-medium mb-1" style="color: rgb(22 163 74);">مثال إيجابي:</div>
+                        <p class="text-sm" style="color: rgb(21 128 61);">"{{ is_array($positiveQuotes) ? $positiveQuotes[0] : $positiveQuotes }}"</p>
                     </div>
                 @endif
 
                 @if(!empty($negativeQuotes) && count($negativeQuotes) > 0)
-                    <div class="bg-red-50 dark:bg-red-900/20 border-r-4 border-red-400 dark:border-red-600 p-3 rounded">
-                        <div class="text-xs text-red-600 dark:text-red-400 font-medium mb-1">مثال سلبي:</div>
-                        <p class="text-sm text-red-800 dark:text-red-200">"{{ is_array($negativeQuotes) ? $negativeQuotes[0] : $negativeQuotes }}"</p>
+                    <div class="p-3 rounded" style="background-color: rgb(254 242 242); border-right: 4px solid rgb(248 113 113);">
+                        <div class="text-xs font-medium mb-1" style="color: rgb(220 38 38);">مثال سلبي:</div>
+                        <p class="text-sm" style="color: rgb(185 28 28);">"{{ is_array($negativeQuotes) ? $negativeQuotes[0] : $negativeQuotes }}"</p>
                     </div>
                 @endif
             </div>
