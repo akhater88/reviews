@@ -34,104 +34,117 @@
 
     {{-- Main Metrics Grid - 4 Cards in 2x2 --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {{-- Total Reviews Card --}}
-        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-            <div class="p-6">
-                <div class="flex items-center gap-4 mb-5">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background: rgb(99 102 241);">
-                        <x-heroicon-o-chat-bubble-left-right class="h-6 w-6 text-white" />
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">إجمالي المراجعات</div>
-                        <div class="text-xs text-gray-400 dark:text-gray-500">من Google Places</div>
-                    </div>
+
+        {{-- Average Rating Card (Top Left) - Light Green Background --}}
+        <div class="rounded-2xl p-6 relative" style="background: linear-gradient(135deg, rgb(236 253 245), rgb(220 252 231));">
+            {{-- Badge Top Left --}}
+            <span class="absolute top-4 right-4 text-xs px-3 py-1.5 rounded-full font-medium" style="background: rgba(0,0,0,0.08); color: rgb(55 65 81);">
+                {{ $ratingLabel }}
+            </span>
+
+            {{-- Icon Top Right --}}
+            <div class="absolute top-4 left-4 w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgb(59 130 246);">
+                <x-heroicon-s-star class="h-6 w-6 text-white" />
+            </div>
+
+            {{-- Content - Centered --}}
+            <div class="text-center pt-14 pb-4">
+                <div class="text-5xl font-bold mb-3" style="color: rgb(17 24 39);">
+                    @if($averageRating > 0)
+                        {{ number_format($averageRating, 1) }}/5
+                    @else
+                        --
+                    @endif
                 </div>
-                <div class="text-4xl font-bold" style="color: rgb(99 102 241);">
+                <div class="text-base font-medium mb-1" style="color: rgb(55 65 81);">
+                    متوسط التقييم الكلّي (كل الفترة)
+                </div>
+                @if($averageRating > 0)
+                    <div class="flex items-center justify-center gap-0.5 mt-2">
+                        @for($i = 1; $i <= 5; $i++)
+                            <x-heroicon-s-star class="h-5 w-5 {{ $i <= round($averageRating) ? 'text-amber-400' : 'text-gray-300' }}" />
+                        @endfor
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        {{-- Total Reviews Card (Top Right) - White Background --}}
+        <div class="rounded-2xl p-6 relative bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+            {{-- Icon Top Right --}}
+            <div class="absolute top-4 left-4 w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgb(139 92 246);">
+                <x-heroicon-o-chat-bubble-left-right class="h-6 w-6 text-white" />
+            </div>
+
+            {{-- Content - Centered --}}
+            <div class="text-center pt-14 pb-4">
+                <div class="text-5xl font-bold mb-3" style="color: rgb(17 24 39);">
                     {{ $formattedTotalReviews }}
                 </div>
-            </div>
-        </div>
-
-        {{-- Average Rating Card --}}
-        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-            <div class="p-6">
-                <div class="flex items-center gap-4 mb-5">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background: rgb(59 130 246);">
-                        <x-heroicon-s-star class="h-6 w-6 text-white" />
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">متوسط التقييم الكلّي</div>
-                        <div class="text-xs text-gray-400 dark:text-gray-500">كل الفترة</div>
-                    </div>
-                    @if($averageRating > 0)
-                        <span class="text-xs px-3 py-1.5 rounded-full font-medium" style="background-color: rgb(239 246 255); color: rgb(59 130 246);">
-                            {{ $ratingLabel }}
-                        </span>
-                    @endif
+                <div class="text-base font-medium mb-1" style="color: rgb(55 65 81);">
+                    إجمالي المراجعات
                 </div>
-                <div class="flex items-center gap-3">
-                    <div class="text-4xl font-bold" style="color: rgb(59 130 246);">
-                        @if($averageRating > 0)
-                            {{ number_format($averageRating, 1) }}/5
-                        @else
-                            --
-                        @endif
-                    </div>
-                    @if($averageRating > 0)
-                        <div class="flex items-center gap-0.5">
-                            @for($i = 1; $i <= 5; $i++)
-                                <x-heroicon-s-star class="h-5 w-5 {{ $i <= round($averageRating) ? 'text-amber-400' : 'text-gray-300 dark:text-gray-600' }}" />
-                            @endfor
-                        </div>
-                    @endif
+                <div class="text-sm" style="color: rgb(107 114 128);">
+                    من Google Places
                 </div>
             </div>
         </div>
 
-        {{-- 3-Month Reviews Card --}}
-        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-            <div class="p-6">
-                <div class="flex items-center gap-4 mb-5">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background: rgb(34 197 94);">
-                        <x-heroicon-o-check-circle class="h-6 w-6 text-white" />
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">عدد المراجعات</div>
-                        <div class="text-xs text-gray-400 dark:text-gray-500">من التحليل الذكي</div>
-                    </div>
-                    <span class="text-xs px-3 py-1.5 rounded-full font-medium" style="background-color: rgb(240 253 244); color: rgb(34 197 94);">
-                        آخر 3 شهور
-                    </span>
-                </div>
-                <div class="text-4xl font-bold" style="color: rgb(34 197 94);">
-                    {{ number_format($analysisReviewCount) }}
-                </div>
-            </div>
-        </div>
+        {{-- AI Rating Card (Bottom Left) - Light Mint Background --}}
+        <div class="rounded-2xl p-6 relative" style="background: linear-gradient(135deg, rgb(236 253 245), rgb(209 250 229));">
+            {{-- Badge Top Left --}}
+            <span class="absolute top-4 right-4 text-xs px-3 py-1.5 rounded-full font-medium" style="background: rgba(0,0,0,0.08); color: rgb(22 101 52);">
+                آخر 3 شهور
+            </span>
 
-        {{-- 3-Month AI Rating Card --}}
-        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-            <div class="p-6">
-                <div class="flex items-center gap-4 mb-5">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background: rgb(34 197 94);">
-                        <x-heroicon-s-star class="h-6 w-6 text-white" />
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">متوسط التحليل الذكي</div>
-                        <div class="text-xs text-gray-400 dark:text-gray-500">من الذكاء الاصطناعي</div>
-                    </div>
-                    <span class="text-xs px-3 py-1.5 rounded-full font-medium" style="background-color: rgb(240 253 244); color: rgb(34 197 94);">
-                        آخر 3 شهور
-                    </span>
-                </div>
-                <div class="text-4xl font-bold" style="color: rgb(34 197 94);">
+            {{-- Icon Top Right --}}
+            <div class="absolute top-4 left-4 w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgb(16 185 129);">
+                <x-heroicon-s-star class="h-6 w-6 text-white" />
+            </div>
+
+            {{-- Content - Centered --}}
+            <div class="text-center pt-14 pb-4">
+                <div class="text-5xl font-bold mb-3" style="color: rgb(17 24 39);">
                     @if($aiRating > 0)
                         {{ number_format($aiRating, 1) }}/5
                     @else
                         {{ number_format($averageRating, 1) }}/5
                     @endif
                 </div>
+                <div class="text-base font-medium mb-1" style="color: rgb(55 65 81);">
+                    متوسط التحليل الذكي
+                </div>
+                <div class="text-sm" style="color: rgb(107 114 128);">
+                    من الذكاء الاصطناعي
+                </div>
             </div>
         </div>
+
+        {{-- 3-Month Reviews Card (Bottom Right) - White/Light Purple Background --}}
+        <div class="rounded-2xl p-6 relative bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+            {{-- Badge Top Left --}}
+            <span class="absolute top-4 right-4 text-xs px-3 py-1.5 rounded-full font-medium" style="background: rgba(139, 92, 246, 0.1); color: rgb(109 40 217);">
+                آخر 3 شهور
+            </span>
+
+            {{-- Icon Top Right --}}
+            <div class="absolute top-4 left-4 w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgb(139 92 246);">
+                <x-heroicon-o-check-circle class="h-6 w-6 text-white" />
+            </div>
+
+            {{-- Content - Centered --}}
+            <div class="text-center pt-14 pb-4">
+                <div class="text-5xl font-bold mb-3" style="color: rgb(17 24 39);">
+                    {{ number_format($analysisReviewCount) }}
+                </div>
+                <div class="text-base font-medium mb-1" style="color: rgb(55 65 81);">
+                    عدد المراجعات
+                </div>
+                <div class="text-sm" style="color: rgb(107 114 128);">
+                    من التحليل الذكي
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
