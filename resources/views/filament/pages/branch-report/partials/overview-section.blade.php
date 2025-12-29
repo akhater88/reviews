@@ -18,6 +18,9 @@
         {{-- 1. Ratings & Reviews Cards --}}
         @if($ratingsCard)
             @include('filament.pages.branch-report.partials.ratings-reviews-card', ['card' => $ratingsCard])
+
+            {{-- Timeline Trend Chart --}}
+            @include('filament.pages.branch-report.partials.timeline-trend-chart', ['card' => $ratingsCard])
         @else
             {{-- Fallback: Show branch basic stats if no card data --}}
             <div class="space-y-6">
