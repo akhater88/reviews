@@ -124,7 +124,7 @@
 
             <div class="rounded-xl overflow-hidden" style="background: linear-gradient(to bottom right, rgb(250 245 255), rgb(245 243 255)); border: 1px solid rgb(233 213 255);">
                 {{-- Section Header --}}
-                <div class="text-left p-4">
+                <div class="text-right p-4">
                     <span class="text-sm text-gray-500">تفاصيل فئة:</span>
                     <span class="text-lg font-bold" style="{{ $headerColor }}">{{ $genderName }}</span>
                 </div>
