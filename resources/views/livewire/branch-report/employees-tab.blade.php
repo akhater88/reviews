@@ -24,16 +24,16 @@
 
                     {{-- Tabs --}}
                     <div class="w-full">
-                        <div class="grid w-full grid-cols-2 h-12 sm:h-10 rounded-lg p-1 mb-6" style="background: rgb(243 244 246);">
+                        <div class="rounded-lg p-1 mb-6" style="display: grid; grid-template-columns: repeat(2, 1fr); height: 2.5rem; background: rgb(243 244 246);">
                             <button
                                 wire:click="setActiveView('overview')"
-                                class="text-sm sm:text-base px-2 rounded-md transition-all {{ $activeView === 'overview' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900' }}"
+                                class="text-sm px-2 rounded-md transition-all {{ $activeView === 'overview' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900' }}"
                             >
                                 نظرة عامة
                             </button>
                             <button
                                 wire:click="setActiveView('performance')"
-                                class="text-sm sm:text-base px-2 rounded-md transition-all {{ $activeView === 'performance' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900' }}"
+                                class="text-sm px-2 rounded-md transition-all {{ $activeView === 'performance' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900' }}"
                             >
                                 الأداء
                             </button>
