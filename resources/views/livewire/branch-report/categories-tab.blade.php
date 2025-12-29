@@ -1,80 +1,94 @@
-<div class="space-y-6" dir="rtl">
-    {{-- Section Header --}}
-    <div class="rounded-xl shadow-sm border border-blue-100 dark:border-blue-800" style="background: linear-gradient(to right, rgb(239 246 255), rgb(238 242 255));">
-        <div class="px-5 py-4">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white">تحليل الفئات</h2>
-        </div>
-    </div>
-
+<div class="space-y-4" dir="rtl">
     {{-- Categories Content Card --}}
     <div class="bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 rounded-xl overflow-hidden">
-        {{-- Header with Icon --}}
-        <div class="p-6 border-b border-gray-100 dark:border-gray-700">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgb(99 102 241);">
-                    <x-heroicon-o-tag class="w-6 h-6 text-white" />
-                </div>
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white">تحليل الفئات</h3>
-                @php $categoryCount = count($data['categories'] ?? $data ?? []); @endphp
-                @if($categoryCount > 0)
-                    <span class="mr-auto px-3 py-1.5 text-sm font-medium rounded-full" style="background-color: rgb(238 242 255); color: rgb(99 102 241);">
-                        {{ $categoryCount }} فئة
-                    </span>
-                @endif
-            </div>
-        </div>
-
         {{-- Categories List --}}
-        <div class="p-6 space-y-6">
+        <div class="p-6 space-y-4">
             @forelse(($data['categories'] ?? $data ?? []) as $category)
                 @php
                     $rating = $category['rating'] ?? 0;
                     $totalMentions = $category['totalMentions'] ?? $category['mentions'] ?? 0;
                     $positiveCount = $category['positiveCount'] ?? 0;
                     $negativeCount = $category['negativeCount'] ?? 0;
-                    $positiveExamples = $category['positiveExamples'] ?? [];
-                    $negativeExamples = $category['negativeExamples'] ?? [];
+                    $positiveExamples = $category['positiveExamples'] ?? $category['topPhrasesPositive'] ?? [];
+                    $negativeExamples = $category['negativeExamples'] ?? $category['topPhrasesNegative'] ?? [];
+
+                    // Star color based on rating
+                    $starColor = match(true) {
+                        $rating >= 4 => 'color: rgb(34 197 94);',
+                        $rating >= 3 => 'color: rgb(234 179 8);',
+                        default => 'color: rgb(239 68 68);',
+                    };
                 @endphp
 
-                <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
-                    {{-- Category Header --}}
-                    <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
-                        <h4 class="text-lg font-bold text-gray-900 dark:text-white">{{ $category['name'] }}</h4>
-                        <div class="flex items-center gap-4">
-                            <span class="text-sm text-gray-500 dark:text-gray-400">{{ number_format($totalMentions) }} إشارة</span>
-                            <div class="flex items-center gap-1">
-                                <span class="text-xl font-bold text-gray-900 dark:text-white">{{ number_format($rating, 1) }}</span>
-                                <x-heroicon-s-star class="w-5 h-5 text-yellow-400" />
+                {{-- Category Card --}}
+                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg" style="padding: 1rem;">
+                    {{-- Header with Category Name on Right, Star Rating and Mentions on Left --}}
+                    <div class="flex items-center justify-between" style="margin-bottom: 1rem;">
+                        <div class="text-right">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                                {{ $category['name'] }}
+                            </h3>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ number_format($totalMentions) }} إشارة
+                            </div>
+                            <div class="text-xl font-bold flex items-center gap-1" style="{{ $starColor }}">
+                                {{ number_format($rating, 1) }}
+                                <span>⭐</span>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Positive/Negative Counts --}}
-                    <div class="grid grid-cols-2 gap-4 mb-5">
-                        <div class="text-center p-4 rounded-xl" style="background-color: rgb(240 253 244);">
-                            <div class="text-2xl font-bold" style="color: rgb(22 163 74);">{{ number_format($positiveCount) }}</div>
+                    {{-- Authentic Feedback Count Split --}}
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                        {{-- Positive Feedback --}}
+                        <div class="text-center rounded-lg" style="padding: 0.75rem; background: rgb(240 253 244);">
+                            <div class="text-2xl font-bold" style="color: rgb(22 163 74);">
+                                {{ number_format($positiveCount) }}
+                            </div>
                             <div class="text-sm" style="color: rgb(21 128 61);">تعليقات إيجابية</div>
                         </div>
-                        <div class="text-center p-4 rounded-xl" style="background-color: rgb(254 242 242);">
-                            <div class="text-2xl font-bold" style="color: rgb(220 38 38);">{{ number_format($negativeCount) }}</div>
+
+                        {{-- Negative Feedback --}}
+                        <div class="text-center rounded-lg" style="padding: 0.75rem; background: rgb(254 242 242);">
+                            <div class="text-2xl font-bold" style="color: rgb(220 38 38);">
+                                {{ number_format($negativeCount) }}
+                            </div>
                             <div class="text-sm" style="color: rgb(185 28 28);">تعليقات سلبية</div>
                         </div>
                     </div>
 
-                    {{-- Quote Examples --}}
+                    {{-- Customer Quote Examples --}}
                     <div class="space-y-3">
-                        @if(!empty($positiveExamples) && is_array($positiveExamples))
-                            <div class="p-4 rounded-lg" style="background-color: rgb(240 253 244); border-right: 4px solid rgb(74 222 128);">
-                                <div class="text-xs font-medium mb-1" style="color: rgb(22 163 74);">مثال إيجابي:</div>
-                                <p class="text-sm" style="color: rgb(21 128 61);">"{{ is_string($positiveExamples[0] ?? '') ? $positiveExamples[0] : '' }}"</p>
-                            </div>
+                        {{-- Positive Quote --}}
+                        @if(!empty($positiveExamples) && is_array($positiveExamples) && count(array_filter($positiveExamples, fn($q) => is_string($q) && trim($q))) > 0)
+                            @php $firstPositive = collect($positiveExamples)->filter(fn($q) => is_string($q) && trim($q))->first(); @endphp
+                            @if($firstPositive)
+                                <div class="rounded-lg" style="padding: 0.75rem; background: rgb(240 253 244); border-right: 4px solid rgb(74 222 128);">
+                                    <div class="text-xs font-medium" style="color: rgb(22 163 74); margin-bottom: 0.25rem;">
+                                        مثال إيجابي:
+                                    </div>
+                                    <p class="text-sm" style="color: rgb(21 128 61);">
+                                        "{{ trim($firstPositive) }}"
+                                    </p>
+                                </div>
+                            @endif
                         @endif
 
-                        @if(!empty($negativeExamples) && is_array($negativeExamples))
-                            <div class="p-4 rounded-lg" style="background-color: rgb(254 242 242); border-right: 4px solid rgb(248 113 113);">
-                                <div class="text-xs font-medium mb-1" style="color: rgb(220 38 38);">مثال سلبي:</div>
-                                <p class="text-sm" style="color: rgb(185 28 28);">"{{ is_string($negativeExamples[0] ?? '') ? $negativeExamples[0] : '' }}"</p>
-                            </div>
+                        {{-- Negative Quote --}}
+                        @if(!empty($negativeExamples) && is_array($negativeExamples) && count(array_filter($negativeExamples, fn($q) => is_string($q) && trim($q))) > 0)
+                            @php $firstNegative = collect($negativeExamples)->filter(fn($q) => is_string($q) && trim($q))->first(); @endphp
+                            @if($firstNegative)
+                                <div class="rounded-lg" style="padding: 0.75rem; background: rgb(254 242 242); border-right: 4px solid rgb(248 113 113);">
+                                    <div class="text-xs font-medium" style="color: rgb(220 38 38); margin-bottom: 0.25rem;">
+                                        مثال سلبي:
+                                    </div>
+                                    <p class="text-sm" style="color: rgb(185 28 28);">
+                                        "{{ trim($firstNegative) }}"
+                                    </p>
+                                </div>
+                            @endif
                         @endif
                     </div>
                 </div>
@@ -89,22 +103,22 @@
 
     {{-- Best & Worst Categories Summary --}}
     @if(!empty($data['bestCategory']) || !empty($data['worstCategory']))
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
             {{-- Best Category --}}
             @if(!empty($data['bestCategory']))
-                <div class="rounded-xl p-6 border border-green-200 dark:border-green-700" style="background: linear-gradient(to bottom right, rgb(240 253 244), rgba(187 247 208, 0.5));">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
+                <div class="rounded-xl border" style="padding: 1.5rem; background: linear-gradient(to bottom right, rgb(240 253 244), rgb(220 252 231)); border-color: rgb(187 247 208);">
+                    <div class="flex items-center gap-3" style="margin-bottom: 1rem;">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgb(34 197 94);">
                             <x-heroicon-o-trophy class="w-6 h-6 text-white" />
                         </div>
                         <div>
-                            <p class="text-sm text-green-600 dark:text-green-400">أفضل فئة</p>
+                            <p class="text-sm" style="color: rgb(22 163 74);">أفضل فئة</p>
                             <h3 class="text-xl font-bold text-gray-900 dark:text-white">{{ $data['bestCategory']['name'] }}</h3>
                         </div>
                     </div>
                     @if(!empty($data['bestCategory']['rating']))
                         <div class="flex items-center gap-2">
-                            <div class="flex text-yellow-400">
+                            <div class="flex">
                                 @for($i = 1; $i <= 5; $i++)
                                     <x-heroicon-s-star class="w-5 h-5 {{ $i <= round($data['bestCategory']['rating']) ? 'text-yellow-400' : 'text-gray-300' }}" />
                                 @endfor
@@ -117,19 +131,19 @@
 
             {{-- Worst Category --}}
             @if(!empty($data['worstCategory']))
-                <div class="rounded-xl p-6 border border-red-200 dark:border-red-700" style="background: linear-gradient(to bottom right, rgb(254 242 242), rgba(254 202 202, 0.5));">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center">
+                <div class="rounded-xl border" style="padding: 1.5rem; background: linear-gradient(to bottom right, rgb(254 242 242), rgb(254 226 226)); border-color: rgb(254 202 202);">
+                    <div class="flex items-center gap-3" style="margin-bottom: 1rem;">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgb(239 68 68);">
                             <x-heroicon-o-exclamation-triangle class="w-6 h-6 text-white" />
                         </div>
                         <div>
-                            <p class="text-sm text-red-600 dark:text-red-400">فئة تحتاج تحسين</p>
+                            <p class="text-sm" style="color: rgb(220 38 38);">فئة تحتاج تحسين</p>
                             <h3 class="text-xl font-bold text-gray-900 dark:text-white">{{ $data['worstCategory']['name'] }}</h3>
                         </div>
                     </div>
                     @if(!empty($data['worstCategory']['rating']))
                         <div class="flex items-center gap-2">
-                            <div class="flex text-yellow-400">
+                            <div class="flex">
                                 @for($i = 1; $i <= 5; $i++)
                                     <x-heroicon-s-star class="w-5 h-5 {{ $i <= round($data['worstCategory']['rating']) ? 'text-yellow-400' : 'text-gray-300' }}" />
                                 @endfor
