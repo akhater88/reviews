@@ -1,6 +1,27 @@
 @php
-    $data = $card['data'] ?? [];
-    $timeline = $data['timeline'] ?? [];
+    // Helper function for formatting period labels - must be defined FIRST
+    if (!function_exists('formatTimelinePeriod')) {
+        function formatTimelinePeriod($label) {
+            if (empty($label)) return '';
+
+            $parts = explode('-', $label);
+            if (count($parts) < 2) return $label;
+
+            $year = $parts[0];
+            $month = (int)$parts[1];
+
+            $monthNames = [
+                1 => 'يناير', 2 => 'فبراير', 3 => 'مارس', 4 => 'أبريل',
+                5 => 'مايو', 6 => 'يونيو', 7 => 'يوليو', 8 => 'أغسطس',
+                9 => 'سبتمبر', 10 => 'أكتوبر', 11 => 'نوفمبر', 12 => 'ديسمبر'
+            ];
+
+            return ($monthNames[$month] ?? $month) . ' ' . $year;
+        }
+    }
+
+    // Get timeline data - use dedicated method that generates data if not available
+    $timeline = $this->getTimelineData();
 
     // Handle timeline as array or object with periods
     $periods = is_array($timeline) && !isset($timeline['periods']) ? $timeline : ($timeline['periods'] ?? []);
@@ -18,7 +39,7 @@
 
     // Calculate metrics
     $firstRating = $chartData[0]['rating'] ?? 0;
-    $lastRating = end($chartData)['rating'] ?? 0;
+    $lastRating = !empty($chartData) ? end($chartData)['rating'] : 0;
     $overallChange = $lastRating - $firstRating;
     $averageRating = count($chartData) > 0
         ? collect($chartData)->avg('rating')
@@ -30,7 +51,7 @@
     elseif ($overallChange < -0.15) $trend = 'declining';
 
     // Get AI insights
-    $aiInsights = $data['aiInsights'] ?? $timeline['aiInsights'] ?? [];
+    $aiInsights = $timeline['aiInsights'] ?? [];
     $trendDescription = $aiInsights['overallTrend'] ?? $aiInsights['description'] ?? '';
 
     // Generate default description if none provided
@@ -52,25 +73,6 @@
         $averageRating >= 3.0 => 'متوسط',
         default => 'ضعيف',
     };
-
-    // Helper function for formatting period labels
-    function formatTimelinePeriod($label) {
-        if (empty($label)) return '';
-
-        $parts = explode('-', $label);
-        if (count($parts) < 2) return $label;
-
-        $year = $parts[0];
-        $month = (int)$parts[1];
-
-        $monthNames = [
-            1 => 'يناير', 2 => 'فبراير', 3 => 'مارس', 4 => 'أبريل',
-            5 => 'مايو', 6 => 'يونيو', 7 => 'يوليو', 8 => 'أغسطس',
-            9 => 'سبتمبر', 10 => 'أكتوبر', 11 => 'نوفمبر', 12 => 'ديسمبر'
-        ];
-
-        return ($monthNames[$month] ?? $month) . ' ' . $year;
-    }
 @endphp
 
 @if(count($chartData) > 0)
@@ -145,7 +147,7 @@
         <div class="relative h-72 sm:h-80 w-full mb-2 sm:mb-6 bg-white rounded-lg border" style="border-color: rgb(229 231 235);">
             <canvas
                 id="timeline-chart-{{ uniqid() }}"
-                class="w-full h-full"
+                class="w-full h-full timeline-chart-canvas"
                 data-chart-labels="{{ json_encode(collect($chartData)->pluck('month')->toArray()) }}"
                 data-chart-data="{{ json_encode(collect($chartData)->pluck('rating')->toArray()) }}"
                 data-chart-reviews="{{ json_encode(collect($chartData)->pluck('reviews')->toArray()) }}"
@@ -155,20 +157,21 @@
 </div>
 
 {{-- Chart.js Initialization Script --}}
+@once
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    initTimelineCharts();
+    setTimeout(initTimelineCharts, 100);
 });
 
 document.addEventListener('livewire:navigated', function() {
-    initTimelineCharts();
+    setTimeout(initTimelineCharts, 100);
 });
 
 function initTimelineCharts() {
-    document.querySelectorAll('canvas[id^="timeline-chart-"]').forEach(function(canvas) {
-        if (canvas.chart) return; // Already initialized
+    document.querySelectorAll('.timeline-chart-canvas').forEach(function(canvas) {
+        if (canvas.chartInstance) return; // Already initialized
 
         const labels = JSON.parse(canvas.dataset.chartLabels || '[]');
         const data = JSON.parse(canvas.dataset.chartData || '[]');
@@ -177,7 +180,7 @@ function initTimelineCharts() {
         if (labels.length === 0) return;
 
         const ctx = canvas.getContext('2d');
-        canvas.chart = new Chart(ctx, {
+        canvas.chartInstance = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
@@ -257,4 +260,5 @@ function initTimelineCharts() {
 }
 </script>
 @endpush
+@endonce
 @endif
