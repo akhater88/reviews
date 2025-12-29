@@ -4,13 +4,6 @@
     $sentimentCard = collect($overviewCards)->firstWhere('type', 'general_sentiment');
 @endphp
 
-{{-- Section Header --}}
-<div class="rounded-xl shadow-sm border border-blue-100 dark:border-blue-800" style="background: linear-gradient(to right, rgb(239 246 255), rgb(238 242 255));">
-    <div class="px-5 py-4">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white">نظرة عامة</h2>
-    </div>
-</div>
-
 {{-- Content Card --}}
 <div class="bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 rounded-xl">
     <div class="p-6">
