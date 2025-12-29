@@ -5,7 +5,7 @@
 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
     {{-- Hero Section with Gradient --}}
     <div class="p-6 sm:p-8 rounded-t-2xl" style="background: linear-gradient(to bottom right, rgb(59 130 246), rgb(79 70 229));">
-        <div class="flex items-center gap-5 sm:gap-6">
+        <div class="flex items-center" style="gap: 1.5rem;">
             {{-- Restaurant Image --}}
             <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-4 border-white shadow-xl bg-white flex-shrink-0">
                 @if($restaurantInfo['photoUrl'])
