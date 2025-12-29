@@ -13,17 +13,21 @@
 
 {{-- Content Card --}}
 <div class="bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 rounded-xl">
-    <div class="p-6 space-y-8">
+    <div class="p-6">
 
         {{-- 1. Ratings & Reviews Cards --}}
         @if($ratingsCard)
-            @include('filament.pages.branch-report.partials.ratings-reviews-card', ['card' => $ratingsCard])
+            <div style="margin-bottom: 2.5rem;">
+                @include('filament.pages.branch-report.partials.ratings-reviews-card', ['card' => $ratingsCard])
+            </div>
 
-            {{-- Timeline Trend Chart --}}
-            @include('filament.pages.branch-report.partials.timeline-trend-chart', ['card' => $ratingsCard])
+            {{-- 2. Timeline Trend Chart --}}
+            <div style="margin-bottom: 2.5rem;">
+                @include('filament.pages.branch-report.partials.timeline-trend-chart', ['card' => $ratingsCard])
+            </div>
         @else
             {{-- Fallback: Show branch basic stats if no card data --}}
-            <div class="space-y-6">
+            <div class="space-y-6" style="margin-bottom: 2.5rem;">
                 <div class="border-b border-gray-100 dark:border-gray-700 pb-3">
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white">التقييمات والمراجعات</h3>
                 </div>
@@ -66,9 +70,11 @@
             </div>
         @endif
 
-        {{-- 2. Sentiment Distribution --}}
+        {{-- 3. Sentiment Distribution --}}
         @if($sentimentCard)
-            @include('filament.pages.branch-report.partials.sentiment-card', ['card' => $sentimentCard])
+            <div>
+                @include('filament.pages.branch-report.partials.sentiment-card', ['card' => $sentimentCard])
+            </div>
         @endif
 
     </div>
