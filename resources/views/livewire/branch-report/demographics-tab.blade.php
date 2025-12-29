@@ -102,4 +102,100 @@
             @endif
         </div>
     </div>
+
+    {{-- Category Details Sections --}}
+    @if(!empty($data['categories']))
+        @foreach(($data['categories'] ?? []) as $category)
+            @php
+                $genderName = $category['category'] ?? '';
+                $percentage = $category['percentage'] ?? 0;
+                $avgRating = $category['averageRating'] ?? 0;
+                $positiveCount = $category['positiveCount'] ?? 0;
+                $topPositives = $category['topPositives'] ?? [];
+                $topNegatives = $category['topNegatives'] ?? [];
+
+                // Colors based on gender
+                $headerColor = match($genderName) {
+                    'ذكور' => 'color: rgb(29 78 216);',
+                    'إناث' => 'color: rgb(190 24 93);',
+                    default => 'color: rgb(75 85 99);',
+                };
+            @endphp
+
+            <div class="rounded-xl overflow-hidden" style="background: linear-gradient(to bottom right, rgb(250 245 255), rgb(245 243 255)); border: 1px solid rgb(233 213 255);">
+                {{-- Section Header --}}
+                <div class="text-left p-4">
+                    <span class="text-sm text-gray-500">تفاصيل فئة:</span>
+                    <span class="text-lg font-bold" style="{{ $headerColor }}">{{ $genderName }}</span>
+                </div>
+
+                {{-- Positives & Negatives Cards --}}
+                <div class="px-4 pb-4">
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                        {{-- Positives Card --}}
+                        <div class="bg-white dark:bg-gray-800 rounded-xl" style="padding: 1.25rem;">
+                            <div class="flex items-center gap-2" style="margin-bottom: 1rem;">
+                                <x-heroicon-s-hand-thumb-up class="w-5 h-5" style="color: rgb(34 197 94);" />
+                                <h4 class="font-bold text-gray-900 dark:text-white">أبرز الإيجابيات</h4>
+                            </div>
+                            <div class="space-y-3">
+                                @forelse(collect($topPositives)->filter(fn($q) => is_string($q) && trim($q))->take(4) as $quote)
+                                    <div class="flex gap-2">
+                                        <span class="w-2 h-2 rounded-full flex-shrink-0" style="background: rgb(34 197 94); margin-top: 0.5rem;"></span>
+                                        <p class="text-sm text-gray-700 dark:text-gray-300">"{{ trim($quote) }}"</p>
+                                    </div>
+                                @empty
+                                    <p class="text-sm text-gray-500">لا توجد تعليقات إيجابية</p>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        {{-- Negatives Card --}}
+                        <div class="bg-white dark:bg-gray-800 rounded-xl" style="padding: 1.25rem;">
+                            <div class="flex items-center gap-2" style="margin-bottom: 1rem;">
+                                <x-heroicon-s-hand-thumb-down class="w-5 h-5" style="color: rgb(239 68 68);" />
+                                <h4 class="font-bold text-gray-900 dark:text-white">أبرز السلبيات</h4>
+                            </div>
+                            <div class="space-y-3">
+                                @forelse(collect($topNegatives)->filter(fn($q) => is_string($q) && trim($q))->take(4) as $quote)
+                                    <div class="flex gap-2">
+                                        <span class="w-2 h-2 rounded-full flex-shrink-0" style="background: rgb(239 68 68); margin-top: 0.5rem;"></span>
+                                        <p class="text-sm text-gray-700 dark:text-gray-300">"{{ trim($quote) }}"</p>
+                                    </div>
+                                @empty
+                                    <p class="text-sm text-gray-500">لا توجد تعليقات سلبية</p>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Stats Row --}}
+                <div class="border-t" style="border-color: rgb(233 213 255);">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr);">
+                        {{-- Positives Count --}}
+                        <div class="text-center py-4 border-l" style="border-color: rgb(233 213 255);">
+                            <div class="text-2xl font-bold" style="color: rgb(34 197 94);">{{ number_format($positiveCount) }}</div>
+                            <div class="text-sm text-gray-500">إيجابيات</div>
+                        </div>
+
+                        {{-- Rating --}}
+                        <div class="text-center py-4 border-l" style="border-color: rgb(233 213 255);">
+                            <div class="text-2xl font-bold flex items-center justify-center gap-1">
+                                <span style="color: rgb(234 179 8);">{{ number_format($avgRating, 1) }}</span>
+                                <x-heroicon-o-star class="w-5 h-5" style="color: rgb(234 179 8);" />
+                            </div>
+                            <div class="text-sm text-gray-500">التقييم</div>
+                        </div>
+
+                        {{-- Percentage --}}
+                        <div class="text-center py-4">
+                            <div class="text-2xl font-bold" style="color: rgb(168 85 247);">{{ number_format($percentage, 2) }}%</div>
+                            <div class="text-sm text-gray-500">النسبة</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    @endif
 </div>
