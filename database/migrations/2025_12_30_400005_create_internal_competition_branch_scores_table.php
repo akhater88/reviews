@@ -36,7 +36,7 @@ return new class extends Migration
 
             $table->unique(['competition_id', 'branch_id', 'metric_type'], 'unique_branch_metric_score');
             $table->index(['competition_id', 'metric_type', 'score'], 'idx_ranking');
-            $table->index(['competition_id', 'tenant_id']);
+            $table->index(['competition_id', 'tenant_id'], 'idx_ic_scores_comp_tenant');
             $table->index('is_final');
         });
     }

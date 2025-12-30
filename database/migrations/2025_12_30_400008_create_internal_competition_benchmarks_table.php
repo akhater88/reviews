@@ -29,8 +29,8 @@ return new class extends Migration
                 ['competition_id', 'tenant_id', 'branch_id', 'period_type'],
                 'unique_benchmark'
             );
-            $table->index(['competition_id', 'tenant_id']);
-            $table->index(['competition_id', 'period_type']);
+            $table->index(['competition_id', 'tenant_id'], 'idx_ic_bench_comp_tenant');
+            $table->index(['competition_id', 'period_type'], 'idx_ic_bench_comp_period');
         });
     }
 

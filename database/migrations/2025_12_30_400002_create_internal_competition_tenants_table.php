@@ -22,7 +22,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['competition_id', 'tenant_id'], 'unique_competition_tenant');
-            $table->index(['competition_id', 'status']);
+            $table->index(['competition_id', 'status'], 'idx_ic_tenants_comp_status');
         });
     }
 

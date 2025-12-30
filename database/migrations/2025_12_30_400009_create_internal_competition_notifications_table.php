@@ -37,9 +37,9 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->index(['competition_id', 'status']);
-            $table->index(['scheduled_at', 'status']);
-            $table->index(['recipient_user_id', 'event_type']);
+            $table->index(['competition_id', 'status'], 'idx_ic_notif_comp_status');
+            $table->index(['scheduled_at', 'status'], 'idx_ic_notif_sched_status');
+            $table->index(['recipient_user_id', 'event_type'], 'idx_ic_notif_user_event');
         });
     }
 

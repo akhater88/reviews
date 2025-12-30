@@ -49,8 +49,8 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['competition_id', 'metric_type', 'final_rank'], 'unique_winner_per_metric_rank');
-            $table->index(['competition_id', 'prize_status']);
-            $table->index(['competition_id', 'tenant_id']);
+            $table->index(['competition_id', 'prize_status'], 'idx_ic_winners_comp_status');
+            $table->index(['competition_id', 'tenant_id'], 'idx_ic_winners_comp_tenant');
         });
     }
 

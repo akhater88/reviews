@@ -42,8 +42,8 @@ return new class extends Migration
 
             $table->unique(['competition_id', 'branch_id', 'normalized_name'], 'unique_employee_per_branch');
             $table->index(['competition_id', 'score'], 'idx_employee_ranking');
-            $table->index(['competition_id', 'branch_id']);
-            $table->index(['competition_id', 'tenant_id']);
+            $table->index(['competition_id', 'branch_id'], 'idx_ic_emps_comp_branch');
+            $table->index(['competition_id', 'tenant_id'], 'idx_ic_emps_comp_tenant');
             $table->index('normalized_name');
         });
     }
