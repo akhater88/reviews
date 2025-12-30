@@ -7,6 +7,7 @@ use App\Enums\InternalCompetition\CompetitionPeriod;
 use App\Enums\InternalCompetition\CompetitionScope;
 use App\Enums\InternalCompetition\CompetitionStatus;
 use App\Enums\InternalCompetition\LeaderboardVisibility;
+use App\Enums\InternalCompetition\TenantEnrollmentMode;
 use App\Filament\SuperAdmin\Resources\InternalCompetitionResource\Pages;
 use App\Filament\SuperAdmin\Resources\InternalCompetitionResource\RelationManagers;
 use App\Models\InternalCompetition\InternalCompetition;
@@ -80,24 +81,143 @@ class InternalCompetitionResource extends Resource
                                             ->maxLength(1000)
                                             ->placeholder('وصف تفصيلي للمسابقة وأهدافها...'),
 
-                                        Forms\Components\Grid::make(2)
+                                        Forms\Components\Section::make('نطاق المسابقة والمشاركين')
+                                            ->description('حدد نطاق المسابقة والمستأجرين المشاركين')
                                             ->schema([
-                                                Forms\Components\Select::make('scope')
-                                                    ->label('نطاق المسابقة')
-                                                    ->options(CompetitionScope::class)
-                                                    ->required()
-                                                    ->default(CompetitionScope::SINGLE_TENANT)
-                                                    ->live()
-                                                    ->afterStateUpdated(fn (Forms\Set $set) => $set('tenant_id', null)),
+                                                Forms\Components\Grid::make(2)
+                                                    ->schema([
+                                                        Forms\Components\Select::make('scope')
+                                                            ->label('نطاق المسابقة')
+                                                            ->options(CompetitionScope::class)
+                                                            ->required()
+                                                            ->default(CompetitionScope::SINGLE_TENANT)
+                                                            ->live()
+                                                            ->afterStateUpdated(function (Forms\Set $set) {
+                                                                $set('tenant_id', null);
+                                                                $set('tenant_enrollment_mode', null);
+                                                                $set('selected_tenant_ids', []);
+                                                            }),
 
-                                                Forms\Components\Select::make('tenant_id')
-                                                    ->label('المستأجر')
-                                                    ->relationship('tenant', 'name')
-                                                    ->searchable()
-                                                    ->preload()
+                                                        // For Single Tenant - show tenant dropdown
+                                                        Forms\Components\Select::make('tenant_id')
+                                                            ->label('المستأجر')
+                                                            ->relationship('tenant', 'name')
+                                                            ->searchable()
+                                                            ->preload()
+                                                            ->required()
+                                                            ->visible(fn (Forms\Get $get) =>
+                                                                $get('scope') === CompetitionScope::SINGLE_TENANT->value ||
+                                                                $get('scope') === CompetitionScope::SINGLE_TENANT
+                                                            ),
+                                                    ]),
+
+                                                // For Multi-Tenant - show enrollment mode selection
+                                                Forms\Components\Radio::make('tenant_enrollment_mode')
+                                                    ->label('طريقة تسجيل المستأجرين')
+                                                    ->options(TenantEnrollmentMode::class)
+                                                    ->descriptions([
+                                                        'manual' => 'اختر المستأجرين يدوياً من القائمة أدناه',
+                                                        'auto_all' => 'سيتم تسجيل جميع المستأجرين الحاليين تلقائياً',
+                                                        'auto_new' => 'جميع المستأجرين الحاليين + أي مستأجر جديد ينضم لاحقاً',
+                                                    ])
                                                     ->required()
-                                                    ->visible(fn (Forms\Get $get) => $get('scope') === CompetitionScope::SINGLE_TENANT->value || $get('scope') === CompetitionScope::SINGLE_TENANT),
-                                            ]),
+                                                    ->default(TenantEnrollmentMode::MANUAL)
+                                                    ->live()
+                                                    ->visible(fn (Forms\Get $get) =>
+                                                        $get('scope') === CompetitionScope::MULTI_TENANT->value ||
+                                                        $get('scope') === CompetitionScope::MULTI_TENANT
+                                                    )
+                                                    ->columnSpanFull(),
+
+                                                // Manual Tenant Selection
+                                                Forms\Components\Section::make('اختيار المستأجرين')
+                                                    ->description('اختر المستأجرين المشاركين في المسابقة')
+                                                    ->schema([
+                                                        Forms\Components\Actions::make([
+                                                            Forms\Components\Actions\Action::make('selectAll')
+                                                                ->label('تحديد الكل')
+                                                                ->icon('heroicon-o-check-circle')
+                                                                ->color('success')
+                                                                ->action(function (Forms\Set $set) {
+                                                                    $allTenantIds = \App\Models\Tenant::where('is_active', true)
+                                                                        ->pluck('id')
+                                                                        ->toArray();
+                                                                    $set('selected_tenant_ids', $allTenantIds);
+                                                                }),
+                                                            Forms\Components\Actions\Action::make('deselectAll')
+                                                                ->label('إلغاء تحديد الكل')
+                                                                ->icon('heroicon-o-x-circle')
+                                                                ->color('danger')
+                                                                ->action(function (Forms\Set $set) {
+                                                                    $set('selected_tenant_ids', []);
+                                                                }),
+                                                        ]),
+
+                                                        Forms\Components\CheckboxList::make('selected_tenant_ids')
+                                                            ->label('')
+                                                            ->options(function () {
+                                                                return \App\Models\Tenant::where('is_active', true)
+                                                                    ->with('branches')
+                                                                    ->get()
+                                                                    ->mapWithKeys(function ($tenant) {
+                                                                        $branchCount = $tenant->branches->count();
+                                                                        $label = "{$tenant->name}";
+                                                                        if ($branchCount > 0) {
+                                                                            $label .= " ({$branchCount} فرع)";
+                                                                        }
+                                                                        if ($tenant->city) {
+                                                                            $label .= " - {$tenant->city}";
+                                                                        }
+                                                                        return [$tenant->id => $label];
+                                                                    });
+                                                            })
+                                                            ->searchable()
+                                                            ->bulkToggleable()
+                                                            ->columns(2)
+                                                            ->gridDirection('row')
+                                                            ->required()
+                                                            ->minItems(2)
+                                                            ->validationMessages([
+                                                                'required' => 'يجب اختيار مستأجرين على الأقل',
+                                                                'min' => 'يجب اختيار مستأجرين على الأقل للمسابقة متعددة المستأجرين',
+                                                            ]),
+
+                                                        Forms\Components\Placeholder::make('selected_count')
+                                                            ->label('المستأجرين المختارين')
+                                                            ->content(function (Forms\Get $get) {
+                                                                $count = count($get('selected_tenant_ids') ?? []);
+                                                                $total = \App\Models\Tenant::where('is_active', true)->count();
+                                                                return "{$count} من {$total} مستأجر";
+                                                            }),
+                                                    ])
+                                                    ->visible(fn (Forms\Get $get) =>
+                                                        ($get('scope') === CompetitionScope::MULTI_TENANT->value ||
+                                                         $get('scope') === CompetitionScope::MULTI_TENANT) &&
+                                                        ($get('tenant_enrollment_mode') === TenantEnrollmentMode::MANUAL->value ||
+                                                         $get('tenant_enrollment_mode') === TenantEnrollmentMode::MANUAL)
+                                                    )
+                                                    ->collapsible()
+                                                    ->columnSpanFull(),
+
+                                                // Auto-enrollment preview
+                                                Forms\Components\Placeholder::make('auto_enroll_preview')
+                                                    ->label('معاينة التسجيل التلقائي')
+                                                    ->content(function () {
+                                                        $count = \App\Models\Tenant::where('is_active', true)->count();
+                                                        return "سيتم تسجيل {$count} مستأجر تلقائياً عند تفعيل المسابقة";
+                                                    })
+                                                    ->visible(fn (Forms\Get $get) =>
+                                                        ($get('scope') === CompetitionScope::MULTI_TENANT->value ||
+                                                         $get('scope') === CompetitionScope::MULTI_TENANT) &&
+                                                        ($get('tenant_enrollment_mode') === TenantEnrollmentMode::AUTO_ALL->value ||
+                                                         $get('tenant_enrollment_mode') === TenantEnrollmentMode::AUTO_NEW->value ||
+                                                         $get('tenant_enrollment_mode') === TenantEnrollmentMode::AUTO_ALL ||
+                                                         $get('tenant_enrollment_mode') === TenantEnrollmentMode::AUTO_NEW)
+                                                    )
+                                                    ->columnSpanFull(),
+                                            ])
+                                            ->collapsible()
+                                            ->columnSpanFull(),
 
                                         Forms\Components\Grid::make(3)
                                             ->schema([
@@ -265,6 +385,11 @@ class InternalCompetitionResource extends Resource
                     ->label('النطاق')
                     ->badge(),
 
+                Tables\Columns\TextColumn::make('tenant_enrollment_mode')
+                    ->label('طريقة التسجيل')
+                    ->badge()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('status')
                     ->label('الحالة')
                     ->badge(),
@@ -274,6 +399,12 @@ class InternalCompetitionResource extends Resource
                     ->visible(fn () => true)
                     ->placeholder('متعدد المستأجرين')
                     ->toggleable(),
+
+                Tables\Columns\TextColumn::make('enrolled_tenants_count')
+                    ->label('المستأجرين')
+                    ->state(fn (InternalCompetition $record) => $record->participatingTenants()->count())
+                    ->suffix(' مستأجر')
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('period')
                     ->label('المدة')
@@ -559,6 +690,35 @@ class InternalCompetitionResource extends Resource
                                     ->join('، ');
                             }),
                     ]),
+
+                Infolists\Components\Section::make('المستأجرين المشاركين')
+                    ->schema([
+                        Infolists\Components\TextEntry::make('tenant_enrollment_mode')
+                            ->label('طريقة التسجيل')
+                            ->badge(),
+
+                        Infolists\Components\TextEntry::make('enrolled_tenants')
+                            ->label('المستأجرين المسجلين')
+                            ->state(function (InternalCompetition $record) {
+                                return $record->participatingTenants()
+                                    ->with('tenant')
+                                    ->get()
+                                    ->map(fn ($ct) => $ct->tenant?->name)
+                                    ->filter()
+                                    ->join('، ');
+                            })
+                            ->columnSpanFull(),
+
+                        Infolists\Components\TextEntry::make('enrolled_count')
+                            ->label('العدد')
+                            ->state(fn (InternalCompetition $record) =>
+                                $record->participatingTenants()->count() . ' مستأجر'
+                            ),
+                    ])
+                    ->visible(fn (InternalCompetition $record) =>
+                        $record->scope === CompetitionScope::MULTI_TENANT
+                    )
+                    ->collapsible(),
             ]);
     }
 

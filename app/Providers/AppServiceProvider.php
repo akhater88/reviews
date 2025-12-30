@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Tenant;
+use App\Observers\TenantObserver;
 use App\Services\Competition\CompetitionOtpService;
 use App\Services\Infobip\InfobipService;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -32,6 +34,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register observers
+        Tenant::observe(TenantObserver::class);
+
         $this->configureCompetitionRateLimiting();
     }
 

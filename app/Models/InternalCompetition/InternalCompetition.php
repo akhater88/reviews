@@ -7,6 +7,7 @@ use App\Enums\InternalCompetition\CompetitionPeriod;
 use App\Enums\InternalCompetition\CompetitionStatus;
 use App\Enums\InternalCompetition\CompetitionMetric;
 use App\Enums\InternalCompetition\LeaderboardVisibility;
+use App\Enums\InternalCompetition\TenantEnrollmentMode;
 use App\Models\User;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,6 +32,7 @@ class InternalCompetition extends Model
         'description_ar',
         'cover_image',
         'scope',
+        'tenant_enrollment_mode',
         'period_type',
         'start_date',
         'end_date',
@@ -47,6 +49,7 @@ class InternalCompetition extends Model
 
     protected $casts = [
         'scope' => CompetitionScope::class,
+        'tenant_enrollment_mode' => TenantEnrollmentMode::class,
         'period_type' => CompetitionPeriod::class,
         'status' => CompetitionStatus::class,
         'leaderboard_visibility' => LeaderboardVisibility::class,
@@ -219,6 +222,16 @@ class InternalCompetition extends Model
     public function getIsMultiTenantAttribute(): bool
     {
         return $this->scope === CompetitionScope::MULTI_TENANT;
+    }
+
+    public function isManualTenantSelection(): bool
+    {
+        return $this->tenant_enrollment_mode === TenantEnrollmentMode::MANUAL;
+    }
+
+    public function isAutoEnrollNewTenants(): bool
+    {
+        return $this->tenant_enrollment_mode === TenantEnrollmentMode::AUTO_NEW;
     }
 
     // ==================== METHODS ====================
