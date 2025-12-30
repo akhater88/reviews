@@ -72,16 +72,40 @@ class BranchReportPage extends Page
         }
     }
 
-    public function setActiveTab(string $tab): void
-    {
-        $this->activeTab = $tab;
-    }
-
     public function hasAnalysisData(): bool
     {
         return $this->latestAnalysis !== null && !empty($this->analysisData);
     }
 
+    public function setActiveTab(string $tab): void
+    {
+        $this->activeTab = $tab;
+    }
+
+    /**
+     * Get restaurant information for the header
+     */
+    public function getRestaurantInfo(): array
+    {
+        return [
+            'name' => $this->branch->name,
+            'location' => $this->branch->full_address ?? "{$this->branch->city}, {$this->branch->country}",
+            'photoUrl' => $this->branch->photo_url ?? null,
+            'placeId' => $this->branch->google_place_id,
+        ];
+    }
+
+    /**
+     * Get overview cards from analysis data
+     */
+    public function getOverviewCards(): array
+    {
+        return $this->analysisData[AnalysisType::OVERVIEW_CARDS->value] ?? [];
+    }
+
+    /**
+     * Get raw overview data
+     */
     public function getOverviewData(): array
     {
         return $this->analysisData[AnalysisType::OVERVIEW_CARDS->value] ?? [];
@@ -92,9 +116,23 @@ class BranchReportPage extends Page
         return $this->analysisData[AnalysisType::SENTIMENT->value] ?? [];
     }
 
+    /**
+     * Get category data from overview cards
+     */
     public function getCategoryData(): array
     {
-        return $this->analysisData[AnalysisType::CATEGORY_INSIGHTS->value] ?? [];
+        $overviewCards = $this->getOverviewCards();
+        foreach ($overviewCards as $card) {
+            if (($card['type'] ?? '') === 'category_analysis') {
+                return $card['data']['categories']
+                    ?? $card['data']['dynamicCategories']
+                    ?? $card['data']['organicCategories']
+                    ?? [];
+            }
+        }
+        // Fallback to category_insights data
+        $categoryInsights = $this->analysisData[AnalysisType::CATEGORY_INSIGHTS->value] ?? [];
+        return $categoryInsights['categories'] ?? $categoryInsights;
     }
 
     public function getGenderData(): array
@@ -117,9 +155,116 @@ class BranchReportPage extends Page
         return $this->analysisData[AnalysisType::RECOMMENDATIONS->value] ?? [];
     }
 
+    /**
+     * Get operational data with fallback to recommendations
+     */
     public function getOperationalData(): array
     {
-        return $this->analysisData[AnalysisType::OPERATIONAL_INTELLIGENCE->value] ?? [];
+        return $this->analysisData[AnalysisType::OPERATIONAL_INTELLIGENCE->value]
+            ?? $this->analysisData[AnalysisType::RECOMMENDATIONS->value]
+            ?? [];
+    }
+
+    /**
+     * Get timeline data for ratings trend chart
+     */
+    public function getTimelineData(): array
+    {
+        // First try to get from stored analysis data
+        $overviewCards = $this->getOverviewCards();
+        foreach ($overviewCards as $card) {
+            if (($card['type'] ?? '') === 'ratings_reviews') {
+                $timeline = $card['data']['timeline'] ?? [];
+                if (!empty($timeline)) {
+                    return $timeline;
+                }
+            }
+        }
+
+        // Generate on the fly if not available
+        return $this->generateTimelineFromReviews();
+    }
+
+    /**
+     * Generate timeline data from branch reviews
+     */
+    private function generateTimelineFromReviews(): array
+    {
+        $periodEnd = now();
+        $periodStart = now()->subMonths(3);
+
+        $reviews = $this->branch->reviews()
+            ->whereBetween('review_date', [$periodStart, $periodEnd])
+            ->whereNotNull('rating')
+            ->orderBy('review_date')
+            ->get(['rating', 'review_date']);
+
+        if ($reviews->isEmpty()) {
+            return [];
+        }
+
+        // Group reviews by month
+        $groupedByMonth = $reviews->groupBy(function ($review) {
+            return \Carbon\Carbon::parse($review->review_date)->format('Y-m');
+        });
+
+        $periods = [];
+        $previousRating = null;
+
+        foreach ($groupedByMonth as $month => $monthReviews) {
+            $averageRating = round($monthReviews->avg('rating'), 2);
+            $reviewCount = $monthReviews->count();
+
+            // Determine trend direction
+            $trendDirection = 'stable';
+            if ($previousRating !== null) {
+                $change = $averageRating - $previousRating;
+                if ($change > 0.1) {
+                    $trendDirection = 'improving';
+                } elseif ($change < -0.1) {
+                    $trendDirection = 'declining';
+                }
+            }
+
+            $periods[] = [
+                'period' => $month,
+                'label' => $month,
+                'averageRating' => $averageRating,
+                'reviewCount' => $reviewCount,
+                'trendDirection' => $trendDirection,
+            ];
+
+            $previousRating = $averageRating;
+        }
+
+        if (count($periods) < 2) {
+            return [
+                'periods' => $periods,
+                'aiInsights' => ['overallTrend' => 'لا توجد بيانات كافية لتحليل الاتجاه الزمني'],
+            ];
+        }
+
+        // Generate insights
+        $firstRating = $periods[0]['averageRating'];
+        $lastRating = end($periods)['averageRating'];
+        $change = $lastRating - $firstRating;
+
+        if ($change > 0.2) {
+            $description = 'الاتجاه الزمني يظهر تحسناً ملحوظاً في التقييمات خلال الأشهر الثلاثة الماضية';
+        } elseif ($change < -0.2) {
+            $description = 'الاتجاه الزمني يظهر انخفاضاً في التقييمات يتطلب الانتباه';
+        } else {
+            $description = 'الاتجاه الزمني يظهر استقراراً في التقييمات مع تذبذبات طفيفة';
+        }
+
+        return [
+            'periods' => $periods,
+            'aiInsights' => [
+                'overallTrend' => $description,
+                'change' => round($change, 2),
+                'direction' => $change > 0.15 ? 'improving' : ($change < -0.15 ? 'declining' : 'stable'),
+            ],
+        ];
     }
 
     public function startNewAnalysis(): void

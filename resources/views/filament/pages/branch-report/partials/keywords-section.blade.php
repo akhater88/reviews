@@ -1,3 +1,9 @@
+@php
+    $keywordsData = $this->getKeywordsData();
+    $keywordGroups = $keywordsData['keywordGroups'] ?? [];
+    $foodItems = $keywordsData['foodItems'] ?? [];
+@endphp
+
 <div class="space-y-6" dir="rtl">
     {{-- Keyword Groups Grid --}}
     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
@@ -8,16 +14,16 @@
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">الكلمات الأكثر تكراراً</h3>
                 </div>
                 <div class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-sm">
-                    {{ count($data['keywordGroups'] ?? []) }} كلمة أساسية
+                    {{ count($keywordGroups) }} كلمة أساسية
                 </div>
             </div>
         </div>
         <div class="p-4">
-            @if(!empty($data['keywordGroups']))
+            @if(!empty($keywordGroups))
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
-                    @foreach($data['keywordGroups'] as $group)
+                    @foreach($keywordGroups as $keyword)
                         @php
-                            $sentiment = $group['sentiment'] ?? 'neutral';
+                            $sentiment = $keyword['sentiment'] ?? 'neutral';
                             $bgColor = match($sentiment) {
                                 'positive' => 'background: rgb(240 253 244); border-right: 4px solid rgb(34 197 94);',
                                 'negative' => 'background: rgb(254 242 242); border-right: 4px solid rgb(239 68 68);',
@@ -36,18 +42,18 @@
                                 'mixed' => 'color: rgb(234 179 8);',
                                 default => 'color: rgb(156 163 175);',
                             };
-                            $synonyms = $group['synonyms'] ?? [];
+                            $synonyms = $keyword['synonyms'] ?? [];
                         @endphp
                         <div class="relative rounded-lg p-4" style="{{ $bgColor }}">
                             {{-- Frequency Number - Top Right (RTL) --}}
                             <div class="absolute top-3 right-3 text-xl font-bold" style="{{ $textColor }}">
-                                {{ $group['frequency'] ?? 0 }}
+                                {{ $keyword['frequency'] ?? 0 }}
                             </div>
 
                             {{-- Main Keyword - Center --}}
                             <div class="flex flex-col items-center justify-center text-center" style="min-height: 80px; padding-top: 1rem;">
                                 <span class="font-bold text-lg" style="{{ $textColor }}">
-                                    {{ $group['mainKeyword'] ?? '' }}
+                                    {{ $keyword['mainKeyword'] ?? '' }}
                                 </span>
 
                                 {{-- Synonyms Preview - Below keyword --}}
@@ -84,7 +90,7 @@
     </div>
 
     {{-- Food Items Section --}}
-    @if(!empty($data['foodItems']))
+    @if(!empty($foodItems))
         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
@@ -93,13 +99,13 @@
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">العناصر الغذائية</h3>
                     </div>
                     <div class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-sm">
-                        {{ count($data['foodItems'] ?? []) }} صنف
+                        {{ count($foodItems) }} صنف
                     </div>
                 </div>
             </div>
             <div class="p-4">
                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
-                    @foreach($data['foodItems'] as $item)
+                    @foreach($foodItems as $item)
                         @php
                             $sentiment = $item['sentiment'] ?? 'neutral';
                             $bgColor = match($sentiment) {

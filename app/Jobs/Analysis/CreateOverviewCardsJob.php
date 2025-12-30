@@ -133,6 +133,9 @@ class CreateOverviewCardsJob implements ShouldQueue
 
     private function buildRatingsCard(AnalysisOverview $overview): array
     {
+        // Build timeline data from reviews
+        $timeline = $this->buildTimelineData($overview);
+
         return [
             'id' => "ratings_{$this->restaurantId}",
             'title' => 'التقييمات والمراجعات',
@@ -143,7 +146,120 @@ class CreateOverviewCardsJob implements ShouldQueue
                 'starOnlyReviews' => $overview->star_only_reviews,
                 'periodStart' => $overview->period_start?->format('Y-m-d'),
                 'periodEnd' => $overview->period_end?->format('Y-m-d'),
+                'timeline' => $timeline,
             ],
+        ];
+    }
+
+    /**
+     * Build timeline data showing ratings trend over the analysis period
+     */
+    private function buildTimelineData(AnalysisOverview $overview): array
+    {
+        $branch = Branch::find($overview->branch_id);
+        if (!$branch) {
+            return [];
+        }
+
+        // Get reviews for the last 3 months
+        $periodEnd = $overview->period_end ?? now();
+        $periodStart = $overview->period_start ?? now()->subMonths(3);
+
+        $reviews = $branch->reviews()
+            ->whereBetween('review_date', [$periodStart, $periodEnd])
+            ->whereNotNull('rating')
+            ->orderBy('review_date')
+            ->get(['rating', 'review_date']);
+
+        if ($reviews->isEmpty()) {
+            return [];
+        }
+
+        // Group reviews by month
+        $groupedByMonth = $reviews->groupBy(function ($review) {
+            return Carbon::parse($review->review_date)->format('Y-m');
+        });
+
+        $periods = [];
+        $previousRating = null;
+
+        foreach ($groupedByMonth as $month => $monthReviews) {
+            $averageRating = round($monthReviews->avg('rating'), 2);
+            $reviewCount = $monthReviews->count();
+
+            // Determine trend direction
+            $trendDirection = 'stable';
+            if ($previousRating !== null) {
+                $change = $averageRating - $previousRating;
+                if ($change > 0.1) {
+                    $trendDirection = 'improving';
+                } elseif ($change < -0.1) {
+                    $trendDirection = 'declining';
+                }
+            }
+
+            $periods[] = [
+                'period' => $month,
+                'label' => $month,
+                'averageRating' => $averageRating,
+                'reviewCount' => $reviewCount,
+                'trendDirection' => $trendDirection,
+            ];
+
+            $previousRating = $averageRating;
+        }
+
+        // Generate AI insights based on trend
+        $aiInsights = $this->generateTimelineInsights($periods);
+
+        return [
+            'periods' => $periods,
+            'aiInsights' => $aiInsights,
+        ];
+    }
+
+    /**
+     * Generate AI insights for timeline trend
+     */
+    private function generateTimelineInsights(array $periods): array
+    {
+        if (count($periods) < 2) {
+            return [
+                'overallTrend' => 'لا توجد بيانات كافية لتحليل الاتجاه الزمني',
+            ];
+        }
+
+        $firstRating = $periods[0]['averageRating'];
+        $lastRating = end($periods)['averageRating'];
+        $change = $lastRating - $firstRating;
+
+        if ($change > 0.2) {
+            $description = 'الاتجاه الزمني يظهر تحسناً ملحوظاً في التقييمات خلال الأشهر الثلاثة الماضية';
+        } elseif ($change < -0.2) {
+            $description = 'الاتجاه الزمني يظهر انخفاضاً في التقييمات يتطلب الانتباه';
+        } else {
+            // More detailed analysis for stable trends
+            if (count($periods) >= 3) {
+                $middleRating = $periods[1]['averageRating'];
+                $firstToMiddle = $middleRating - $firstRating;
+                $middleToLast = $lastRating - $middleRating;
+
+                if ($firstToMiddle < -0.1 && $middleToLast > 0.1) {
+                    $description = 'الاتجاه الزمني يظهر تذبذب في التقييمات، مع تراجع ثم تحسن طفيف';
+                } elseif ($firstToMiddle > 0.1 && $middleToLast < -0.1) {
+                    $description = 'الاتجاه الزمني يظهر تحسناً في البداية ثم تراجعاً في الفترة الأخيرة';
+                } else {
+                    $description = 'الاتجاه الزمني يظهر استقراراً في التقييمات مع تذبذبات طفيفة';
+                }
+            } else {
+                $description = 'الاتجاه الزمني يظهر استقراراً في التقييمات';
+            }
+        }
+
+        return [
+            'overallTrend' => $description,
+            'change' => round($change, 2),
+            'direction' => $change > 0.15 ? 'improving' : ($change < -0.15 ? 'declining' : 'stable'),
         ];
     }
 
