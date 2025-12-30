@@ -228,6 +228,15 @@ class InternalCompetition extends Model
         return $this->metrics_config[$metric->value]['enabled'] ?? false;
     }
 
+    public function getMetricWeight(CompetitionMetric $metric): float
+    {
+        if (!$this->isMetricEnabled($metric)) {
+            return 0;
+        }
+
+        return (float) ($this->metrics_config[$metric->value]['weight'] ?? 1.0);
+    }
+
     public function canBeActivated(): bool
     {
         return $this->status->canActivate()
