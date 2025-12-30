@@ -4,12 +4,14 @@ namespace App\Providers;
 
 use App\Contracts\InternalCompetition\ScoreCalculatorInterface;
 use App\Services\InternalCompetition\ArabicNameNormalizer;
+use App\Services\InternalCompetition\BenchmarkService;
 use App\Services\InternalCompetition\CompetitionService;
 use App\Services\InternalCompetition\CustomerSatisfactionScoreService;
 use App\Services\InternalCompetition\EmployeeExtractionService;
 use App\Services\InternalCompetition\ParticipantService;
 use App\Services\InternalCompetition\ResponseTimeScoreService;
 use App\Services\InternalCompetition\ScoreCalculationService;
+use App\Services\InternalCompetition\WinnerService;
 use Illuminate\Support\ServiceProvider;
 
 class InternalCompetitionServiceProvider extends ServiceProvider
@@ -43,6 +45,16 @@ class InternalCompetitionServiceProvider extends ServiceProvider
                 $app->make(ResponseTimeScoreService::class),
                 $app->make(EmployeeExtractionService::class)
             );
+        });
+
+        // Register benchmark service
+        $this->app->singleton(BenchmarkService::class, function ($app) {
+            return new BenchmarkService();
+        });
+
+        // Register winner service
+        $this->app->singleton(WinnerService::class, function ($app) {
+            return new WinnerService();
         });
 
         // Register participant service
