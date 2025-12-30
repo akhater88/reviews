@@ -33,7 +33,7 @@ class EmployeeReportSeeder extends Seeder
             $analysisOverview = AnalysisOverview::create([
                 'tenant_id' => $branch->tenant_id,
                 'branch_id' => $branch->id,
-                'restaurant_id' => $branch->restaurant_id,
+                'restaurant_id' => $branch->google_place_id,
                 'status' => AnalysisStatus::COMPLETED,
                 'progress' => 100,
                 'total_reviews' => 150,
@@ -161,7 +161,7 @@ class EmployeeReportSeeder extends Seeder
         // Create the analysis result
         AnalysisResult::create([
             'analysis_overview_id' => $analysisOverview->id,
-            'restaurant_id' => $branch->restaurant_id,
+            'restaurant_id' => $branch->google_place_id,
             'analysis_type' => AnalysisType::EMPLOYEES_INSIGHTS,
             'result' => $employeeData,
             'status' => AnalysisStatus::COMPLETED,
