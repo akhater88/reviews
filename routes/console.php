@@ -152,3 +152,52 @@ Schedule::job(new \App\Jobs\Competition\SendClaimRemindersJob)
     ->withoutOverlapping()
     ->name('competition-claim-reminders')
     ->onOneServer();
+
+/*
+|--------------------------------------------------------------------------
+| Internal Competition Scheduler
+|--------------------------------------------------------------------------
+|
+| Schedule automated internal competition tasks:
+| - Auto-start competitions at midnight
+| - Auto-end competitions at end of day
+| - Calculate daily scores twice a day
+| - Schedule reminders in the morning
+| - Weekly cleanup of old data
+|
+*/
+
+// Internal Competition: Auto-start competitions at midnight
+Schedule::job(new \App\Jobs\InternalCompetition\AutoStartCompetitionsJob())
+    ->dailyAt('00:05')
+    ->name('internal-competition:auto-start')
+    ->withoutOverlapping()
+    ->onOneServer();
+
+// Internal Competition: Auto-end competitions at end of day
+Schedule::job(new \App\Jobs\InternalCompetition\AutoEndCompetitionsJob())
+    ->dailyAt('23:55')
+    ->name('internal-competition:auto-end')
+    ->withoutOverlapping()
+    ->onOneServer();
+
+// Internal Competition: Calculate daily scores (twice a day - 6 AM and 6 PM)
+Schedule::job(new \App\Jobs\InternalCompetition\CalculateDailyScoresJob())
+    ->twiceDaily(6, 18)
+    ->name('internal-competition:daily-scores')
+    ->withoutOverlapping()
+    ->onOneServer();
+
+// Internal Competition: Schedule reminders (once a day in the morning)
+Schedule::job(new \App\Jobs\InternalCompetition\ScheduleCompetitionRemindersJob())
+    ->dailyAt('09:00')
+    ->name('internal-competition:reminders')
+    ->withoutOverlapping()
+    ->onOneServer();
+
+// Internal Competition: Weekly cleanup (Sunday at 3 AM)
+Schedule::job(new \App\Jobs\InternalCompetition\CleanupOldCompetitionsJob())
+    ->weeklyOn(0, '03:00')
+    ->name('internal-competition:cleanup')
+    ->withoutOverlapping()
+    ->onOneServer();
