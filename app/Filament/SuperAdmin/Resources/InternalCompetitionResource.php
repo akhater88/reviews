@@ -236,7 +236,10 @@ class InternalCompetitionResource extends Resource
                                                     ->live()
                                                     ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set, $state) {
                                                         if ($state && $get('period')) {
-                                                            $period = CompetitionPeriod::from($get('period'));
+                                                            $periodValue = $get('period');
+                                                            $period = $periodValue instanceof CompetitionPeriod
+                                                                ? $periodValue
+                                                                : CompetitionPeriod::from($periodValue);
                                                             $endDate = \Carbon\Carbon::parse($state)
                                                                 ->addDays($period->getDurationInDays())
                                                                 ->subDay();
