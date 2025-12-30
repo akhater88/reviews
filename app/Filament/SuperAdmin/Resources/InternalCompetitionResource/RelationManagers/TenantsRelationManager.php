@@ -15,7 +15,7 @@ use Filament\Tables\Table;
 
 class TenantsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'competitionTenants';
+    protected static string $relationship = 'participatingTenants';
 
     protected static ?string $title = 'المستأجرين المشاركين';
 
@@ -35,7 +35,7 @@ class TenantsRelationManager extends RelationManager
                 Forms\Components\Select::make('tenant_id')
                     ->label('المستأجر')
                     ->options(function () {
-                        $enrolledIds = $this->ownerRecord->competitionTenants()->pluck('tenant_id');
+                        $enrolledIds = $this->ownerRecord->participatingTenants()->pluck('tenant_id');
                         return Tenant::whereNotIn('id', $enrolledIds)
                             ->pluck('name', 'id');
                     })
@@ -87,7 +87,7 @@ class TenantsRelationManager extends RelationManager
                         Forms\Components\Select::make('tenant_id')
                             ->label('المستأجر')
                             ->options(function () {
-                                $enrolledIds = $this->ownerRecord->competitionTenants()->pluck('tenant_id');
+                                $enrolledIds = $this->ownerRecord->participatingTenants()->pluck('tenant_id');
                                 return Tenant::whereNotIn('id', $enrolledIds)
                                     ->pluck('name', 'id');
                             })
@@ -101,10 +101,10 @@ class TenantsRelationManager extends RelationManager
                     ->action(function (array $data) {
                         try {
                             $service = app(ParticipantService::class);
-                            $service->enrollTenant($this->ownerRecord, $data['tenant_id']);
+                            $service->enrollTenant($this->ownerRecord, $data['tenant_id'], auth()->id());
 
                             if ($data['enroll_all_branches'] ?? false) {
-                                $service->enrollAllTenantBranches($this->ownerRecord, $data['tenant_id']);
+                                $service->enrollAllTenantBranches($this->ownerRecord, $data['tenant_id'], auth()->id());
                             }
 
                             Notification::make()

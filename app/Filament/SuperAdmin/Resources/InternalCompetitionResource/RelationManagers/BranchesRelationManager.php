@@ -15,7 +15,7 @@ use Filament\Tables\Table;
 
 class BranchesRelationManager extends RelationManager
 {
-    protected static string $relationship = 'competitionBranches';
+    protected static string $relationship = 'participatingBranches';
 
     protected static ?string $title = 'الفروع المشاركة';
 
@@ -63,7 +63,7 @@ class BranchesRelationManager extends RelationManager
                         Forms\Components\Select::make('branch_id')
                             ->label('الفرع')
                             ->options(function () {
-                                $enrolledIds = $this->ownerRecord->competitionBranches()->pluck('branch_id');
+                                $enrolledIds = $this->ownerRecord->participatingBranches()->pluck('branch_id');
 
                                 $query = Branch::whereNotIn('id', $enrolledIds);
 
@@ -87,7 +87,7 @@ class BranchesRelationManager extends RelationManager
                             $service = app(ParticipantService::class);
 
                             foreach ((array) $data['branch_id'] as $branchId) {
-                                $service->enrollBranch($this->ownerRecord, $branchId);
+                                $service->enrollBranch($this->ownerRecord, $branchId, auth()->id());
                             }
 
                             Notification::make()
