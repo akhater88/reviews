@@ -11,6 +11,7 @@ use App\Models\InternalCompetition\InternalCompetitionBranchScore;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 
 class ScoreCalculationService
@@ -22,10 +23,12 @@ class ScoreCalculationService
 
     public function __construct(
         private readonly CustomerSatisfactionScoreService $satisfactionScoreService,
-        private readonly ResponseTimeScoreService $responseTimeScoreService
+        private readonly ResponseTimeScoreService $responseTimeScoreService,
+        private readonly EmployeeExtractionService $employeeService
     ) {
         $this->registerCalculator($this->satisfactionScoreService);
         $this->registerCalculator($this->responseTimeScoreService);
+        $this->registerCalculator($this->employeeService);
     }
 
     /**
@@ -63,7 +66,12 @@ class ScoreCalculationService
 
         foreach ($enabledMetrics as $metric) {
             if ($metric === CompetitionMetric::EMPLOYEE_MENTIONS) {
-                // Employee mentions are handled separately
+                // Employee mentions use a different storage mechanism
+                $this->employeeService->calculateForAllBranches(
+                    $competition,
+                    $periodStart,
+                    $periodEnd
+                );
                 continue;
             }
 
@@ -74,6 +82,163 @@ class ScoreCalculationService
                 $periodEnd
             );
         }
+    }
+
+    /**
+     * Calculate all scores for a competition and return summary.
+     */
+    public function calculateAllScores(InternalCompetition $competition): array
+    {
+        $results = [
+            'satisfaction' => null,
+            'response_time' => null,
+            'employee_mentions' => null,
+            'total_branches' => 0,
+            'calculated_at' => now(),
+        ];
+
+        $periodStart = $competition->start_date;
+        $periodEnd = min($competition->end_date, now());
+
+        // Calculate satisfaction scores if enabled
+        if ($competition->isMetricEnabled(CompetitionMetric::CUSTOMER_SATISFACTION)) {
+            $this->calculateAndStoreMetricScores(
+                $competition,
+                CompetitionMetric::CUSTOMER_SATISFACTION,
+                $periodStart,
+                $periodEnd
+            );
+            $results['satisfaction'] = [
+                'calculated' => true,
+                'statistics' => $this->getMetricStatistics($competition, CompetitionMetric::CUSTOMER_SATISFACTION),
+            ];
+        }
+
+        // Calculate response time scores if enabled
+        if ($competition->isMetricEnabled(CompetitionMetric::RESPONSE_TIME)) {
+            $this->calculateAndStoreMetricScores(
+                $competition,
+                CompetitionMetric::RESPONSE_TIME,
+                $periodStart,
+                $periodEnd
+            );
+            $results['response_time'] = [
+                'calculated' => true,
+                'statistics' => $this->getMetricStatistics($competition, CompetitionMetric::RESPONSE_TIME),
+            ];
+        }
+
+        // Extract and calculate employee mentions if enabled
+        if ($competition->isMetricEnabled(CompetitionMetric::EMPLOYEE_MENTIONS)) {
+            $employees = $this->employeeService->calculateForAllBranches(
+                $competition,
+                $periodStart,
+                $periodEnd
+            );
+            $results['employee_mentions'] = [
+                'count' => $employees->count(),
+                'statistics' => $this->employeeService->getScoreStatistics($competition),
+            ];
+        }
+
+        $results['total_branches'] = $competition->activeBranches()->count();
+
+        Log::info('All scores calculated for competition', [
+            'competition_id' => $competition->id,
+            'results' => $results,
+        ]);
+
+        return $results;
+    }
+
+    /**
+     * Finalize all scores at competition end.
+     */
+    public function finalizeAllScores(InternalCompetition $competition): void
+    {
+        $this->calculateAllScores($competition);
+
+        // Mark branch scores as final
+        InternalCompetitionBranchScore::where('competition_id', $competition->id)
+            ->update(['is_final' => true]);
+
+        // Finalize employee scores
+        if ($competition->isMetricEnabled(CompetitionMetric::EMPLOYEE_MENTIONS)) {
+            $this->employeeService->finalizeScores($competition);
+        }
+
+        Log::info('All scores finalized for competition', [
+            'competition_id' => $competition->id,
+        ]);
+    }
+
+    /**
+     * Get top performers across all metrics.
+     */
+    public function getTopPerformers(InternalCompetition $competition, int $limit = 3): array
+    {
+        $topPerformers = [];
+
+        if ($competition->isMetricEnabled(CompetitionMetric::CUSTOMER_SATISFACTION)) {
+            $topPerformers['satisfaction'] = $this->getLeaderboard(
+                $competition,
+                CompetitionMetric::CUSTOMER_SATISFACTION,
+                $limit
+            );
+        }
+
+        if ($competition->isMetricEnabled(CompetitionMetric::RESPONSE_TIME)) {
+            $topPerformers['response_time'] = $this->getLeaderboard(
+                $competition,
+                CompetitionMetric::RESPONSE_TIME,
+                $limit
+            );
+        }
+
+        if ($competition->isMetricEnabled(CompetitionMetric::EMPLOYEE_MENTIONS)) {
+            $topPerformers['employee_mentions'] = $this->employeeService->getTopPerformers($competition, $limit);
+        }
+
+        return $topPerformers;
+    }
+
+    /**
+     * Get service for a specific metric.
+     */
+    public function getServiceForMetric(CompetitionMetric $metric): ?object
+    {
+        return match ($metric) {
+            CompetitionMetric::CUSTOMER_SATISFACTION => $this->satisfactionScoreService,
+            CompetitionMetric::RESPONSE_TIME => $this->responseTimeScoreService,
+            CompetitionMetric::EMPLOYEE_MENTIONS => $this->employeeService,
+        };
+    }
+
+    /**
+     * Get statistics for a specific metric.
+     */
+    protected function getMetricStatistics(InternalCompetition $competition, CompetitionMetric $metric): array
+    {
+        $scores = InternalCompetitionBranchScore::query()
+            ->where('competition_id', $competition->id)
+            ->where('metric_type', $metric->value)
+            ->get();
+
+        if ($scores->isEmpty()) {
+            return [
+                'count' => 0,
+                'average_score' => 0,
+                'min_score' => 0,
+                'max_score' => 0,
+            ];
+        }
+
+        return [
+            'count' => $scores->count(),
+            'average_score' => round($scores->avg('score') ?? 0, 2),
+            'min_score' => round($scores->min('score') ?? 0, 2),
+            'max_score' => round($scores->max('score') ?? 0, 2),
+        ];
     }
 
     /**
