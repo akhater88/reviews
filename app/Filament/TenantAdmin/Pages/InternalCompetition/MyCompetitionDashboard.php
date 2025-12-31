@@ -20,9 +20,9 @@ class MyCompetitionDashboard extends Page
     public array $myRankings = [];
     public array $myWinnings = [];
 
-    protected function getPerformanceHint(int $rank, int $totalParticipants): string
+    protected function getPerformanceHint(?int $rank, int $totalParticipants): string
     {
-        if ($totalParticipants <= 0) {
+        if ($rank === null || $totalParticipants <= 0) {
             return 'غير محدد';
         }
 
@@ -37,8 +37,12 @@ class MyCompetitionDashboard extends Page
         };
     }
 
-    protected function getRankDisplay(int $rank): string
+    protected function getRankDisplay(?int $rank): string
     {
+        if ($rank === null) {
+            return '-';
+        }
+
         return match ($rank) {
             1 => '🥇 الأول',
             2 => '🥈 الثاني',

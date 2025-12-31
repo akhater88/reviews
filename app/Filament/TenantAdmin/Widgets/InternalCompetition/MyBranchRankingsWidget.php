@@ -15,9 +15,9 @@ class MyBranchRankingsWidget extends BaseWidget
     protected static ?int $sort = 1;
     protected int|string|array $columnSpan = 'full';
 
-    protected function getPerformanceHint(int $rank, int $totalParticipants): string
+    protected function getPerformanceHint(?int $rank, int $totalParticipants): string
     {
-        if ($totalParticipants <= 0) {
+        if ($rank === null || $totalParticipants <= 0) {
             return 'غير محدد';
         }
 
@@ -59,6 +59,7 @@ class MyBranchRankingsWidget extends BaseWidget
 
                         // For single-tenant: show actual rank
                         if ($competition->scope === CompetitionScope::SINGLE_TENANT) {
+                            if ($record->rank === null) return '-';
                             return match ($record->rank) {
                                 1 => '🥇 الأول',
                                 2 => '🥈 الثاني',

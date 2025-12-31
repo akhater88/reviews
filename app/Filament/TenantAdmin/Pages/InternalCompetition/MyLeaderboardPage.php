@@ -49,9 +49,9 @@ class MyLeaderboardPage extends Page implements HasTable
         return $this->competition?->scope === CompetitionScope::MULTI_TENANT;
     }
 
-    protected function getPerformanceHint(int $rank, int $totalParticipants): string
+    protected function getPerformanceHint(?int $rank, int $totalParticipants): string
     {
-        if ($totalParticipants <= 0) {
+        if ($rank === null || $totalParticipants <= 0) {
             return 'غير محدد';
         }
 
@@ -120,7 +120,7 @@ class MyLeaderboardPage extends Page implements HasTable
                 // For single-tenant: show actual rank
                 Tables\Columns\TextColumn::make('rank')
                     ->label('الترتيب')
-                    ->formatStateUsing(fn ($state) => match ($state) { 1 => '🥇', 2 => '🥈', 3 => '🥉', default => "#{$state}" })
+                    ->formatStateUsing(fn ($state) => $state === null ? '-' : match ($state) { 1 => '🥇', 2 => '🥈', 3 => '🥉', default => "#{$state}" })
                     ->alignCenter()
                     ->visible(!$isMultiTenant),
 
@@ -143,7 +143,7 @@ class MyLeaderboardPage extends Page implements HasTable
                 Tables\Columns\TextColumn::make('relative_position')
                     ->label('الموقع النسبي')
                     ->state(function ($record) use ($totalParticipants) {
-                        if ($totalParticipants <= 0) return '-';
+                        if ($record->rank === null || $totalParticipants <= 0) return '-';
                         $percentile = 100 - (($record->rank / $totalParticipants) * 100);
                         return 'أفضل من ' . round($percentile) . '% من المشاركين';
                     })
