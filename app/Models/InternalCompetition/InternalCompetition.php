@@ -210,13 +210,13 @@ class InternalCompetition extends Model
 
     public function getEnabledMetricsAttribute(): array
     {
-        $enabled = [];
-        foreach ($this->metrics_config ?? [] as $metric => $config) {
-            if ($config['enabled'] ?? false) {
-                $enabled[] = CompetitionMetric::tryFrom($metric);
-            }
-        }
-        return array_filter($enabled);
+        $enabledMetrics = $this->metrics_config['enabled_metrics'] ?? [];
+
+        return collect($enabledMetrics)
+            ->map(fn ($metric) => CompetitionMetric::tryFrom($metric))
+            ->filter()
+            ->values()
+            ->toArray();
     }
 
     public function getIsMultiTenantAttribute(): bool
@@ -238,7 +238,9 @@ class InternalCompetition extends Model
 
     public function isMetricEnabled(CompetitionMetric $metric): bool
     {
-        return $this->metrics_config[$metric->value]['enabled'] ?? false;
+        $enabledMetrics = $this->metrics_config['enabled_metrics'] ?? [];
+
+        return in_array($metric->value, $enabledMetrics);
     }
 
     public function getMetricWeight(CompetitionMetric $metric): float
@@ -247,7 +249,7 @@ class InternalCompetition extends Model
             return 0;
         }
 
-        return (float) ($this->metrics_config[$metric->value]['weight'] ?? 1.0);
+        return (float) ($this->metrics_config['weights'][$metric->value] ?? 1.0);
     }
 
     public function canBeActivated(): bool
