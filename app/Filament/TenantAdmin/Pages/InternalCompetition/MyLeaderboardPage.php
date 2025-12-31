@@ -3,6 +3,7 @@
 namespace App\Filament\TenantAdmin\Pages\InternalCompetition;
 
 use App\Enums\InternalCompetition\CompetitionMetric;
+use App\Enums\InternalCompetition\CompetitionScope;
 use App\Enums\InternalCompetition\CompetitionStatus;
 use App\Models\InternalCompetition\InternalCompetition;
 use App\Models\InternalCompetition\InternalCompetitionBranchScore;
@@ -43,6 +44,28 @@ class MyLeaderboardPage extends Page implements HasTable
         $this->competition = InternalCompetition::find($this->selectedCompetitionId);
     }
 
+    public function isMultiTenantCompetition(): bool
+    {
+        return $this->competition?->scope === CompetitionScope::MULTI_TENANT;
+    }
+
+    protected function getPerformanceHint(int $rank, int $totalParticipants): string
+    {
+        if ($totalParticipants <= 0) {
+            return 'غير محدد';
+        }
+
+        $percentile = ($rank / $totalParticipants) * 100;
+
+        return match (true) {
+            $percentile <= 10 => '🌟 متميز جداً',
+            $percentile <= 25 => '⭐ متميز',
+            $percentile <= 50 => '📈 فوق المتوسط',
+            $percentile <= 75 => '📊 متوسط',
+            default => '📉 يحتاج تحسين',
+        };
+    }
+
     protected function getHeaderActions(): array
     {
         $tenantId = auth()->user()?->tenant_id;
@@ -79,6 +102,12 @@ class MyLeaderboardPage extends Page implements HasTable
     public function table(Tables\Table $table): Tables\Table
     {
         $tenantId = auth()->user()?->tenant_id;
+        $isMultiTenant = $this->isMultiTenantCompetition();
+
+        // Get total participants for hint calculation
+        $totalParticipants = InternalCompetitionBranchScore::where('competition_id', $this->selectedCompetitionId)
+            ->where('metric_type', $this->selectedMetric)
+            ->count();
 
         return $table
             ->query(fn () => InternalCompetitionBranchScore::query()
@@ -88,16 +117,38 @@ class MyLeaderboardPage extends Page implements HasTable
                 ->with(['branch'])
                 ->orderBy('rank'))
             ->columns([
+                // For single-tenant: show actual rank
                 Tables\Columns\TextColumn::make('rank')
-                    ->label('ترتيبي')
+                    ->label('الترتيب')
                     ->formatStateUsing(fn ($state) => match ($state) { 1 => '🥇', 2 => '🥈', 3 => '🥉', default => "#{$state}" })
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->visible(!$isMultiTenant),
+
+                // For multi-tenant: show performance hint instead of rank
+                Tables\Columns\TextColumn::make('performance_hint')
+                    ->label('مستوى الأداء')
+                    ->state(fn ($record) => $this->getPerformanceHint($record->rank, $totalParticipants))
+                    ->alignCenter()
+                    ->visible($isMultiTenant),
+
                 Tables\Columns\TextColumn::make('branch.name')
                     ->label('الفرع')
                     ->weight('bold'),
+
                 Tables\Columns\TextColumn::make('score')
                     ->label('النقاط')
                     ->numeric(2),
+
+                // For multi-tenant: show relative position hint
+                Tables\Columns\TextColumn::make('relative_position')
+                    ->label('الموقع النسبي')
+                    ->state(function ($record) use ($totalParticipants) {
+                        if ($totalParticipants <= 0) return '-';
+                        $percentile = 100 - (($record->rank / $totalParticipants) * 100);
+                        return 'أفضل من ' . round($percentile) . '% من المشاركين';
+                    })
+                    ->color('gray')
+                    ->visible($isMultiTenant),
             ])
             ->striped();
     }

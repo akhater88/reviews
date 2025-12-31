@@ -2,6 +2,7 @@
 
 namespace App\Filament\TenantAdmin\Pages\InternalCompetition;
 
+use App\Enums\InternalCompetition\CompetitionScope;
 use App\Models\InternalCompetition\InternalCompetition;
 use App\Models\InternalCompetition\InternalCompetitionBranchScore;
 use App\Models\InternalCompetition\InternalCompetitionWinner;
@@ -18,6 +19,33 @@ class MyCompetitionDashboard extends Page
     public array $activeCompetitions = [];
     public array $myRankings = [];
     public array $myWinnings = [];
+
+    protected function getPerformanceHint(int $rank, int $totalParticipants): string
+    {
+        if ($totalParticipants <= 0) {
+            return 'غير محدد';
+        }
+
+        $percentile = ($rank / $totalParticipants) * 100;
+
+        return match (true) {
+            $percentile <= 10 => '🌟 متميز جداً',
+            $percentile <= 25 => '⭐ متميز',
+            $percentile <= 50 => '📈 فوق المتوسط',
+            $percentile <= 75 => '📊 متوسط',
+            default => '📉 يحتاج تحسين',
+        };
+    }
+
+    protected function getRankDisplay(int $rank): string
+    {
+        return match ($rank) {
+            1 => '🥇 الأول',
+            2 => '🥈 الثاني',
+            3 => '🥉 الثالث',
+            default => "#{$rank}"
+        };
+    }
 
     public function mount(): void
     {
@@ -36,6 +64,7 @@ class MyCompetitionDashboard extends Page
                 'remaining_days' => $c->remaining_days,
                 'progress' => $c->progress_percentage,
                 'my_branches' => $c->activeBranches()->where('tenant_id', $tenantId)->count(),
+                'is_multi_tenant' => $c->scope === CompetitionScope::MULTI_TENANT,
             ])->toArray();
 
         $activeCompetitionIds = InternalCompetition::active()->forTenant($tenantId)->pluck('id');
@@ -46,13 +75,30 @@ class MyCompetitionDashboard extends Page
             ->orderBy('rank')
             ->limit(10)
             ->get()
-            ->map(fn ($s) => [
-                'competition' => $s->competition?->display_name,
-                'branch' => $s->branch?->name,
-                'metric' => $s->metric_type->getLabel(),
-                'rank' => $s->rank,
-                'score' => $s->score,
-            ])->toArray();
+            ->map(function ($s) {
+                $competition = $s->competition;
+                $isMultiTenant = $competition?->scope === CompetitionScope::MULTI_TENANT;
+
+                // For multi-tenant: calculate performance hint
+                $positionDisplay = '-';
+                if ($isMultiTenant) {
+                    $totalParticipants = InternalCompetitionBranchScore::where('competition_id', $s->competition_id)
+                        ->where('metric_type', $s->metric_type)
+                        ->count();
+                    $positionDisplay = $this->getPerformanceHint($s->rank, $totalParticipants);
+                } else {
+                    $positionDisplay = $this->getRankDisplay($s->rank);
+                }
+
+                return [
+                    'competition' => $competition?->display_name,
+                    'branch' => $s->branch?->name,
+                    'metric' => $s->metric_type->getLabel(),
+                    'position_display' => $positionDisplay,
+                    'score' => $s->score,
+                    'is_multi_tenant' => $isMultiTenant,
+                ];
+            })->toArray();
 
         $this->myWinnings = InternalCompetitionWinner::where('tenant_id', $tenantId)
             ->with(['competition', 'branch', 'prize'])

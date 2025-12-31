@@ -36,7 +36,7 @@
                         <tr class="border-b">
                             <th class="text-right py-2">المسابقة</th>
                             <th class="text-right py-2">الفرع</th>
-                            <th class="text-center py-2">المركز</th>
+                            <th class="text-center py-2">المركز / الأداء</th>
                             <th class="text-center py-2">النقاط</th>
                         </tr>
                     </thead>
@@ -45,13 +45,7 @@
                             <tr class="border-b">
                                 <td class="py-2">{{ $ranking['competition'] }}</td>
                                 <td class="py-2">{{ $ranking['branch'] }}</td>
-                                <td class="py-2 text-center text-lg">
-                                    @if($ranking['rank'] == 1) 🥇
-                                    @elseif($ranking['rank'] == 2) 🥈
-                                    @elseif($ranking['rank'] == 3) 🥉
-                                    @else #{{ $ranking['rank'] }}
-                                    @endif
-                                </td>
+                                <td class="py-2 text-center">{{ $ranking['position_display'] }}</td>
                                 <td class="py-2 text-center font-medium">{{ number_format($ranking['score'], 0) }}</td>
                             </tr>
                         @endforeach
