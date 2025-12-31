@@ -14,7 +14,7 @@ class MyWinnersWidget extends BaseWidget
 
     public function table(Table $table): Table
     {
-        $tenantId = filament()->getTenant()?->id;
+        $tenantId = auth()->user()?->tenant_id;
 
         return $table
             ->query(InternalCompetitionWinner::query()

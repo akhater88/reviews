@@ -24,11 +24,13 @@ class TenantCompetitionResource extends Resource
 
     protected static ?string $pluralModelLabel = 'المسابقات';
 
+    protected static ?string $navigationGroup = 'المسابقات';
+
     protected static ?int $navigationSort = 1;
 
     public static function getNavigationBadge(): ?string
     {
-        $tenantId = filament()->getTenant()?->id;
+        $tenantId = auth()->user()?->tenant_id;
         if (!$tenantId) {
             return null;
         }
@@ -71,7 +73,7 @@ class TenantCompetitionResource extends Resource
                 Tables\Columns\TextColumn::make('my_branches_count')
                     ->label('فروعي المشاركة')
                     ->state(function (InternalCompetition $record) {
-                        $tenantId = filament()->getTenant()?->id;
+                        $tenantId = auth()->user()?->tenant_id;
                         return $record->activeBranches()
                             ->where('tenant_id', $tenantId)
                             ->count();
@@ -173,7 +175,7 @@ class TenantCompetitionResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $tenantId = filament()->getTenant()?->id;
+        $tenantId = auth()->user()?->tenant_id;
 
         return parent::getEloquentQuery()
             ->forTenant($tenantId)

@@ -15,6 +15,7 @@ class MyBranchPerformance extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
     protected static ?string $navigationLabel = 'أداء فروعي';
+    protected static ?string $navigationGroup = 'المسابقات';
     protected static ?int $navigationSort = 3;
     protected static string $view = 'filament.pages.internal-competition.my-branch-performance';
 
@@ -27,7 +28,7 @@ class MyBranchPerformance extends Page
 
     public function mount(): void
     {
-        $tenantId = filament()->getTenant()?->id;
+        $tenantId = auth()->user()?->tenant_id;
         $this->selectedCompetitionId = InternalCompetition::active()->forTenant($tenantId)->latest()->value('id');
         $this->selectedBranchId = Branch::where('tenant_id', $tenantId)->value('id');
         $this->loadData();
@@ -35,7 +36,7 @@ class MyBranchPerformance extends Page
 
     protected function getHeaderActions(): array
     {
-        $tenantId = filament()->getTenant()?->id;
+        $tenantId = auth()->user()?->tenant_id;
 
         return [
             Action::make('selectFilters')

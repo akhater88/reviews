@@ -16,7 +16,7 @@ class MyBranchRankingsWidget extends BaseWidget
 
     public function table(Table $table): Table
     {
-        $tenantId = filament()->getTenant()?->id;
+        $tenantId = auth()->user()?->tenant_id;
         $activeCompetitionIds = InternalCompetition::active()->forTenant($tenantId)->pluck('id');
 
         return $table

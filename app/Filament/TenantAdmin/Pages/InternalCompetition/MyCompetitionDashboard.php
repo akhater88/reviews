@@ -11,6 +11,7 @@ class MyCompetitionDashboard extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-chart-pie';
     protected static ?string $navigationLabel = 'لوحة المسابقات';
+    protected static ?string $navigationGroup = 'المسابقات';
     protected static ?int $navigationSort = 0;
     protected static string $view = 'filament.pages.internal-competition.my-competition-dashboard';
 
@@ -20,7 +21,7 @@ class MyCompetitionDashboard extends Page
 
     public function mount(): void
     {
-        $tenantId = filament()->getTenant()?->id;
+        $tenantId = auth()->user()?->tenant_id;
         if (!$tenantId) {
             return;
         }

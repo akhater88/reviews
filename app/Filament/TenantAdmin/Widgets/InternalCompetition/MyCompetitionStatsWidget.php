@@ -13,7 +13,7 @@ class MyCompetitionStatsWidget extends BaseWidget
 
     protected function getStats(): array
     {
-        $tenantId = filament()->getTenant()?->id;
+        $tenantId = auth()->user()?->tenant_id;
         if (!$tenantId) {
             return [];
         }

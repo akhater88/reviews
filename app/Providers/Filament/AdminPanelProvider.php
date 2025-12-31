@@ -47,11 +47,14 @@ class AdminPanelProvider extends PanelProvider
             ->maxContentWidth('full')
             ->topNavigation(false)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
+            ->discoverResources(in: app_path('Filament/TenantAdmin/Resources'), for: 'App\\Filament\\TenantAdmin\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->discoverPages(in: app_path('Filament/TenantAdmin/Pages'), for: 'App\\Filament\\TenantAdmin\\Pages')
             ->pages([
                 // Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->discoverWidgets(in: app_path('Filament/TenantAdmin/Widgets'), for: 'App\\Filament\\TenantAdmin\\Widgets')
             ->widgets([
                 // Widgets\AccountWidget::class,
             ])
@@ -72,6 +75,7 @@ class AdminPanelProvider extends PanelProvider
                 \App\Http\Middleware\EnsurePhoneIsVerified::class,
             ])
             ->navigationGroups([
+                'المسابقات',
                 'إدارة النظام',
                 'التقارير',
                 'الإعدادات',

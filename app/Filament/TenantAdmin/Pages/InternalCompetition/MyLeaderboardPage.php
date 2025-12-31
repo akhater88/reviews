@@ -20,6 +20,7 @@ class MyLeaderboardPage extends Page implements HasTable
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
     protected static ?string $navigationLabel = 'ترتيبي في المسابقات';
+    protected static ?string $navigationGroup = 'المسابقات';
     protected static ?int $navigationSort = 2;
     protected static string $view = 'filament.pages.internal-competition.my-leaderboard';
 
@@ -29,7 +30,7 @@ class MyLeaderboardPage extends Page implements HasTable
 
     public function mount(): void
     {
-        $tenantId = filament()->getTenant()?->id;
+        $tenantId = auth()->user()?->tenant_id;
         $this->selectedCompetitionId = InternalCompetition::active()->forTenant($tenantId)->latest()->value('id');
         $this->loadCompetition();
         if ($this->competition) {
@@ -44,7 +45,7 @@ class MyLeaderboardPage extends Page implements HasTable
 
     protected function getHeaderActions(): array
     {
-        $tenantId = filament()->getTenant()?->id;
+        $tenantId = auth()->user()?->tenant_id;
 
         return [
             Action::make('selectCompetition')
@@ -77,7 +78,7 @@ class MyLeaderboardPage extends Page implements HasTable
 
     public function table(Tables\Table $table): Tables\Table
     {
-        $tenantId = filament()->getTenant()?->id;
+        $tenantId = auth()->user()?->tenant_id;
 
         return $table
             ->query(fn () => InternalCompetitionBranchScore::query()
