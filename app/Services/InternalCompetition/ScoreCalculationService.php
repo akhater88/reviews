@@ -274,7 +274,7 @@ class ScoreCalculationService
                         'score' => $score,
                         'period_start' => $periodStart,
                         'period_end' => $periodEnd,
-                        'last_calculated_at' => now(),
+                        'calculated_at' => now(),
                     ]
                 );
             }
@@ -425,7 +425,7 @@ class ScoreCalculationService
                 'score' => round($score->score, 2),
                 'rank' => $this->getBranchPosition($competition, $branchId, $metric),
                 'weight' => $competition->getMetricWeight($metric),
-                'last_calculated_at' => $score->last_calculated_at?->toDateTimeString(),
+                'calculated_at' => $score->calculated_at?->toDateTimeString(),
             ];
         }
 
