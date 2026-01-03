@@ -40,9 +40,11 @@
                 <span class="text-sm px-4 py-1.5 rounded-full font-medium" style="background: rgb(239 246 255); color: rgb(29 78 216); border: 1px solid rgb(191 219 254);">
                     تقرير آخر 3 شهور
                 </span>
-                <x-filament::button wire:click="startNewAnalysis" icon="heroicon-o-arrow-path" size="sm" color="gray">
-                    تحديث
-                </x-filament::button>
+                @if($this->canStartAnalysis())
+                    <x-filament::button wire:click="startNewAnalysis" icon="heroicon-o-arrow-path" size="sm" color="gray">
+                        تحديث
+                    </x-filament::button>
+                @endif
             </div>
         </div>
     </div>

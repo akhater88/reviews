@@ -381,7 +381,7 @@ class BranchResource extends Resource
                     ->modalHeading('مزامنة المراجعات')
                     ->modalDescription('سيتم جلب أحدث المراجعات. قد تستغرق العملية بضع دقائق.')
                     ->modalSubmitActionLabel('بدء المزامنة')
-                    ->visible(fn (Branch $record): bool => !empty($record->google_place_id))
+                    ->visible(fn (Branch $record): bool => !empty($record->google_place_id) && Auth::user()?->isAdmin())
                     ->action(function (Branch $record) {
                         SyncBranchReviewsJob::dispatch($record)->onQueue('reviews');
 
@@ -399,7 +399,7 @@ class BranchResource extends Resource
                     ->modalHeading('تحليل المراجعات بالذكاء الاصطناعي')
                     ->modalDescription('سيتم تحليل المراجعات باستخدام الذكاء الاصطناعي لاستخراج رؤى وتوصيات. قد تستغرق العملية عدة دقائق.')
                     ->modalSubmitActionLabel('بدء التحليل')
-                    ->visible(fn (Branch $record): bool => $record->reviews()->exists())
+                    ->visible(fn (Branch $record): bool => $record->reviews()->exists() && Auth::user()?->isAdmin())
                     ->disabled(fn (Branch $record): bool => app(AnalysisPipelineService::class)->hasActiveAnalysis($record))
                     ->action(function (Branch $record) {
                         try {
