@@ -3,6 +3,7 @@
 namespace App\Filament\TenantAdmin\Widgets\InternalCompetition;
 
 use App\Models\InternalCompetition\InternalCompetitionWinner;
+use App\Models\User;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -14,11 +15,14 @@ class MyWinnersWidget extends BaseWidget
 
     public function table(Table $table): Table
     {
-        $tenantId = auth()->user()?->tenant_id;
+        /** @var User $user */
+        $user = auth()->user();
+        // Get accessible branch IDs for the current user
+        $accessibleBranchIds = $user->accessibleBranches()->pluck('branches.id');
 
         return $table
             ->query(InternalCompetitionWinner::query()
-                ->where('tenant_id', $tenantId)
+                ->whereIn('branch_id', $accessibleBranchIds)
                 ->with(['competition', 'branch', 'prize'])
                 ->orderByDesc('announced_at'))
             ->columns([

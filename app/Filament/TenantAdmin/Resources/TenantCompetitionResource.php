@@ -5,6 +5,7 @@ namespace App\Filament\TenantAdmin\Resources;
 use App\Enums\InternalCompetition\CompetitionStatus;
 use App\Filament\TenantAdmin\Resources\TenantCompetitionResource\Pages;
 use App\Models\InternalCompetition\InternalCompetition;
+use App\Models\User;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
@@ -73,9 +74,11 @@ class TenantCompetitionResource extends Resource
                 Tables\Columns\TextColumn::make('my_branches_count')
                     ->label('فروعي المشاركة')
                     ->state(function (InternalCompetition $record) {
-                        $tenantId = auth()->user()?->tenant_id;
+                        /** @var User $user */
+                        $user = auth()->user();
+                        $accessibleBranchIds = $user->accessibleBranches()->pluck('branches.id');
                         return $record->activeBranches()
-                            ->where('tenant_id', $tenantId)
+                            ->whereIn('branch_id', $accessibleBranchIds)
                             ->count();
                     })
                     ->badge()
