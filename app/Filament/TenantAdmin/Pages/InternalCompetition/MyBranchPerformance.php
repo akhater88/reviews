@@ -6,6 +6,7 @@ use App\Enums\InternalCompetition\CompetitionStatus;
 use App\Models\Branch;
 use App\Models\InternalCompetition\InternalCompetition;
 use App\Models\InternalCompetition\InternalCompetitionBranchScore;
+use App\Models\User;
 use App\Services\InternalCompetition\BenchmarkService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
@@ -28,15 +29,29 @@ class MyBranchPerformance extends Page
 
     public function mount(): void
     {
-        $tenantId = auth()->user()?->tenant_id;
-        $this->selectedCompetitionId = InternalCompetition::active()->forTenant($tenantId)->latest()->value('id');
-        $this->selectedBranchId = Branch::where('tenant_id', $tenantId)->value('id');
+        /** @var User $user */
+        $user = auth()->user();
+        $tenantId = $user?->tenant_id;
+
+        // Get the most recent active competition (ordered by start_date descending)
+        $this->selectedCompetitionId = InternalCompetition::active()
+            ->forTenant($tenantId)
+            ->orderByDesc('start_date')
+            ->value('id');
+
+        // Get the first accessible branch for the current user
+        $this->selectedBranchId = $user->accessibleBranches()->value('branches.id');
         $this->loadData();
     }
 
     protected function getHeaderActions(): array
     {
-        $tenantId = auth()->user()?->tenant_id;
+        /** @var User $user */
+        $user = auth()->user();
+        $tenantId = $user?->tenant_id;
+
+        // Get only accessible branches for the current user
+        $accessibleBranches = $user->accessibleBranches()->pluck('name', 'branches.id');
 
         return [
             Action::make('selectFilters')
@@ -53,7 +68,7 @@ class MyBranchPerformance extends Page
                         ->default($this->selectedCompetitionId),
                     Select::make('branch_id')
                         ->label('الفرع')
-                        ->options(Branch::where('tenant_id', $tenantId)->pluck('name', 'id'))
+                        ->options($accessibleBranches)
                         ->required()
                         ->default($this->selectedBranchId),
                 ])

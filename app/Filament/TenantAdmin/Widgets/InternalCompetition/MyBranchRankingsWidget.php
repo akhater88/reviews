@@ -5,15 +5,28 @@ namespace App\Filament\TenantAdmin\Widgets\InternalCompetition;
 use App\Enums\InternalCompetition\CompetitionScope;
 use App\Models\InternalCompetition\InternalCompetition;
 use App\Models\InternalCompetition\InternalCompetitionBranchScore;
+use App\Models\User;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Support\Collection;
 
 class MyBranchRankingsWidget extends BaseWidget
 {
     protected static ?string $heading = 'ترتيب فروعي';
     protected static ?int $sort = 1;
     protected int|string|array $columnSpan = 'full';
+
+    /**
+     * Get the IDs of branches accessible to the current user.
+     * Managers only see branches they manage, admins see all tenant branches.
+     */
+    protected function getAccessibleBranchIds(): Collection
+    {
+        /** @var User $user */
+        $user = auth()->user();
+        return $user->accessibleBranches()->pluck('branches.id');
+    }
 
     protected function getPerformanceHint(?int $rank, int $totalParticipants): string
     {
@@ -35,12 +48,18 @@ class MyBranchRankingsWidget extends BaseWidget
     public function table(Table $table): Table
     {
         $tenantId = auth()->user()?->tenant_id;
-        $activeCompetitionIds = InternalCompetition::active()->forTenant($tenantId)->pluck('id');
+        $accessibleBranchIds = $this->getAccessibleBranchIds();
+
+        // Get the most recent active competition (ordered by start_date descending)
+        $mostRecentCompetitionId = InternalCompetition::active()
+            ->forTenant($tenantId)
+            ->orderByDesc('start_date')
+            ->value('id');
 
         return $table
             ->query(InternalCompetitionBranchScore::query()
-                ->whereIn('competition_id', $activeCompetitionIds)
-                ->where('tenant_id', $tenantId)
+                ->where('competition_id', $mostRecentCompetitionId)
+                ->whereIn('branch_id', $accessibleBranchIds)
                 ->with(['branch', 'competition'])
                 ->orderBy('rank'))
             ->columns([

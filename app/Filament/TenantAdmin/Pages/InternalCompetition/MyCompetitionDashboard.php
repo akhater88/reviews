@@ -6,7 +6,9 @@ use App\Enums\InternalCompetition\CompetitionScope;
 use App\Models\InternalCompetition\InternalCompetition;
 use App\Models\InternalCompetition\InternalCompetitionBranchScore;
 use App\Models\InternalCompetition\InternalCompetitionWinner;
+use App\Models\User;
 use Filament\Pages\Page;
+use Illuminate\Support\Collection;
 
 class MyCompetitionDashboard extends Page
 {
@@ -51,15 +53,32 @@ class MyCompetitionDashboard extends Page
         };
     }
 
+    /**
+     * Get the IDs of branches accessible to the current user.
+     * Managers only see branches they manage, admins see all tenant branches.
+     */
+    protected function getAccessibleBranchIds(): Collection
+    {
+        /** @var User $user */
+        $user = auth()->user();
+        return $user->accessibleBranches()->pluck('branches.id');
+    }
+
     public function mount(): void
     {
-        $tenantId = auth()->user()?->tenant_id;
+        /** @var User $user */
+        $user = auth()->user();
+        $tenantId = $user?->tenant_id;
         if (!$tenantId) {
             return;
         }
 
+        // Get accessible branch IDs for the current user
+        $accessibleBranchIds = $this->getAccessibleBranchIds();
+
         $this->activeCompetitions = InternalCompetition::active()
             ->forTenant($tenantId)
+            ->orderByDesc('start_date')
             ->with(['prizes'])
             ->get()
             ->map(fn ($c) => [
@@ -67,14 +86,16 @@ class MyCompetitionDashboard extends Page
                 'name' => $c->display_name,
                 'remaining_days' => $c->remaining_days,
                 'progress' => $c->progress_percentage,
-                'my_branches' => $c->activeBranches()->where('tenant_id', $tenantId)->count(),
+                // Count only accessible branches for this user
+                'my_branches' => $c->activeBranches()->whereIn('branch_id', $accessibleBranchIds)->count(),
                 'is_multi_tenant' => $c->scope === CompetitionScope::MULTI_TENANT,
             ])->toArray();
 
         $activeCompetitionIds = InternalCompetition::active()->forTenant($tenantId)->pluck('id');
 
+        // Filter rankings by accessible branches only
         $this->myRankings = InternalCompetitionBranchScore::whereIn('competition_id', $activeCompetitionIds)
-            ->where('tenant_id', $tenantId)
+            ->whereIn('branch_id', $accessibleBranchIds)
             ->with(['branch', 'competition'])
             ->orderBy('rank')
             ->limit(10)
@@ -104,7 +125,8 @@ class MyCompetitionDashboard extends Page
                 ];
             })->toArray();
 
-        $this->myWinnings = InternalCompetitionWinner::where('tenant_id', $tenantId)
+        // Filter winnings by accessible branches only
+        $this->myWinnings = InternalCompetitionWinner::whereIn('branch_id', $accessibleBranchIds)
             ->with(['competition', 'branch', 'prize'])
             ->orderByDesc('announced_at')
             ->limit(5)

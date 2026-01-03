@@ -7,6 +7,7 @@ use App\Enums\InternalCompetition\CompetitionScope;
 use App\Enums\InternalCompetition\CompetitionStatus;
 use App\Models\InternalCompetition\InternalCompetition;
 use App\Models\InternalCompetition\InternalCompetitionBranchScore;
+use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Pages\Page;
@@ -14,6 +15,7 @@ use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class MyLeaderboardPage extends Page implements HasTable
 {
@@ -32,7 +34,11 @@ class MyLeaderboardPage extends Page implements HasTable
     public function mount(): void
     {
         $tenantId = auth()->user()?->tenant_id;
-        $this->selectedCompetitionId = InternalCompetition::active()->forTenant($tenantId)->latest()->value('id');
+        // Get the most recent active competition (ordered by start_date descending)
+        $this->selectedCompetitionId = InternalCompetition::active()
+            ->forTenant($tenantId)
+            ->orderByDesc('start_date')
+            ->value('id');
         $this->loadCompetition();
         if ($this->competition) {
             $this->selectedMetric = $this->competition->enabled_metrics[0]?->value ?? CompetitionMetric::CUSTOMER_SATISFACTION->value;
@@ -42,6 +48,17 @@ class MyLeaderboardPage extends Page implements HasTable
     protected function loadCompetition(): void
     {
         $this->competition = InternalCompetition::find($this->selectedCompetitionId);
+    }
+
+    /**
+     * Get the IDs of branches accessible to the current user.
+     * Managers only see branches they manage, admins see all tenant branches.
+     */
+    protected function getAccessibleBranchIds(): Collection
+    {
+        /** @var User $user */
+        $user = auth()->user();
+        return $user->accessibleBranches()->pluck('branches.id');
     }
 
     public function isMultiTenantCompetition(): bool
@@ -101,7 +118,7 @@ class MyLeaderboardPage extends Page implements HasTable
 
     public function table(Tables\Table $table): Tables\Table
     {
-        $tenantId = auth()->user()?->tenant_id;
+        $accessibleBranchIds = $this->getAccessibleBranchIds();
         $isMultiTenant = $this->isMultiTenantCompetition();
 
         // Get total participants for hint calculation
@@ -113,11 +130,11 @@ class MyLeaderboardPage extends Page implements HasTable
             ->query(fn () => InternalCompetitionBranchScore::query()
                 ->where('competition_id', $this->selectedCompetitionId)
                 ->where('metric_type', $this->selectedMetric)
-                ->where('tenant_id', $tenantId)
+                ->whereIn('branch_id', $accessibleBranchIds)
                 ->with(['branch'])
                 ->orderBy('rank'))
             ->columns([
-                // For single-tenant: show actual rank
+                // For single-tenant: show actual rank for manager's branches
                 Tables\Columns\TextColumn::make('rank')
                     ->label('الترتيب')
                     ->formatStateUsing(fn ($state) => $state === null ? '-' : match ($state) { 1 => '🥇', 2 => '🥈', 3 => '🥉', default => "#{$state}" })
