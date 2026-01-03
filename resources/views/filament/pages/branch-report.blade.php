@@ -10,10 +10,12 @@
                         <x-heroicon-o-chart-bar class="w-10 h-10 text-gray-400" />
                     </div>
                     <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">لا توجد بيانات تحليل</h2>
-                    <p class="text-gray-600 dark:text-gray-400 mb-8">لم يتم تحليل مراجعات هذا الفرع بعد. ابدأ التحليل الآن للحصول على رؤى مفصلة.</p>
-                    <x-filament::button wire:click="startNewAnalysis" icon="heroicon-o-play" size="lg">
-                        بدء التحليل
-                    </x-filament::button>
+                    <p class="text-gray-600 dark:text-gray-400 mb-8">لم يتم تحليل مراجعات هذا الفرع بعد.{{ $this->canStartAnalysis() ? ' ابدأ التحليل الآن للحصول على رؤى مفصلة.' : '' }}</p>
+                    @if($this->canStartAnalysis())
+                        <x-filament::button wire:click="startNewAnalysis" icon="heroicon-o-play" size="lg">
+                            بدء التحليل
+                        </x-filament::button>
+                    @endif
                 </div>
             </div>
         @else

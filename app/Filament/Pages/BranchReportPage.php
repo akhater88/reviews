@@ -77,6 +77,14 @@ class BranchReportPage extends Page
         return $this->latestAnalysis !== null && !empty($this->analysisData);
     }
 
+    /**
+     * Check if current user can start new analysis (admin only)
+     */
+    public function canStartAnalysis(): bool
+    {
+        return auth()->user()->isAdmin();
+    }
+
     public function setActiveTab(string $tab): void
     {
         $this->activeTab = $tab;
@@ -269,6 +277,16 @@ class BranchReportPage extends Page
 
     public function startNewAnalysis(): void
     {
+        // Only admins can start new analysis
+        if (!auth()->user()->isAdmin()) {
+            Notification::make()
+                ->title('غير مصرح')
+                ->body('ليس لديك صلاحية لبدء التحليل')
+                ->danger()
+                ->send();
+            return;
+        }
+
         $service = app(AnalysisPipelineService::class);
 
         // Check if there's already an active analysis

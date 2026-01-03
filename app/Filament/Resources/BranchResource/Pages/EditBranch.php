@@ -8,6 +8,7 @@ use App\Services\Analysis\AnalysisPipelineService;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Auth;
 
 class EditBranch extends EditRecord
 {
@@ -24,7 +25,7 @@ class EditBranch extends EditRecord
                 ->modalHeading('مزامنة المراجعات')
                 ->modalDescription('سيتم جلب أحدث المراجعات. قد تستغرق العملية بضع دقائق.')
                 ->modalSubmitActionLabel('بدء المزامنة')
-                ->visible(fn (): bool => !empty($this->record->google_place_id))
+                ->visible(fn (): bool => !empty($this->record->google_place_id) && Auth::user()?->isAdmin())
                 ->action(function () {
                     SyncBranchReviewsJob::dispatch($this->record)->onQueue('reviews');
 
@@ -42,7 +43,7 @@ class EditBranch extends EditRecord
                 ->modalHeading('تحليل المراجعات بالذكاء الاصطناعي')
                 ->modalDescription('سيتم تحليل المراجعات باستخدام الذكاء الاصطناعي لاستخراج رؤى وتوصيات. قد تستغرق العملية عدة دقائق.')
                 ->modalSubmitActionLabel('بدء التحليل')
-                ->visible(fn (): bool => $this->record->reviews()->exists())
+                ->visible(fn (): bool => $this->record->reviews()->exists() && Auth::user()?->isAdmin())
                 ->disabled(fn (): bool => app(AnalysisPipelineService::class)->hasActiveAnalysis($this->record))
                 ->action(function () {
                     try {
