@@ -19,6 +19,9 @@ class BenchmarkMetricsData
         public readonly ?float $averageReviewLength = null,
         public readonly ?int $fiveStarCount = null,
         public readonly ?int $oneStarCount = null,
+        public readonly int $foodTastePositive = 0,
+        public readonly int $foodTasteNegative = 0,
+        public readonly int $foodTasteTotal = 0,
     ) {}
 
     public static function fromArray(array $data): self
@@ -49,6 +52,9 @@ class BenchmarkMetricsData
             oneStarCount: isset($data['one_star_count'])
                 ? (int) $data['one_star_count']
                 : null,
+            foodTastePositive: (int) ($data['food_taste_positive'] ?? 0),
+            foodTasteNegative: (int) ($data['food_taste_negative'] ?? 0),
+            foodTasteTotal: (int) ($data['food_taste_total'] ?? 0),
         );
     }
 
@@ -69,6 +75,9 @@ class BenchmarkMetricsData
             'average_review_length' => $this->averageReviewLength,
             'five_star_count' => $this->fiveStarCount,
             'one_star_count' => $this->oneStarCount,
+            'food_taste_positive' => $this->foodTastePositive,
+            'food_taste_negative' => $this->foodTasteNegative,
+            'food_taste_total' => $this->foodTasteTotal,
         ];
     }
 
@@ -86,6 +95,9 @@ class BenchmarkMetricsData
             employeeMentionsPositive: 0,
             employeeMentionsNegative: 0,
             employeeMentionsTotal: 0,
+            foodTastePositive: 0,
+            foodTasteNegative: 0,
+            foodTasteTotal: 0,
         );
     }
 }
