@@ -426,14 +426,17 @@ class BranchResource extends Resource
                     ->url(fn (Branch $record): string => \App\Filament\Pages\BranchReportPage::getUrl(['branch' => $record]))
                     ->visible(fn (Branch $record): bool => $record->reviews()->exists()),
                 Tables\Actions\EditAction::make()
-                    ->label('تعديل'),
+                    ->label('تعديل')
+                    ->visible(fn (): bool => Auth::user()?->isAdmin()),
                 Tables\Actions\DeleteAction::make()
-                    ->label('حذف'),
+                    ->label('حذف')
+                    ->visible(fn (): bool => Auth::user()?->isAdmin()),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
-                        ->label('حذف المحدد'),
+                        ->label('حذف المحدد')
+                        ->visible(fn (): bool => Auth::user()?->isAdmin()),
                 ]),
             ])
             ->emptyStateHeading('لا يوجد فروع')
