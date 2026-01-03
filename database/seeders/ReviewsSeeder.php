@@ -16,12 +16,61 @@ class ReviewsSeeder extends Seeder
     private array $branchIds = [6, 8, 9, 10];
 
     /**
+     * Competition date range
+     */
+    private Carbon $competitionStart;
+    private Carbon $competitionEnd;
+
+    /**
      * Employee names for mentions in reviews
      */
     private array $employeeNames = [
         'محمد', 'أحمد', 'خالد', 'فهد', 'سعود',
         'عبدالله', 'يوسف', 'علي', 'حسن', 'عمر',
     ];
+
+    public function __construct()
+    {
+        // Competition period: January 4, 2026 - January 29, 2026
+        $this->competitionStart = Carbon::create(2026, 1, 4, 0, 0, 0);
+        $this->competitionEnd = Carbon::create(2026, 1, 29, 23, 59, 59);
+    }
+
+    /**
+     * Get a random date within the competition period
+     */
+    private function getRandomCompetitionDate(int $dayOffset = 0): Carbon
+    {
+        $start = $this->competitionStart->copy()->addDays($dayOffset);
+        $end = min($start->copy()->addDays(3), $this->competitionEnd);
+
+        return Carbon::createFromTimestamp(
+            rand($start->timestamp, $end->timestamp)
+        );
+    }
+
+    /**
+     * Get a date within competition period based on day number (1-25)
+     */
+    private function getCompetitionDate(int $dayNumber): Carbon
+    {
+        $day = max(1, min($dayNumber, 25)); // Clamp to valid range (1-25 days)
+        return $this->competitionStart->copy()->addDays($day - 1)->setTime(
+            rand(8, 22), // Random hour between 8 AM and 10 PM
+            rand(0, 59),
+            rand(0, 59)
+        );
+    }
+
+    /**
+     * Get reply date (hours after review)
+     */
+    private function getReplyDate(Carbon $reviewDate, int $hoursAfter = 12): Carbon
+    {
+        $replyDate = $reviewDate->copy()->addHours($hoursAfter);
+        // Ensure reply is within competition period
+        return $replyDate->lessThan($this->competitionEnd) ? $replyDate : $this->competitionEnd;
+    }
 
     /**
      * Run the database seeds.
@@ -127,11 +176,12 @@ class ReviewsSeeder extends Seeder
 
     /**
      * Common reviews for all branches
+     * Reviews are distributed across the competition period (Jan 4-29, 2026)
      */
     private function getBaseReviews(): array
     {
         return [
-            // Day 1-5: Recent reviews
+            // Week 1: Days 1-7 (Jan 4-10)
             [
                 'reviewer_name' => 'سلمان العتيبي',
                 'rating' => 5,
@@ -141,9 +191,9 @@ class ReviewsSeeder extends Seeder
                 'categories' => ['food', 'taste', 'service', 'staff'],
                 'keywords' => ['طعام', 'لذيذ', 'طعم', 'ممتاز', 'خدمة'],
                 'reviewer_gender' => 'male',
-                'review_date' => Carbon::now()->subDays(1),
+                'review_date' => $this->getCompetitionDate(1),
                 'owner_reply' => 'شكراً جزيلاً أخي سلمان! نفتخر بخدمتك دائماً.',
-                'owner_reply_date' => Carbon::now()->subHours(12),
+                'owner_reply_date' => $this->getCompetitionDate(1)->addHours(4),
             ],
             [
                 'reviewer_name' => 'هند المطيري',
@@ -154,9 +204,9 @@ class ReviewsSeeder extends Seeder
                 'categories' => ['food', 'taste', 'service', 'cleanliness', 'speed'],
                 'keywords' => ['أكل', 'طيب', 'طعم', 'نظيف', 'سريعة'],
                 'reviewer_gender' => 'female',
-                'review_date' => Carbon::now()->subDays(2),
+                'review_date' => $this->getCompetitionDate(2),
                 'owner_reply' => 'شكراً هند! ننتظر زيارتك القادمة.',
-                'owner_reply_date' => Carbon::now()->subDays(1),
+                'owner_reply_date' => $this->getCompetitionDate(2)->addHours(6),
             ],
             [
                 'reviewer_name' => 'فيصل الدوسري',
@@ -167,12 +217,10 @@ class ReviewsSeeder extends Seeder
                 'categories' => ['taste', 'speed', 'staff', 'service'],
                 'keywords' => ['طعم', 'مقبول', 'انتظار', 'بطيئة'],
                 'reviewer_gender' => 'male',
-                'review_date' => Carbon::now()->subDays(3),
+                'review_date' => $this->getCompetitionDate(3),
                 'owner_reply' => null,
                 'owner_reply_date' => null,
             ],
-
-            // Day 6-10: More reviews
             [
                 'reviewer_name' => 'نوف السبيعي',
                 'rating' => 5,
@@ -182,10 +230,12 @@ class ReviewsSeeder extends Seeder
                 'categories' => ['food', 'taste', 'staff', 'service'],
                 'keywords' => ['أفضل', 'مطعم', 'طعم', 'رائع', 'شهي'],
                 'reviewer_gender' => 'female',
-                'review_date' => Carbon::now()->subDays(6),
+                'review_date' => $this->getCompetitionDate(5),
                 'owner_reply' => 'شكراً نوف! سعداء بتجربتك الرائعة.',
-                'owner_reply_date' => Carbon::now()->subDays(5),
+                'owner_reply_date' => $this->getCompetitionDate(5)->addHours(3),
             ],
+
+            // Week 2: Days 8-14 (Jan 11-17)
             [
                 'reviewer_name' => 'تركي الحربي',
                 'rating' => 2,
@@ -195,9 +245,9 @@ class ReviewsSeeder extends Seeder
                 'categories' => ['food', 'taste', 'price', 'quality'],
                 'keywords' => ['بارد', 'طعم', 'غير مرضي', 'أسعار', 'مرتفعة'],
                 'reviewer_gender' => 'male',
-                'review_date' => Carbon::now()->subDays(7),
+                'review_date' => $this->getCompetitionDate(8),
                 'owner_reply' => 'نعتذر عن تجربتك أخي تركي. نتواصل معك لحل المشكلة.',
-                'owner_reply_date' => Carbon::now()->subDays(6),
+                'owner_reply_date' => $this->getCompetitionDate(8)->addHours(5),
             ],
             [
                 'reviewer_name' => 'ريم القحطاني',
@@ -208,12 +258,10 @@ class ReviewsSeeder extends Seeder
                 'categories' => ['taste', 'ambiance'],
                 'keywords' => ['طعم', 'جيد', 'مريح', 'عائلات'],
                 'reviewer_gender' => 'female',
-                'review_date' => Carbon::now()->subDays(8),
+                'review_date' => $this->getCompetitionDate(9),
                 'owner_reply' => null,
                 'owner_reply_date' => null,
             ],
-
-            // Day 11-20: Historical reviews
             [
                 'reviewer_name' => 'عبدالرحمن الشهري',
                 'rating' => 5,
@@ -223,9 +271,9 @@ class ReviewsSeeder extends Seeder
                 'categories' => ['food', 'taste', 'staff', 'service'],
                 'keywords' => ['ممتازة', 'طعام', 'لذيذ', 'طعم', 'أصيل'],
                 'reviewer_gender' => 'male',
-                'review_date' => Carbon::now()->subDays(12),
+                'review_date' => $this->getCompetitionDate(11),
                 'owner_reply' => 'شكراً عبدالرحمن! نفخر بخدمتك.',
-                'owner_reply_date' => Carbon::now()->subDays(11),
+                'owner_reply_date' => $this->getCompetitionDate(11)->addHours(8),
             ],
             [
                 'reviewer_name' => 'لمياء العنزي',
@@ -236,10 +284,12 @@ class ReviewsSeeder extends Seeder
                 'categories' => ['food', 'taste', 'quality'],
                 'keywords' => ['سيء', 'طعم', 'غريب'],
                 'reviewer_gender' => 'female',
-                'review_date' => Carbon::now()->subDays(15),
+                'review_date' => $this->getCompetitionDate(13),
                 'owner_reply' => 'نأسف جداً لتجربتك. نود معرفة المزيد لتحسين خدماتنا.',
-                'owner_reply_date' => Carbon::now()->subDays(14),
+                'owner_reply_date' => $this->getCompetitionDate(13)->addHours(2),
             ],
+
+            // Week 3: Days 15-21 (Jan 18-24)
             [
                 'reviewer_name' => 'ماجد السعيد',
                 'rating' => 4,
@@ -249,12 +299,10 @@ class ReviewsSeeder extends Seeder
                 'categories' => ['taste', 'service', 'price'],
                 'keywords' => ['طعم', 'ممتاز', 'خدمة', 'أسعار'],
                 'reviewer_gender' => 'male',
-                'review_date' => Carbon::now()->subDays(18),
+                'review_date' => $this->getCompetitionDate(15),
                 'owner_reply' => null,
                 'owner_reply_date' => null,
             ],
-
-            // Day 21-35: More historical reviews
             [
                 'reviewer_name' => 'غادة المالكي',
                 'rating' => 5,
@@ -264,9 +312,9 @@ class ReviewsSeeder extends Seeder
                 'categories' => ['food', 'taste', 'staff', 'service'],
                 'keywords' => ['شهي', 'طعم', 'رائع', 'مميز'],
                 'reviewer_gender' => 'female',
-                'review_date' => Carbon::now()->subDays(22),
+                'review_date' => $this->getCompetitionDate(16),
                 'owner_reply' => 'شكراً غادة! سعداء بزيارتك.',
-                'owner_reply_date' => Carbon::now()->subDays(21),
+                'owner_reply_date' => $this->getCompetitionDate(16)->addHours(6),
             ],
             [
                 'reviewer_name' => 'بندر الزهراني',
@@ -277,7 +325,7 @@ class ReviewsSeeder extends Seeder
                 'categories' => ['taste', 'service', 'food', 'quality'],
                 'keywords' => ['طعم', 'عادي', 'تحسين'],
                 'reviewer_gender' => 'male',
-                'review_date' => Carbon::now()->subDays(25),
+                'review_date' => $this->getCompetitionDate(18),
                 'owner_reply' => null,
                 'owner_reply_date' => null,
             ],
@@ -290,7 +338,7 @@ class ReviewsSeeder extends Seeder
                 'categories' => null,
                 'keywords' => null,
                 'reviewer_gender' => 'female',
-                'review_date' => Carbon::now()->subDays(28),
+                'review_date' => $this->getCompetitionDate(19),
                 'owner_reply' => null,
                 'owner_reply_date' => null,
             ],
@@ -303,12 +351,12 @@ class ReviewsSeeder extends Seeder
                 'categories' => ['taste', 'food', 'staff'],
                 'keywords' => ['طعم', 'طيب', 'أكل', 'لذيذ'],
                 'reviewer_gender' => 'male',
-                'review_date' => Carbon::now()->subDays(30),
+                'review_date' => $this->getCompetitionDate(20),
                 'owner_reply' => 'شكراً عادل!',
-                'owner_reply_date' => Carbon::now()->subDays(29),
+                'owner_reply_date' => $this->getCompetitionDate(20)->addHours(10),
             ],
 
-            // Day 36-50: Older reviews
+            // Week 4: Days 22-25 (Jan 25-29)
             [
                 'reviewer_name' => 'منى الشريف',
                 'rating' => 2,
@@ -318,7 +366,7 @@ class ReviewsSeeder extends Seeder
                 'categories' => ['taste', 'speed'],
                 'keywords' => ['طعم', 'انتظار', 'طويل'],
                 'reviewer_gender' => 'female',
-                'review_date' => Carbon::now()->subDays(38),
+                'review_date' => $this->getCompetitionDate(22),
                 'owner_reply' => null,
                 'owner_reply_date' => null,
             ],
@@ -331,9 +379,9 @@ class ReviewsSeeder extends Seeder
                 'categories' => ['taste', 'food', 'service', 'staff'],
                 'keywords' => ['أفضل', 'طعم', 'ممتاز', 'راقية'],
                 'reviewer_gender' => 'male',
-                'review_date' => Carbon::now()->subDays(42),
+                'review_date' => $this->getCompetitionDate(23),
                 'owner_reply' => 'شكراً ياسر! نفتخر بثقتك.',
-                'owner_reply_date' => Carbon::now()->subDays(41),
+                'owner_reply_date' => $this->getCompetitionDate(23)->addHours(4),
             ],
             [
                 'reviewer_name' => 'سمر الحمود',
@@ -344,12 +392,10 @@ class ReviewsSeeder extends Seeder
                 'categories' => ['taste', 'cleanliness'],
                 'keywords' => ['طعم', 'جيد', 'نظيف'],
                 'reviewer_gender' => 'female',
-                'review_date' => Carbon::now()->subDays(45),
+                'review_date' => $this->getCompetitionDate(24),
                 'owner_reply' => null,
                 'owner_reply_date' => null,
             ],
-
-            // Day 51-60: Oldest reviews
             [
                 'reviewer_name' => 'نايف العسيري',
                 'rating' => 3,
@@ -359,9 +405,9 @@ class ReviewsSeeder extends Seeder
                 'categories' => ['taste', 'service', 'food'],
                 'keywords' => ['طعم', 'متوسط', 'تحسين'],
                 'reviewer_gender' => 'male',
-                'review_date' => Carbon::now()->subDays(52),
+                'review_date' => $this->getCompetitionDate(25),
                 'owner_reply' => 'شكراً على ملاحظاتك نايف. نعمل على التحسين.',
-                'owner_reply_date' => Carbon::now()->subDays(51),
+                'owner_reply_date' => $this->getCompetitionDate(25)->addHours(6),
             ],
             [
                 'reviewer_name' => 'دلال الراشد',
@@ -372,9 +418,9 @@ class ReviewsSeeder extends Seeder
                 'categories' => ['taste', 'service', 'staff'],
                 'keywords' => ['طعم', 'رائع', 'ممتازة', 'مذهل'],
                 'reviewer_gender' => 'female',
-                'review_date' => Carbon::now()->subDays(55),
+                'review_date' => $this->getCompetitionDate(25),
                 'owner_reply' => 'شكراً دلال!',
-                'owner_reply_date' => Carbon::now()->subDays(54),
+                'owner_reply_date' => $this->getCompetitionDate(25)->addHours(8),
             ],
             [
                 'reviewer_name' => 'حمد الهاجري',
@@ -385,7 +431,7 @@ class ReviewsSeeder extends Seeder
                 'categories' => ['food', 'taste'],
                 'keywords' => ['أكل', 'لذيذ', 'طعم', 'مميز'],
                 'reviewer_gender' => 'male',
-                'review_date' => Carbon::now()->subDays(58),
+                'review_date' => $this->getCompetitionDate(25),
                 'owner_reply' => null,
                 'owner_reply_date' => null,
             ],
@@ -394,6 +440,7 @@ class ReviewsSeeder extends Seeder
 
     /**
      * Get branch-specific reviews to differentiate competition scores
+     * Reviews are distributed across the competition period (Jan 4-29, 2026)
      */
     private function getBranchSpecificReviews(int $branchId): array
     {
@@ -409,9 +456,9 @@ class ReviewsSeeder extends Seeder
                     'categories' => ['taste', 'food', 'quality'],
                     'keywords' => ['طعم', 'أسطوري', 'أفضل', 'طعام', 'نكهات'],
                     'reviewer_gender' => 'male',
-                    'review_date' => Carbon::now()->subDays(4),
+                    'review_date' => $this->getCompetitionDate(4),
                     'owner_reply' => 'شكراً سعد! سعداء بإعجابك.',
-                    'owner_reply_date' => Carbon::now()->subDays(3),
+                    'owner_reply_date' => $this->getCompetitionDate(4)->addHours(3),
                 ],
                 [
                     'reviewer_name' => 'مها الخالدي',
@@ -422,9 +469,9 @@ class ReviewsSeeder extends Seeder
                     'categories' => ['taste', 'food', 'price', 'quality'],
                     'keywords' => ['طعم', 'طازج', 'لذيذ', 'طعام'],
                     'reviewer_gender' => 'female',
-                    'review_date' => Carbon::now()->subDays(9),
+                    'review_date' => $this->getCompetitionDate(10),
                     'owner_reply' => 'شكراً مها!',
-                    'owner_reply_date' => Carbon::now()->subDays(8),
+                    'owner_reply_date' => $this->getCompetitionDate(10)->addHours(5),
                 ],
                 [
                     'reviewer_name' => 'صالح النعيمي',
@@ -435,7 +482,7 @@ class ReviewsSeeder extends Seeder
                     'categories' => ['taste', 'food', 'quality'],
                     'keywords' => ['أفضل', 'طعم', 'مميزة', 'نكهات', 'أصيلة'],
                     'reviewer_gender' => 'male',
-                    'review_date' => Carbon::now()->subDays(14),
+                    'review_date' => $this->getCompetitionDate(14),
                     'owner_reply' => null,
                     'owner_reply_date' => null,
                 ],
@@ -448,9 +495,9 @@ class ReviewsSeeder extends Seeder
                     'categories' => ['taste', 'staff', 'service'],
                     'keywords' => ['طعم', 'لذيذ', 'رائع'],
                     'reviewer_gender' => 'female',
-                    'review_date' => Carbon::now()->subDays(20),
+                    'review_date' => $this->getCompetitionDate(21),
                     'owner_reply' => 'شكراً وفاء! سننقل تحياتك لمحمد.',
-                    'owner_reply_date' => Carbon::now()->subDays(19),
+                    'owner_reply_date' => $this->getCompetitionDate(21)->addHours(4),
                 ],
             ],
 
@@ -465,9 +512,9 @@ class ReviewsSeeder extends Seeder
                     'categories' => ['staff', 'service'],
                     'keywords' => ['أحمد', 'استثنائي', 'خدمة', 'مميزة'],
                     'reviewer_gender' => 'male',
-                    'review_date' => Carbon::now()->subDays(2),
+                    'review_date' => $this->getCompetitionDate(2),
                     'owner_reply' => 'شكراً فهد! سننقل تحياتك لأحمد.',
-                    'owner_reply_date' => Carbon::now()->subDays(1)->subHours(2),
+                    'owner_reply_date' => $this->getCompetitionDate(2)->addHours(2),
                 ],
                 [
                     'reviewer_name' => 'عبير السالم',
@@ -478,9 +525,9 @@ class ReviewsSeeder extends Seeder
                     'categories' => ['staff', 'service'],
                     'keywords' => ['خالد', 'محترم', 'متعاون'],
                     'reviewer_gender' => 'female',
-                    'review_date' => Carbon::now()->subDays(5),
+                    'review_date' => $this->getCompetitionDate(6),
                     'owner_reply' => 'شكراً عبير! خالد يشكرك على كلماتك الطيبة.',
-                    'owner_reply_date' => Carbon::now()->subDays(4)->subHours(4),
+                    'owner_reply_date' => $this->getCompetitionDate(6)->addHours(3),
                 ],
                 [
                     'reviewer_name' => 'محمد العتيق',
@@ -491,9 +538,9 @@ class ReviewsSeeder extends Seeder
                     'categories' => ['staff', 'service'],
                     'keywords' => ['فهد', 'سعود', 'موظفين', 'ممتازين', 'راقية'],
                     'reviewer_gender' => 'male',
-                    'review_date' => Carbon::now()->subDays(10),
+                    'review_date' => $this->getCompetitionDate(12),
                     'owner_reply' => 'شكراً محمد على كلماتك!',
-                    'owner_reply_date' => Carbon::now()->subDays(9)->subHours(6),
+                    'owner_reply_date' => $this->getCompetitionDate(12)->addHours(4),
                 ],
                 [
                     'reviewer_name' => 'سارة الفيصل',
@@ -504,9 +551,9 @@ class ReviewsSeeder extends Seeder
                     'categories' => ['staff', 'taste', 'service'],
                     'keywords' => ['عبدالله', 'مميز', 'طعم', 'جيد'],
                     'reviewer_gender' => 'female',
-                    'review_date' => Carbon::now()->subDays(16),
+                    'review_date' => $this->getCompetitionDate(17),
                     'owner_reply' => 'شكراً سارة!',
-                    'owner_reply_date' => Carbon::now()->subDays(15)->subHours(3),
+                    'owner_reply_date' => $this->getCompetitionDate(17)->addHours(2),
                 ],
             ],
 
@@ -521,9 +568,9 @@ class ReviewsSeeder extends Seeder
                     'categories' => ['taste', 'service', 'cleanliness', 'ambiance'],
                     'keywords' => ['مثالي', 'طعم', 'رائع', 'ممتازة', 'نظيف'],
                     'reviewer_gender' => 'male',
-                    'review_date' => Carbon::now()->subDays(1),
+                    'review_date' => $this->getCompetitionDate(1),
                     'owner_reply' => 'شكراً عمر! سعداء بتجربتك المميزة.',
-                    'owner_reply_date' => Carbon::now()->subHours(8),
+                    'owner_reply_date' => $this->getCompetitionDate(1)->addHours(3),
                 ],
                 [
                     'reviewer_name' => 'نورة الحسين',
@@ -534,9 +581,9 @@ class ReviewsSeeder extends Seeder
                     'categories' => ['food', 'service', 'ambiance'],
                     'keywords' => ['أفضل', 'مطعم', 'راضية'],
                     'reviewer_gender' => 'female',
-                    'review_date' => Carbon::now()->subDays(4),
+                    'review_date' => $this->getCompetitionDate(7),
                     'owner_reply' => 'شكراً نورة! ننتظر زيارتك القادمة.',
-                    'owner_reply_date' => Carbon::now()->subDays(3),
+                    'owner_reply_date' => $this->getCompetitionDate(7)->addHours(5),
                 ],
                 [
                     'reviewer_name' => 'إبراهيم العمار',
@@ -547,9 +594,9 @@ class ReviewsSeeder extends Seeder
                     'categories' => ['food', 'price'],
                     'keywords' => ['ممتاز', 'أسعار', 'معقولة', 'رضا'],
                     'reviewer_gender' => 'male',
-                    'review_date' => Carbon::now()->subDays(11),
+                    'review_date' => $this->getCompetitionDate(14),
                     'owner_reply' => 'شكراً إبراهيم!',
-                    'owner_reply_date' => Carbon::now()->subDays(10),
+                    'owner_reply_date' => $this->getCompetitionDate(14)->addHours(6),
                 ],
                 [
                     'reviewer_name' => 'هيا الناصر',
@@ -560,7 +607,7 @@ class ReviewsSeeder extends Seeder
                     'categories' => ['service', 'food', 'ambiance'],
                     'keywords' => ['رضا', 'كامل', 'رائعة'],
                     'reviewer_gender' => 'female',
-                    'review_date' => Carbon::now()->subDays(19),
+                    'review_date' => $this->getCompetitionDate(20),
                     'owner_reply' => null,
                     'owner_reply_date' => null,
                 ],
@@ -577,9 +624,9 @@ class ReviewsSeeder extends Seeder
                     'categories' => ['taste', 'staff', 'service'],
                     'keywords' => ['طعم', 'جيد', 'يوسف', 'متعاون'],
                     'reviewer_gender' => 'male',
-                    'review_date' => Carbon::now()->subDays(3),
+                    'review_date' => $this->getCompetitionDate(3),
                     'owner_reply' => 'شكراً زياد!',
-                    'owner_reply_date' => Carbon::now()->subDays(2),
+                    'owner_reply_date' => $this->getCompetitionDate(3)->addHours(8),
                 ],
                 [
                     'reviewer_name' => 'أمل الشمراني',
@@ -590,7 +637,7 @@ class ReviewsSeeder extends Seeder
                     'categories' => ['taste', 'price'],
                     'keywords' => ['عادية', 'طعم', 'مقبول', 'أسعار'],
                     'reviewer_gender' => 'female',
-                    'review_date' => Carbon::now()->subDays(8),
+                    'review_date' => $this->getCompetitionDate(9),
                     'owner_reply' => null,
                     'owner_reply_date' => null,
                 ],
@@ -603,9 +650,9 @@ class ReviewsSeeder extends Seeder
                     'categories' => ['food', 'speed', 'staff'],
                     'keywords' => ['لذيذ', 'سريعة', 'علي'],
                     'reviewer_gender' => 'male',
-                    'review_date' => Carbon::now()->subDays(13),
+                    'review_date' => $this->getCompetitionDate(15),
                     'owner_reply' => 'شكراً راشد! سننقل شكرك لعلي.',
-                    'owner_reply_date' => Carbon::now()->subDays(12),
+                    'owner_reply_date' => $this->getCompetitionDate(15)->addHours(6),
                 ],
                 [
                     'reviewer_name' => 'لطيفة العجمي',
@@ -616,7 +663,7 @@ class ReviewsSeeder extends Seeder
                     'categories' => ['taste', 'staff', 'service'],
                     'keywords' => ['طعم', 'ممتاز', 'حسن', 'رائع'],
                     'reviewer_gender' => 'female',
-                    'review_date' => Carbon::now()->subDays(21),
+                    'review_date' => $this->getCompetitionDate(22),
                     'owner_reply' => null,
                     'owner_reply_date' => null,
                 ],
