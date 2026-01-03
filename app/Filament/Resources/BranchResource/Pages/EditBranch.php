@@ -14,6 +14,11 @@ class EditBranch extends EditRecord
 {
     protected static string $resource = BranchResource::class;
 
+    public static function canAccess(array $parameters = []): bool
+    {
+        return Auth::user()?->isAdmin() ?? false;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -70,7 +75,8 @@ class EditBranch extends EditRecord
                 ->url(fn () => \App\Filament\Pages\BranchReportPage::getUrl(['branch' => $this->record]))
                 ->visible(fn (): bool => $this->record->reviews()->exists()),
             Actions\DeleteAction::make()
-                ->label('حذف'),
+                ->label('حذف')
+                ->visible(fn (): bool => Auth::user()?->isAdmin()),
         ];
     }
 
