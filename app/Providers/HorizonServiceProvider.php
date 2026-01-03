@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Horizon\Horizon;
 use Laravel\Horizon\HorizonApplicationServiceProvider;
@@ -33,8 +34,8 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
                 return true;
             }
 
-            // Allow admin users to access Horizon
-            return $user && $user->role === 'admin';
+            // Only allow super admins to access Horizon
+            return Auth::guard('super_admin')->check();
         });
     }
 }
