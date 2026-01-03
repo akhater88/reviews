@@ -457,13 +457,29 @@ class BranchResource extends Resource
         ];
     }
 
+    /**
+     * Filter branches based on user access level.
+     * Admins see all branches, managers only see branches they manage.
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = Auth::user();
+
+        if ($user && $user->isManager()) {
+            $query->whereIn('id', $user->branches()->pluck('branches.id'));
+        }
+
+        return $query;
+    }
+
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::count();
+        return static::getEloquentQuery()->count();
     }
 
     public static function getNavigationBadgeColor(): string|array|null
     {
-        return static::getModel()::count() > 0 ? 'success' : 'warning';
+        return static::getEloquentQuery()->count() > 0 ? 'success' : 'warning';
     }
 }
