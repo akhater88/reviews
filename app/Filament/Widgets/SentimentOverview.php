@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\Review;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Facades\Auth;
 
 class SentimentOverview extends ChartWidget
 {
@@ -15,11 +16,20 @@ class SentimentOverview extends ChartWidget
 
     protected function getData(): array
     {
-        // Filter reviews through branch relationship to enforce tenant scope
-        // (Branch model has BelongsToTenant trait which applies tenant filtering)
-        $positive = Review::whereHas('branch')->where('sentiment', 'positive')->count();
-        $neutral = Review::whereHas('branch')->where('sentiment', 'neutral')->count();
-        $negative = Review::whereHas('branch')->where('sentiment', 'negative')->count();
+        $user = Auth::user();
+
+        // Filter reviews based on user access level
+        if ($user && $user->isManager()) {
+            $accessibleBranchIds = $user->branches()->pluck('branches.id');
+            $positive = Review::whereIn('branch_id', $accessibleBranchIds)->where('sentiment', 'positive')->count();
+            $neutral = Review::whereIn('branch_id', $accessibleBranchIds)->where('sentiment', 'neutral')->count();
+            $negative = Review::whereIn('branch_id', $accessibleBranchIds)->where('sentiment', 'negative')->count();
+        } else {
+            // Admin sees all reviews
+            $positive = Review::whereHas('branch')->where('sentiment', 'positive')->count();
+            $neutral = Review::whereHas('branch')->where('sentiment', 'neutral')->count();
+            $negative = Review::whereHas('branch')->where('sentiment', 'negative')->count();
+        }
 
         return [
             'datasets' => [

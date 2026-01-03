@@ -6,6 +6,7 @@ use App\Models\Review;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Support\Facades\Auth;
 
 class RecentReviewsWidget extends BaseWidget
 {
@@ -17,14 +18,20 @@ class RecentReviewsWidget extends BaseWidget
 
     public function table(Table $table): Table
     {
+        $query = Review::query()
+            ->whereHas('branch') // Enforce tenant scope through branch relationship
+            ->with('branch')
+            ->latest('review_date')
+            ->limit(10);
+
+        // Filter by manager's accessible branches
+        $user = Auth::user();
+        if ($user && $user->isManager()) {
+            $query->whereIn('branch_id', $user->branches()->pluck('branches.id'));
+        }
+
         return $table
-            ->query(
-                Review::query()
-                    ->whereHas('branch') // Enforce tenant scope through branch relationship
-                    ->with('branch')
-                    ->latest('review_date')
-                    ->limit(10)
-            )
+            ->query($query)
             ->columns([
                 Tables\Columns\TextColumn::make('reviewer_name')
                     ->label('المراجع')
