@@ -44,6 +44,10 @@ class BenchmarkService
             'label' => 'ذكر الموظفين الإيجابي',
             'higher_is_better' => true,
         ],
+        'food_taste_positive' => [
+            'label' => 'الطعام/الطعم الإيجابي',
+            'higher_is_better' => true,
+        ],
     ];
 
     /**
@@ -267,6 +271,9 @@ class BenchmarkService
         // Get employee mention statistics
         $employeeStats = $this->calculateEmployeeMentionStats($branchIds, $periodStart, $periodEnd);
 
+        // Get food/taste mention statistics
+        $foodTasteStats = $this->calculateFoodTasteStats($branchIds, $periodStart, $periodEnd);
+
         return BenchmarkMetricsData::fromArray([
             'average_rating' => $reviewStats->average_rating ?? 0,
             'total_reviews' => $reviewStats->total_reviews ?? 0,
@@ -281,6 +288,9 @@ class BenchmarkService
             'average_review_length' => $reviewStats->average_review_length,
             'five_star_count' => $reviewStats->five_star_count,
             'one_star_count' => $reviewStats->one_star_count,
+            'food_taste_positive' => $foodTasteStats['positive'] ?? 0,
+            'food_taste_negative' => $foodTasteStats['negative'] ?? 0,
+            'food_taste_total' => $foodTasteStats['total'] ?? 0,
         ]);
     }
 
@@ -348,6 +358,33 @@ class BenchmarkService
     }
 
     /**
+     * Calculate food/taste mention statistics
+     */
+    protected function calculateFoodTasteStats(
+        array $branchIds,
+        Carbon $periodStart,
+        Carbon $periodEnd
+    ): array {
+        // Query reviews that have 'food' in their categories JSON array
+        $stats = Review::whereIn('branch_id', $branchIds)
+            ->whereBetween('review_date', [$periodStart, $periodEnd])
+            ->whereNotNull('categories')
+            ->whereRaw('JSON_CONTAINS(categories, \'"food"\')')
+            ->select([
+                DB::raw('COUNT(*) as total'),
+                DB::raw('SUM(CASE WHEN sentiment = "positive" THEN 1 ELSE 0 END) as positive'),
+                DB::raw('SUM(CASE WHEN sentiment = "negative" THEN 1 ELSE 0 END) as negative'),
+            ])
+            ->first();
+
+        return [
+            'total' => $stats->total ?? 0,
+            'positive' => $stats->positive ?? 0,
+            'negative' => $stats->negative ?? 0,
+        ];
+    }
+
+    /**
      * Generate comparison between two periods
      */
     protected function generateComparison(
@@ -397,6 +434,7 @@ class BenchmarkService
             'response_time_avg_hours' => $data->responseTimeAvgHours,
             'reply_rate' => $data->replyRate,
             'employee_mentions_positive' => $data->employeeMentionsPositive,
+            'food_taste_positive' => $data->foodTastePositive,
             default => 0,
         };
     }
