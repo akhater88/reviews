@@ -13,6 +13,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class ReviewResource extends Resource
 {
@@ -345,9 +346,25 @@ class ReviewResource extends Resource
         ];
     }
 
+    /**
+     * Filter reviews based on user access level.
+     * Admins see all reviews, managers only see reviews from branches they manage.
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = Auth::user();
+
+        if ($user && $user->isManager()) {
+            $query->whereIn('branch_id', $user->branches()->pluck('branches.id'));
+        }
+
+        return $query;
+    }
+
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::count();
+        return static::getEloquentQuery()->count();
     }
 
     public static function getNavigationBadgeColor(): string|array|null
