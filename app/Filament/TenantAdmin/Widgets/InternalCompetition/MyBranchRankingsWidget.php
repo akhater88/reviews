@@ -2,6 +2,7 @@
 
 namespace App\Filament\TenantAdmin\Widgets\InternalCompetition;
 
+use App\Enums\InternalCompetition\CompetitionMetric;
 use App\Models\InternalCompetition\InternalCompetition;
 use App\Models\InternalCompetition\InternalCompetitionBranchScore;
 use App\Models\User;
@@ -27,21 +28,33 @@ class MyBranchRankingsWidget extends BaseWidget
         return $user->accessibleBranches()->pluck('branches.id');
     }
 
-    protected function getPerformanceHint(?int $rank, int $totalParticipants): string
+    protected function getPerformanceHint(?int $rank, int $totalParticipants, ?InternalCompetition $competition = null, ?int $branchId = null, ?string $metricType = null): string
     {
-        if ($rank === null || $totalParticipants <= 0) {
-            return 'غير محدد';
+        // If rank is available, use percentile-based hint
+        if ($rank !== null && $totalParticipants > 0) {
+            $percentile = ($rank / $totalParticipants) * 100;
+
+            return match (true) {
+                $percentile <= 10 => '🌟 متميز جداً',
+                $percentile <= 25 => '⭐ متميز',
+                $percentile <= 50 => '📈 فوق المتوسط',
+                $percentile <= 75 => '📊 متوسط',
+                default => '📉 يحتاج تحسين',
+            };
         }
 
-        $percentile = ($rank / $totalParticipants) * 100;
+        // Fall back to competition's progress hint for the branch
+        if ($competition && $branchId && $metricType) {
+            $metric = CompetitionMetric::tryFrom($metricType);
+            if ($metric) {
+                $hint = $competition->getProgressHintForBranch($branchId, $metric);
+                if ($hint) {
+                    return $hint;
+                }
+            }
+        }
 
-        return match (true) {
-            $percentile <= 10 => '🌟 متميز جداً',
-            $percentile <= 25 => '⭐ متميز',
-            $percentile <= 50 => '📈 فوق المتوسط',
-            $percentile <= 75 => '📊 متوسط',
-            default => '📉 يحتاج تحسين',
-        };
+        return '📉 يحتاج تحسين';
     }
 
     public function table(Table $table): Table
@@ -91,7 +104,7 @@ class MyBranchRankingsWidget extends BaseWidget
                             ->where('metric_type', $record->metric_type)
                             ->count();
 
-                        return $this->getPerformanceHint($record->rank, $totalParticipants);
+                        return $this->getPerformanceHint($record->rank, $totalParticipants, $competition, $record->branch_id, $record->metric_type);
                     }),
                 Tables\Columns\TextColumn::make('score')
                     ->label('النقاط')

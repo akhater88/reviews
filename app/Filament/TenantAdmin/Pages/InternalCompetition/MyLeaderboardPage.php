@@ -60,21 +60,33 @@ class MyLeaderboardPage extends Page implements HasTable
         return $user->accessibleBranches()->pluck('branches.id');
     }
 
-    protected function getPerformanceHint(?int $rank, int $totalParticipants): string
+    protected function getPerformanceHint(?int $rank, int $totalParticipants, ?int $branchId = null): string
     {
-        if ($rank === null || $totalParticipants <= 0) {
-            return 'غير محدد';
+        // If rank is available, use percentile-based hint
+        if ($rank !== null && $totalParticipants > 0) {
+            $percentile = ($rank / $totalParticipants) * 100;
+
+            return match (true) {
+                $percentile <= 10 => '🌟 متميز جداً',
+                $percentile <= 25 => '⭐ متميز',
+                $percentile <= 50 => '📈 فوق المتوسط',
+                $percentile <= 75 => '📊 متوسط',
+                default => '📉 يحتاج تحسين',
+            };
         }
 
-        $percentile = ($rank / $totalParticipants) * 100;
+        // Fall back to competition's progress hint for the branch
+        if ($branchId && $this->competition && $this->selectedMetric) {
+            $metric = CompetitionMetric::tryFrom($this->selectedMetric);
+            if ($metric) {
+                $hint = $this->competition->getProgressHintForBranch($branchId, $metric);
+                if ($hint) {
+                    return $hint;
+                }
+            }
+        }
 
-        return match (true) {
-            $percentile <= 10 => '🌟 متميز جداً',
-            $percentile <= 25 => '⭐ متميز',
-            $percentile <= 50 => '📈 فوق المتوسط',
-            $percentile <= 75 => '📊 متوسط',
-            default => '📉 يحتاج تحسين',
-        };
+        return '📉 يحتاج تحسين';
     }
 
     protected function getHeaderActions(): array
@@ -138,7 +150,7 @@ class MyLeaderboardPage extends Page implements HasTable
                 // Show performance hint when leaderboard is not publicly visible
                 Tables\Columns\TextColumn::make('performance_hint')
                     ->label('مستوى الأداء')
-                    ->state(fn ($record) => $this->getPerformanceHint($record->rank, $totalParticipants))
+                    ->state(fn ($record) => $this->getPerformanceHint($record->rank, $totalParticipants, $record->branch_id))
                     ->alignCenter()
                     ->visible(!$showPosition),
 
@@ -154,7 +166,9 @@ class MyLeaderboardPage extends Page implements HasTable
                 Tables\Columns\TextColumn::make('relative_position')
                     ->label('الموقع النسبي')
                     ->state(function ($record) use ($totalParticipants) {
-                        if ($record->rank === null || $totalParticipants <= 0) return '-';
+                        if ($record->rank === null || $totalParticipants <= 0) {
+                            return 'في بداية المنافسة';
+                        }
                         $percentile = 100 - (($record->rank / $totalParticipants) * 100);
                         return 'أفضل من ' . round($percentile) . '% من المشاركين';
                     })
