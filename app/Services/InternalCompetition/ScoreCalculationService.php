@@ -24,11 +24,13 @@ class ScoreCalculationService
     public function __construct(
         private readonly CustomerSatisfactionScoreService $satisfactionScoreService,
         private readonly ResponseTimeScoreService $responseTimeScoreService,
-        private readonly EmployeeExtractionService $employeeService
+        private readonly EmployeeExtractionService $employeeService,
+        private readonly FoodTasteScoreService $foodTasteScoreService
     ) {
         $this->registerCalculator($this->satisfactionScoreService);
         $this->registerCalculator($this->responseTimeScoreService);
         $this->registerCalculator($this->employeeService);
+        $this->registerCalculator($this->foodTasteScoreService);
     }
 
     /**
@@ -93,6 +95,7 @@ class ScoreCalculationService
             'satisfaction' => null,
             'response_time' => null,
             'employee_mentions' => null,
+            'food_taste' => null,
             'total_branches' => 0,
             'calculated_at' => now(),
         ];
@@ -138,6 +141,20 @@ class ScoreCalculationService
             $results['employee_mentions'] = [
                 'count' => $employees->count(),
                 'statistics' => $this->employeeService->getScoreStatistics($competition),
+            ];
+        }
+
+        // Calculate food/taste scores if enabled
+        if ($competition->isMetricEnabled(CompetitionMetric::FOOD_TASTE)) {
+            $this->calculateAndStoreMetricScores(
+                $competition,
+                CompetitionMetric::FOOD_TASTE,
+                $periodStart,
+                $periodEnd
+            );
+            $results['food_taste'] = [
+                'calculated' => true,
+                'statistics' => $this->getMetricStatistics($competition, CompetitionMetric::FOOD_TASTE),
             ];
         }
 
@@ -199,6 +216,14 @@ class ScoreCalculationService
             $topPerformers['employee_mentions'] = $this->employeeService->getTopPerformers($competition, $limit);
         }
 
+        if ($competition->isMetricEnabled(CompetitionMetric::FOOD_TASTE)) {
+            $topPerformers['food_taste'] = $this->getLeaderboard(
+                $competition,
+                CompetitionMetric::FOOD_TASTE,
+                $limit
+            );
+        }
+
         return $topPerformers;
     }
 
@@ -211,6 +236,7 @@ class ScoreCalculationService
             CompetitionMetric::CUSTOMER_SATISFACTION => $this->satisfactionScoreService,
             CompetitionMetric::RESPONSE_TIME => $this->responseTimeScoreService,
             CompetitionMetric::EMPLOYEE_MENTIONS => $this->employeeService,
+            CompetitionMetric::FOOD_TASTE => $this->foodTasteScoreService,
         };
     }
 

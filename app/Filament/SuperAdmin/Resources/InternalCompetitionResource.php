@@ -269,6 +269,7 @@ class InternalCompetitionResource extends Resource
                                                 CompetitionMetric::CUSTOMER_SATISFACTION->value => '⭐ رضا العملاء - بناءً على التقييمات والمشاعر',
                                                 CompetitionMetric::RESPONSE_TIME->value => '⚡ سرعة الاستجابة - بناءً على وقت الرد على المراجعات',
                                                 CompetitionMetric::EMPLOYEE_MENTIONS->value => '👤 ذكر الموظفين - بناءً على ذكر الموظفين في المراجعات',
+                                                CompetitionMetric::FOOD_TASTE->value => '🍽️ الطعام/الطعم - بناءً على تقييمات الطعام في المراجعات',
                                             ])
                                             ->required()
                                             ->columns(1)
@@ -276,7 +277,7 @@ class InternalCompetitionResource extends Resource
 
                                         Forms\Components\Fieldset::make('أوزان المعايير')
                                             ->schema([
-                                                Forms\Components\Grid::make(3)
+                                                Forms\Components\Grid::make(4)
                                                     ->schema([
                                                         Forms\Components\TextInput::make('metrics_config.weights.customer_satisfaction')
                                                             ->label('وزن رضا العملاء')
@@ -298,6 +299,15 @@ class InternalCompetitionResource extends Resource
 
                                                         Forms\Components\TextInput::make('metrics_config.weights.employee_mentions')
                                                             ->label('وزن ذكر الموظفين')
+                                                            ->numeric()
+                                                            ->default(1.0)
+                                                            ->minValue(0)
+                                                            ->maxValue(5)
+                                                            ->step(0.1)
+                                                            ->suffix('×'),
+
+                                                        Forms\Components\TextInput::make('metrics_config.weights.food_taste')
+                                                            ->label('وزن الطعام/الطعم')
                                                             ->numeric()
                                                             ->default(1.0)
                                                             ->minValue(0)

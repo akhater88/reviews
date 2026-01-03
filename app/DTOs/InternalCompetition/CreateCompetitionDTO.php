@@ -103,6 +103,10 @@ class CreateCompetitionDTO
                 'enabled' => true,
                 'weight' => 1.0,
             ],
+            'food_taste' => [
+                'enabled' => true,
+                'weight' => 1.0,
+            ],
         ];
     }
 
