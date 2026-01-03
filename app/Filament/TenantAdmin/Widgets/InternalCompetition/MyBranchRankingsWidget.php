@@ -2,7 +2,6 @@
 
 namespace App\Filament\TenantAdmin\Widgets\InternalCompetition;
 
-use App\Enums\InternalCompetition\CompetitionScope;
 use App\Models\InternalCompetition\InternalCompetition;
 use App\Models\InternalCompetition\InternalCompetitionBranchScore;
 use App\Models\User;
@@ -76,8 +75,8 @@ class MyBranchRankingsWidget extends BaseWidget
                         $competition = $record->competition;
                         if (!$competition) return '-';
 
-                        // For single-tenant: show actual rank
-                        if ($competition->scope === CompetitionScope::SINGLE_TENANT) {
+                        // Show actual rank when leaderboard is publicly visible
+                        if ($competition->shouldShowLeaderboard()) {
                             if ($record->rank === null) return '-';
                             return match ($record->rank) {
                                 1 => '🥇 الأول',
@@ -87,7 +86,7 @@ class MyBranchRankingsWidget extends BaseWidget
                             };
                         }
 
-                        // For multi-tenant: show performance hint
+                        // Show performance hint when leaderboard is not publicly visible
                         $totalParticipants = InternalCompetitionBranchScore::where('competition_id', $record->competition_id)
                             ->where('metric_type', $record->metric_type)
                             ->count();

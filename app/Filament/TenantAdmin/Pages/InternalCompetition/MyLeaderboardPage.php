@@ -3,7 +3,6 @@
 namespace App\Filament\TenantAdmin\Pages\InternalCompetition;
 
 use App\Enums\InternalCompetition\CompetitionMetric;
-use App\Enums\InternalCompetition\CompetitionScope;
 use App\Enums\InternalCompetition\CompetitionStatus;
 use App\Models\InternalCompetition\InternalCompetition;
 use App\Models\InternalCompetition\InternalCompetitionBranchScore;
@@ -61,11 +60,6 @@ class MyLeaderboardPage extends Page implements HasTable
         return $user->accessibleBranches()->pluck('branches.id');
     }
 
-    public function isMultiTenantCompetition(): bool
-    {
-        return $this->competition?->scope === CompetitionScope::MULTI_TENANT;
-    }
-
     protected function getPerformanceHint(?int $rank, int $totalParticipants): string
     {
         if ($rank === null || $totalParticipants <= 0) {
@@ -119,7 +113,7 @@ class MyLeaderboardPage extends Page implements HasTable
     public function table(Tables\Table $table): Tables\Table
     {
         $accessibleBranchIds = $this->getAccessibleBranchIds();
-        $isMultiTenant = $this->isMultiTenantCompetition();
+        $showPosition = $this->competition?->shouldShowLeaderboard() ?? false;
 
         // Get total participants for hint calculation
         $totalParticipants = InternalCompetitionBranchScore::where('competition_id', $this->selectedCompetitionId)
@@ -134,19 +128,19 @@ class MyLeaderboardPage extends Page implements HasTable
                 ->with(['branch'])
                 ->orderBy('rank'))
             ->columns([
-                // For single-tenant: show actual rank for manager's branches
+                // Show actual rank when leaderboard is publicly visible
                 Tables\Columns\TextColumn::make('rank')
                     ->label('الترتيب')
                     ->formatStateUsing(fn ($state) => $state === null ? '-' : match ($state) { 1 => '🥇', 2 => '🥈', 3 => '🥉', default => "#{$state}" })
                     ->alignCenter()
-                    ->visible(!$isMultiTenant),
+                    ->visible($showPosition),
 
-                // For multi-tenant: show performance hint instead of rank
+                // Show performance hint when leaderboard is not publicly visible
                 Tables\Columns\TextColumn::make('performance_hint')
                     ->label('مستوى الأداء')
                     ->state(fn ($record) => $this->getPerformanceHint($record->rank, $totalParticipants))
                     ->alignCenter()
-                    ->visible($isMultiTenant),
+                    ->visible(!$showPosition),
 
                 Tables\Columns\TextColumn::make('branch.name')
                     ->label('الفرع')
@@ -156,7 +150,7 @@ class MyLeaderboardPage extends Page implements HasTable
                     ->label('النقاط')
                     ->numeric(2),
 
-                // For multi-tenant: show relative position hint
+                // Show relative position hint when leaderboard is not publicly visible
                 Tables\Columns\TextColumn::make('relative_position')
                     ->label('الموقع النسبي')
                     ->state(function ($record) use ($totalParticipants) {
@@ -165,7 +159,7 @@ class MyLeaderboardPage extends Page implements HasTable
                         return 'أفضل من ' . round($percentile) . '% من المشاركين';
                     })
                     ->color('gray')
-                    ->visible($isMultiTenant),
+                    ->visible(!$showPosition),
             ])
             ->striped();
     }
