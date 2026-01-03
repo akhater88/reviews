@@ -18,6 +18,15 @@ class MonthlyRankingsPage extends Page implements HasForms
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-trophy';
+
+    /**
+     * Only allow admins to access this page.
+     * Managers should not have access to the monthly report.
+     */
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->isAdmin() ?? false;
+    }
     protected static ?string $navigationLabel = 'الترتيب الشهري';
     protected static ?string $title = 'الترتيب الشهري';
     protected static ?string $slug = 'monthly-rankings';
