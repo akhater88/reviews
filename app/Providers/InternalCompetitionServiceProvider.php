@@ -8,6 +8,7 @@ use App\Services\InternalCompetition\BenchmarkService;
 use App\Services\InternalCompetition\CompetitionService;
 use App\Services\InternalCompetition\CustomerSatisfactionScoreService;
 use App\Services\InternalCompetition\EmployeeExtractionService;
+use App\Services\InternalCompetition\FoodTasteScoreService;
 use App\Services\InternalCompetition\ParticipantService;
 use App\Services\InternalCompetition\ResponseTimeScoreService;
 use App\Services\InternalCompetition\ScoreCalculationService;
@@ -39,11 +40,17 @@ class InternalCompetitionServiceProvider extends ServiceProvider
             );
         });
 
+        // Register food/taste score service
+        $this->app->singleton(FoodTasteScoreService::class, function ($app) {
+            return new FoodTasteScoreService();
+        });
+
         $this->app->singleton(ScoreCalculationService::class, function ($app) {
             return new ScoreCalculationService(
                 $app->make(CustomerSatisfactionScoreService::class),
                 $app->make(ResponseTimeScoreService::class),
-                $app->make(EmployeeExtractionService::class)
+                $app->make(EmployeeExtractionService::class),
+                $app->make(FoodTasteScoreService::class)
             );
         });
 
