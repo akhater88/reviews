@@ -18,14 +18,26 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
-    
+
     protected static ?string $navigationLabel = 'المستخدمين';
-    
+
     protected static ?string $modelLabel = 'مستخدم';
-    
+
     protected static ?string $pluralModelLabel = 'المستخدمين';
 
     protected static ?int $navigationSort = 1;
+
+    /**
+     * Only admins can access the Users resource.
+     * Branch managers should only access their profile via profile settings.
+     */
+    public static function canAccess(): bool
+    {
+        /** @var User|null $user */
+        $user = Auth::user();
+
+        return $user && $user->isAdmin();
+    }
 
     public static function form(Form $form): Form
     {
