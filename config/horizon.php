@@ -100,6 +100,7 @@ return [
         'redis:default' => 60,
         'redis:reviews' => 120, // Reviews queue can wait longer
         'redis:analysis' => 180, // Analysis queue for AI processing
+        'redis:internal-competition' => 120, // Internal competition queue
     ],
 
     /*
@@ -244,6 +245,21 @@ return [
             'timeout' => 300, // 5 minutes for AI calls
             'nice' => 0,
         ],
+
+        // Internal competition queue supervisor
+        'supervisor-internal-competition' => [
+            'connection' => 'redis',
+            'queue' => ['internal-competition'],
+            'balance' => 'auto',
+            'autoScalingStrategy' => 'time',
+            'maxProcesses' => 1,
+            'maxTime' => 0,
+            'maxJobs' => 0,
+            'memory' => 256,
+            'tries' => 3,
+            'timeout' => 600, // 10 minutes for score calculations
+            'nice' => 0,
+        ],
     ],
 
     'environments' => [
@@ -264,6 +280,12 @@ return [
                 'balanceMaxShift' => 1,
                 'balanceCooldown' => 3,
             ],
+            // Internal competition supervisor
+            'supervisor-internal-competition' => [
+                'maxProcesses' => 2,
+                'balanceMaxShift' => 1,
+                'balanceCooldown' => 3,
+            ],
         ],
 
         'local' => [
@@ -274,6 +296,9 @@ return [
                 'maxProcesses' => 2,
             ],
             'supervisor-analysis' => [
+                'maxProcesses' => 2,
+            ],
+            'supervisor-internal-competition' => [
                 'maxProcesses' => 2,
             ],
         ],
