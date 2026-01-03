@@ -3,14 +3,27 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
+use App\Models\User;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class ListUsers extends ListRecords
 {
     protected static string $resource = UserResource::class;
+
+    /**
+     * Only admins can access the users list.
+     */
+    public static function canAccess(array $parameters = []): bool
+    {
+        /** @var User|null $user */
+        $user = Auth::user();
+
+        return $user && $user->isAdmin();
+    }
 
     protected function getHeaderActions(): array
     {
