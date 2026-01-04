@@ -608,6 +608,19 @@ class CompetitionService
             ]);
         }
 
+        // Duplicate benchmarks
+        foreach ($competition->benchmarks as $benchmark) {
+            $newCompetition->benchmarks()->create([
+                'tenant_id' => $benchmark->tenant_id,
+                'branch_id' => $benchmark->branch_id,
+                'period_type' => $benchmark->period_type,
+                'period_start' => $benchmark->period_start,
+                'period_end' => $benchmark->period_end,
+                'metrics' => $benchmark->metrics,
+                'calculated_at' => $benchmark->calculated_at,
+            ]);
+        }
+
         return $newCompetition;
     }
 }
