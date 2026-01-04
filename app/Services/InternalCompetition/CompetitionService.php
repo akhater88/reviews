@@ -484,8 +484,16 @@ class CompetitionService
      */
     protected function validateMetricsConfig(array $metricsConfig): void
     {
-        $hasEnabledMetric = false;
+        // Check for enabled_metrics array structure (current format)
+        if (isset($metricsConfig['enabled_metrics']) && is_array($metricsConfig['enabled_metrics'])) {
+            if (empty($metricsConfig['enabled_metrics'])) {
+                throw CompetitionException::noMetricsEnabled();
+            }
+            return;
+        }
 
+        // Fallback: Check for legacy format ['metric' => ['enabled' => true]]
+        $hasEnabledMetric = false;
         foreach ($metricsConfig as $metric => $config) {
             if ($config['enabled'] ?? false) {
                 $hasEnabledMetric = true;
