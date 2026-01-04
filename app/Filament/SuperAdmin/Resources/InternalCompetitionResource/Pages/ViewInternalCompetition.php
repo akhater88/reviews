@@ -6,7 +6,10 @@ use App\Enums\InternalCompetition\CompetitionStatus;
 use App\Filament\SuperAdmin\Resources\InternalCompetitionResource;
 use App\Jobs\InternalCompetition\CalculateBenchmarksJob;
 use App\Jobs\InternalCompetition\CalculateDailyScoresJob;
+use App\Jobs\InternalCompetition\ProcessCompetitionEndJob;
 use App\Services\InternalCompetition\CompetitionService;
+use App\Services\InternalCompetition\ScoreCalculationService;
+use App\Services\InternalCompetition\WinnerService;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
@@ -84,9 +87,14 @@ class ViewInternalCompetition extends ViewRecord
                 ->visible(fn () => $this->record->status === CompetitionStatus::ACTIVE)
                 ->action(function () {
                     try {
-                        app(CompetitionService::class)->end($this->record);
+                        // Dispatch the job to handle the full end process including:
+                        // - Finalizing scores
+                        // - Calculating benchmarks
+                        // - Determining winners
+                        ProcessCompetitionEndJob::dispatch($this->record->id);
                         Notification::make()
-                            ->title('تم إنهاء المسابقة')
+                            ->title('جاري إنهاء المسابقة')
+                            ->body('تم إرسال المهمة للمعالجة. سيتم حساب النتائج وتحديد الفائزين.')
                             ->success()
                             ->send();
                         $this->refreshFormData(['status']);
@@ -113,6 +121,37 @@ class ViewInternalCompetition extends ViewRecord
                             ->success()
                             ->send();
                         $this->refreshFormData(['status']);
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('خطأ')
+                            ->body($e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                }),
+
+            Actions\Action::make('determine_winners')
+                ->label('تحديد الفائزين')
+                ->icon('heroicon-o-trophy')
+                ->color('warning')
+                ->requiresConfirmation()
+                ->modalHeading('تحديد الفائزين')
+                ->modalDescription('سيتم إعادة حساب النتائج النهائية وتحديد الفائزين. هل تريد المتابعة؟')
+                ->visible(fn () => in_array($this->record->status, [CompetitionStatus::ENDED, CompetitionStatus::PUBLISHED])
+                    && $this->record->winners()->count() === 0)
+                ->action(function () {
+                    try {
+                        // First finalize scores if not done
+                        app(ScoreCalculationService::class)->finalizeAllScores($this->record);
+
+                        // Then determine winners
+                        $winners = app(WinnerService::class)->determineWinners($this->record);
+
+                        Notification::make()
+                            ->title('تم تحديد الفائزين بنجاح')
+                            ->body('تم تحديد ' . $winners->count() . ' فائز')
+                            ->success()
+                            ->send();
                     } catch (\Exception $e) {
                         Notification::make()
                             ->title('خطأ')
