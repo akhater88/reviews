@@ -592,7 +592,12 @@ class InternalCompetitionResource extends Resource
                         ->color('gray')
                         ->action(function (InternalCompetition $record) {
                             try {
-                                $newCompetition = app(CompetitionService::class)->duplicate($record);
+                                $admin = auth()->user();
+                                $newCompetition = app(CompetitionService::class)->duplicate(
+                                    $record,
+                                    $admin->id,
+                                    get_class($admin)
+                                );
                                 Notification::make()
                                     ->title('تم نسخ المسابقة')
                                     ->body("المسابقة الجديدة: {$newCompetition->display_name}")
