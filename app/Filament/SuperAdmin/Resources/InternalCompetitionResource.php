@@ -596,7 +596,7 @@ class InternalCompetitionResource extends Resource
                                 $newCompetition = app(CompetitionService::class)->duplicate(
                                     $record,
                                     $admin->id,
-                                    get_class($admin)
+                                    'super_admin'
                                 );
                                 Notification::make()
                                     ->title('تم نسخ المسابقة')
