@@ -17,7 +17,7 @@ class Login extends BaseLogin
 
     public function getSubheading(): string|Htmlable|null
     {
-        return 'لوحة إدارة منصة TABsense';
+        return 'لوحة إدارة المنصة';
     }
 
     protected function getEmailFormComponent(): Component

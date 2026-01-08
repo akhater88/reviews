@@ -46,7 +46,7 @@ class SuperAdminPanelProvider extends PanelProvider
             ])
             ->font('Cairo')
             ->brandName('TABsense Admin')
-            ->brandLogo(asset('images/logo.svg'))
+            ->brandLogo(asset('images/admin-logo.png'))
             ->brandLogoHeight('2rem')
             ->favicon(asset('favicon.ico'))
             ->darkMode(true)
