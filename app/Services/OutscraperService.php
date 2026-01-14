@@ -43,9 +43,9 @@ class OutscraperService
             'sort' => $sort,
         ]);
 
-        // In development without API key, return mock data
-        if (!$this->apiKey && !app()->isProduction()) {
-            Log::info('OutscraperService: Using mock data (no API key)');
+        // If no API key configured, return mock data (allows testing without subscription)
+        if (!$this->apiKey) {
+            Log::info('OutscraperService: Using mock data (no API key configured)');
             return $this->getMockReviews($placeId, $limit);
         }
 
@@ -137,9 +137,9 @@ class OutscraperService
             'limit' => $limit,
         ]);
 
-        // In development without API key, return mock data
-        if (!$this->apiKey && !app()->isProduction()) {
-            Log::info('OutscraperService: Using mock places (no API key)');
+        // If no API key configured, return mock data (allows testing without subscription)
+        if (!$this->apiKey) {
+            Log::info('OutscraperService: Using mock places (no API key configured)');
             return $this->getMockPlaces($query);
         }
 
