@@ -50,8 +50,7 @@
                     </li>
                 </ul>
                 <a
-                    href="https://www.tabsense.ai/ar/social-landing-pages/google-review-tool"
-                    target="_blank"
+                    href="{{ route('get-started') }}"
                     class="block w-full py-3 text-center rounded-full border-2 border-gray-300 text-gray-700 font-semibold hover:border-blue-500 hover:text-blue-600 transition-colors"
                 >
                     {{ __('app.pricingStarterCTA') }}
@@ -105,8 +104,7 @@
                     </li>
                 </ul>
                 <a
-                    href="https://www.tabsense.ai/ar/social-landing-pages/google-review-tool"
-                    target="_blank"
+                    href="{{ route('get-started') }}"
                     class="block w-full py-3 text-center rounded-full bg-white text-blue-600 font-semibold hover:bg-blue-50 transition-colors"
                 >
                     {{ __('app.pricingProCTA') }}

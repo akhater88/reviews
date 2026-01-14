@@ -61,8 +61,8 @@
             <div class="flex items-center gap-3 sm:gap-4">
                 {{-- Subscribe Button (Desktop) --}}
                 <a
-                    href="https://www.tabsense.ai/ar/social-landing-pages/google-review-tool"
-                    target="_blank"
+                    href="#pricing"
+                    @click.prevent="document.getElementById('pricing').scrollIntoView({ behavior: 'smooth', block: 'start' })"
                     class="hidden sm:inline-flex items-center gap-2 text-gray-300 hover:text-white font-medium transition-colors text-sm"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -218,8 +218,8 @@
 
             {{-- Subscribe Link --}}
             <a
-                href="https://www.tabsense.ai/ar/social-landing-pages/google-review-tool"
-                target="_blank"
+                href="#pricing"
+                @click="mobileMenuOpen = false; setTimeout(() => document.getElementById('pricing').scrollIntoView({ behavior: 'smooth', block: 'start' }), 150)"
                 class="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-800 transition-colors group"
             >
                 <div class="w-10 h-10 bg-gray-700 rounded-xl flex items-center justify-center group-hover:bg-gray-600 transition-colors">
