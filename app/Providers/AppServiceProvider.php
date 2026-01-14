@@ -38,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
         Tenant::observe(TenantObserver::class);
 
         $this->configureCompetitionRateLimiting();
+        $this->configureFreeReportRateLimiting();
     }
 
     /**
@@ -97,6 +98,36 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('competition-resend-otp', function (Request $request) {
             $phone = $request->session()->get('competition_pending_phone', $request->input('phone', ''));
             return Limit::perMinute(3)->by('resend:' . $phone . ':' . $request->ip());
+        });
+    }
+
+    /**
+     * Configure rate limiting for free report routes.
+     */
+    protected function configureFreeReportRateLimiting(): void
+    {
+        // Rate limiter for OTP sending - stricter to prevent abuse
+        RateLimiter::for('free-report-otp', function (Request $request) {
+            $phone = $request->input('phone', '');
+            return Limit::perMinute(5)->by('free-otp:' . $phone . ':' . $request->ip());
+        });
+
+        // Rate limiter for OTP verification
+        RateLimiter::for('free-report-verify', function (Request $request) {
+            $phone = $request->input('phone', '');
+            return Limit::perMinute(10)->by('free-verify:' . $phone . ':' . $request->ip());
+        });
+
+        // Rate limiter for report creation
+        RateLimiter::for('free-report-create', function (Request $request) {
+            $phone = $request->input('phone', '');
+            return Limit::perMinute(5)->by('free-create:' . $phone . ':' . $request->ip());
+        });
+
+        // Rate limiter for magic link resend
+        RateLimiter::for('free-report-resend', function (Request $request) {
+            $phone = $request->input('phone', '');
+            return Limit::perMinute(3)->by('free-resend:' . $phone . ':' . $request->ip());
         });
     }
 }
