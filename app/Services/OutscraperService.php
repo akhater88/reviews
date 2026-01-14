@@ -11,6 +11,10 @@ class OutscraperService
     protected ?string $apiKey;
     protected string $baseUrl;
 
+    // Polling settings for async requests
+    protected int $maxPollingAttempts = 30;  // Max polling attempts
+    protected int $pollingDelaySeconds = 5;   // Delay between polls
+
     public function __construct()
     {
         $this->apiKey = config('outscraper.api_key');
@@ -79,35 +83,24 @@ class OutscraperService
 
             $data = $response->json();
 
-            // Outscraper returns an array of places, get the first one
-            $placeData = $data['data'][0] ?? $data[0] ?? null;
-
-            if (!$placeData) {
-                return [
-                    'success' => false,
-                    'reviews' => [],
-                    'error' => 'No place data found',
-                ];
-            }
-
-            $reviews = $placeData['reviews_data'] ?? [];
-
-            Log::info('OutscraperService: Reviews fetched successfully', [
+            Log::info('OutscraperService: API response received', [
                 'place_id' => $placeId,
-                'reviews_count' => count($reviews),
+                'has_data' => isset($data['data']),
+                'status' => $data['status'] ?? $data['data']['status'] ?? 'unknown',
             ]);
 
-            return [
-                'success' => true,
-                'reviews' => $reviews,
-                'place_info' => [
-                    'name' => $placeData['name'] ?? null,
-                    'address' => $placeData['full_address'] ?? null,
-                    'rating' => $placeData['rating'] ?? null,
-                    'reviews_count' => $placeData['reviews'] ?? 0,
-                ],
-                'error' => null,
-            ];
+            // Check if response is async (Pending status)
+            if ($this->isAsyncResponse($data)) {
+                Log::info('OutscraperService: Async response, starting polling', [
+                    'place_id' => $placeId,
+                    'results_location' => $data['data']['results_location'] ?? $data['results_location'] ?? null,
+                ]);
+
+                return $this->pollForResults($placeId, $data);
+            }
+
+            // Process immediate response
+            return $this->processReviewsData($placeId, $data);
 
         } catch (Exception $e) {
             Log::error('OutscraperService: Exception', [
@@ -121,6 +114,178 @@ class OutscraperService
                 'error' => $e->getMessage(),
             ];
         }
+    }
+
+    /**
+     * Check if the response indicates an async/pending request.
+     */
+    protected function isAsyncResponse(array $data): bool
+    {
+        // Check various possible response structures
+        $status = $data['status'] ?? $data['data']['status'] ?? null;
+
+        return $status === 'Pending' || $status === 'pending';
+    }
+
+    /**
+     * Poll the results_location URL until data is ready.
+     */
+    protected function pollForResults(string $placeId, array $initialData): array
+    {
+        $resultsLocation = $initialData['data']['results_location']
+            ?? $initialData['results_location']
+            ?? null;
+
+        if (!$resultsLocation) {
+            Log::error('OutscraperService: No results_location in async response', [
+                'place_id' => $placeId,
+                'data' => $initialData,
+            ]);
+
+            return [
+                'success' => false,
+                'reviews' => [],
+                'error' => 'No results location provided for async request',
+            ];
+        }
+
+        Log::info('OutscraperService: Polling for results', [
+            'place_id' => $placeId,
+            'results_location' => $resultsLocation,
+        ]);
+
+        for ($attempt = 1; $attempt <= $this->maxPollingAttempts; $attempt++) {
+            // Wait before polling (except first attempt)
+            if ($attempt > 1) {
+                sleep($this->pollingDelaySeconds);
+            }
+
+            try {
+                $response = Http::withHeaders([
+                    'X-API-KEY' => $this->apiKey,
+                ])
+                ->timeout(60)
+                ->get($resultsLocation);
+
+                if (!$response->successful()) {
+                    Log::warning('OutscraperService: Polling request failed', [
+                        'place_id' => $placeId,
+                        'attempt' => $attempt,
+                        'status' => $response->status(),
+                    ]);
+                    continue;
+                }
+
+                $data = $response->json();
+
+                Log::info('OutscraperService: Polling response', [
+                    'place_id' => $placeId,
+                    'attempt' => $attempt,
+                    'status' => $data['status'] ?? 'unknown',
+                ]);
+
+                // Check if still pending
+                $status = $data['status'] ?? null;
+
+                if ($status === 'Pending' || $status === 'pending') {
+                    Log::info('OutscraperService: Still pending, continuing to poll', [
+                        'place_id' => $placeId,
+                        'attempt' => $attempt,
+                        'max_attempts' => $this->maxPollingAttempts,
+                    ]);
+                    continue;
+                }
+
+                // Check for error status
+                if ($status === 'Error' || $status === 'error') {
+                    return [
+                        'success' => false,
+                        'reviews' => [],
+                        'error' => $data['error_message'] ?? 'Outscraper request failed',
+                    ];
+                }
+
+                // Data should be ready - process it
+                if ($status === 'Success' || $status === 'success' || isset($data['data'])) {
+                    return $this->processReviewsData($placeId, $data);
+                }
+
+            } catch (Exception $e) {
+                Log::warning('OutscraperService: Polling exception', [
+                    'place_id' => $placeId,
+                    'attempt' => $attempt,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        // Max attempts reached
+        Log::error('OutscraperService: Polling timeout', [
+            'place_id' => $placeId,
+            'max_attempts' => $this->maxPollingAttempts,
+        ]);
+
+        return [
+            'success' => false,
+            'reviews' => [],
+            'error' => 'Timeout waiting for reviews data',
+        ];
+    }
+
+    /**
+     * Process the reviews data from Outscraper response.
+     */
+    protected function processReviewsData(string $placeId, array $data): array
+    {
+        // Handle different response structures
+        $places = $data['data'] ?? $data;
+
+        // If data is wrapped in another array
+        if (isset($places[0]) && is_array($places[0])) {
+            $placeData = $places[0];
+        } elseif (isset($places['data']) && is_array($places['data'])) {
+            $placeData = $places['data'][0] ?? $places['data'];
+        } else {
+            $placeData = $places;
+        }
+
+        // If placeData is an array of places, get the first one
+        if (isset($placeData[0]) && is_array($placeData[0])) {
+            $placeData = $placeData[0];
+        }
+
+        if (empty($placeData) || (!isset($placeData['reviews_data']) && !isset($placeData['name']))) {
+            Log::warning('OutscraperService: No valid place data found', [
+                'place_id' => $placeId,
+                'data_keys' => is_array($placeData) ? array_keys($placeData) : 'not_array',
+            ]);
+
+            return [
+                'success' => false,
+                'reviews' => [],
+                'error' => 'No place data found in response',
+            ];
+        }
+
+        $reviews = $placeData['reviews_data'] ?? [];
+
+        Log::info('OutscraperService: Reviews processed successfully', [
+            'place_id' => $placeId,
+            'reviews_count' => count($reviews),
+            'place_name' => $placeData['name'] ?? 'unknown',
+        ]);
+
+        return [
+            'success' => true,
+            'reviews' => $reviews,
+            'place_info' => [
+                'name' => $placeData['name'] ?? null,
+                'address' => $placeData['full_address'] ?? null,
+                'rating' => $placeData['rating'] ?? null,
+                'reviews_count' => $placeData['reviews'] ?? 0,
+            ],
+            'error' => null,
+        ];
     }
 
     /**
