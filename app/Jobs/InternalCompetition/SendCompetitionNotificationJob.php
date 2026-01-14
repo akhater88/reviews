@@ -259,11 +259,12 @@ class SendCompetitionNotificationJob implements ShouldQueue
             $userIds = $userIds->merge($tenantAdmins);
         }
 
-        // Get branch managers for enrolled branches
+        // Get branch managers for enrolled branches (using pivot table relationship)
         $branchIds = $competition->activeBranches()->pluck('branch_id');
-        $branchManagers = User::whereIn('branch_id', $branchIds)
-            ->where('role', 'manager')
-            ->pluck('id');
+        $branchManagers = User::whereHas('branches', function ($query) use ($branchIds) {
+            $query->whereIn('branches.id', $branchIds);
+        })->where('role', 'manager')
+          ->pluck('id');
         $userIds = $userIds->merge($branchManagers);
 
         return User::whereIn('id', $userIds->unique())->get();

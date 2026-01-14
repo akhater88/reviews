@@ -1,17 +1,24 @@
 <?php
 
+use App\Http\Controllers\Api\FreeReportController;
+use App\Http\Controllers\FreeReportPageController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Competition\CompetitionAuthController;
 use App\Http\Controllers\Competition\CompetitionController;
 use App\Http\Controllers\Competition\CompetitionDashboardController;
 use App\Http\Controllers\Competition\CompetitionNominationController;
 use App\Http\Controllers\Competition\PrizeClaimController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\Webhooks\PaymentWebhookController;
 use App\Models\SuperAdmin;
 use App\Models\Tenant;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/google-oauth.php';
+
+// TABsense Marketing Landing Page
+Route::get('/', [LandingController::class, 'index'])->name('landing');
+Route::get('/get-started', [LandingController::class, 'getStarted'])->name('get-started');
 
 // Tenant-specific login route
 Route::get('/login/{tenant:slug}', function (Tenant $tenant) {
@@ -144,3 +151,52 @@ Route::get('/super-admin/return', function () {
 
     return redirect('/super-admin');
 })->name('super-admin.return');
+
+// Free Report API Routes
+Route::prefix('api/free-report')->name('free-report.')->group(function () {
+    // Google Places Search (public)
+    Route::get('/places/search', [FreeReportController::class, 'searchPlaces'])
+        ->name('places.search')
+        ->middleware('throttle:60,1');
+
+    // OTP verification
+    Route::post('/request-otp', [FreeReportController::class, 'requestOtp'])
+        ->name('request-otp')
+        ->middleware('throttle:free-report-otp');
+
+    Route::post('/verify-otp', [FreeReportController::class, 'verifyOtp'])
+        ->name('verify-otp')
+        ->middleware('throttle:free-report-verify');
+
+    // Report creation
+    Route::post('/create', [FreeReportController::class, 'createReport'])
+        ->name('create')
+        ->middleware('throttle:free-report-create');
+
+    // Report status
+    Route::get('/status', [FreeReportController::class, 'getStatus'])
+        ->name('status');
+
+    // Resend magic link
+    Route::post('/resend-link', [FreeReportController::class, 'resendMagicLink'])
+        ->name('resend-link')
+        ->middleware('throttle:free-report-resend');
+
+    // View report by magic token
+    Route::get('/view/{token}', [FreeReportController::class, 'getReportByToken'])
+        ->name('view');
+});
+
+// Free Report Public Pages (No Auth Required)
+Route::prefix('free-report')->name('free-report.page.')->group(function () {
+    // Request access (for returning users) - must be defined before {token}
+    Route::get('access', [FreeReportPageController::class, 'accessForm'])
+        ->name('access');
+
+    Route::post('access', [FreeReportPageController::class, 'requestAccess'])
+        ->name('request-access');
+
+    // Main report page (catch-all, must be last)
+    Route::get('{token}', [FreeReportPageController::class, 'show'])
+        ->name('show');
+});
