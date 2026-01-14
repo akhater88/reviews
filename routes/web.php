@@ -8,9 +8,16 @@ use App\Http\Controllers\Competition\CompetitionNominationController;
 use App\Http\Controllers\Competition\PrizeClaimController;
 use App\Http\Controllers\Webhooks\PaymentWebhookController;
 use App\Models\SuperAdmin;
+use App\Models\Tenant;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/google-oauth.php';
+
+// Tenant-specific login route
+Route::get('/login/{tenant:slug}', function (Tenant $tenant) {
+    session(['login_tenant_id' => $tenant->id]);
+    return redirect('/restaurant-owners/login');
+})->name('tenant.login');
 
 // Competition Public Routes
 Route::prefix('competition')->name('competition.')->group(function () {
