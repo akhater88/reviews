@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\FreeReportController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Competition\CompetitionAuthController;
 use App\Http\Controllers\Competition\CompetitionController;
@@ -149,3 +150,38 @@ Route::get('/super-admin/return', function () {
 
     return redirect('/super-admin');
 })->name('super-admin.return');
+
+// Free Report API Routes
+Route::prefix('api/free-report')->name('free-report.')->group(function () {
+    // OTP verification
+    Route::post('/request-otp', [FreeReportController::class, 'requestOtp'])
+        ->name('request-otp')
+        ->middleware('throttle:free-report-otp');
+
+    Route::post('/verify-otp', [FreeReportController::class, 'verifyOtp'])
+        ->name('verify-otp')
+        ->middleware('throttle:free-report-verify');
+
+    // Report creation
+    Route::post('/create', [FreeReportController::class, 'createReport'])
+        ->name('create')
+        ->middleware('throttle:free-report-create');
+
+    // Report status
+    Route::get('/status', [FreeReportController::class, 'getStatus'])
+        ->name('status');
+
+    // Resend magic link
+    Route::post('/resend-link', [FreeReportController::class, 'resendMagicLink'])
+        ->name('resend-link')
+        ->middleware('throttle:free-report-resend');
+
+    // View report by magic token
+    Route::get('/view/{token}', [FreeReportController::class, 'getReportByToken'])
+        ->name('view');
+});
+
+// Free Report View Page (for rendering the report UI)
+Route::get('/free-report/{token}', function (string $token) {
+    return view('landing.free-report', ['token' => $token]);
+})->name('free-report.page');
