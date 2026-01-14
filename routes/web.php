@@ -6,12 +6,17 @@ use App\Http\Controllers\Competition\CompetitionController;
 use App\Http\Controllers\Competition\CompetitionDashboardController;
 use App\Http\Controllers\Competition\CompetitionNominationController;
 use App\Http\Controllers\Competition\PrizeClaimController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\Webhooks\PaymentWebhookController;
 use App\Models\SuperAdmin;
 use App\Models\Tenant;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/google-oauth.php';
+
+// TABsense Marketing Landing Page
+Route::get('/', [LandingController::class, 'index'])->name('landing');
+Route::get('/get-started', [LandingController::class, 'getStarted'])->name('get-started');
 
 // Tenant-specific login route
 Route::get('/login/{tenant:slug}', function (Tenant $tenant) {
