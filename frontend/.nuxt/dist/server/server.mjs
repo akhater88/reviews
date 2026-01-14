@@ -1,0 +1,1 @@
+export { default } from "file:///Users/abdullahkayed/WorkTabsen/vibecodinng-reviews/tabsense-reviews/frontend/node_modules/@nuxt/vite-builder/dist/runtime/vite-node.mjs"
