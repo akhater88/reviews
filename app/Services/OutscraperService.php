@@ -8,13 +8,13 @@ use Illuminate\Support\Facades\Log;
 
 class OutscraperService
 {
-    protected string $apiKey;
+    protected ?string $apiKey;
     protected string $baseUrl;
 
     public function __construct()
     {
         $this->apiKey = config('outscraper.api_key');
-        $this->baseUrl = config('outscraper.base_url');
+        $this->baseUrl = config('outscraper.base_url', 'https://api.app.outscraper.com');
     }
 
     /**
