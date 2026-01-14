@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\FreeReport;
+use App\Services\Competition\GooglePlacesService;
 use App\Services\FreeReportService;
 use App\Services\PhoneOtpService;
 use Illuminate\Http\JsonResponse;
@@ -15,13 +16,54 @@ class FreeReportController extends Controller
 {
     protected FreeReportService $freeReportService;
     protected PhoneOtpService $phoneOtpService;
+    protected GooglePlacesService $placesService;
 
     public function __construct(
         FreeReportService $freeReportService,
-        PhoneOtpService $phoneOtpService
+        PhoneOtpService $phoneOtpService,
+        GooglePlacesService $placesService
     ) {
         $this->freeReportService = $freeReportService;
         $this->phoneOtpService = $phoneOtpService;
+        $this->placesService = $placesService;
+    }
+
+    /**
+     * Search for restaurants via Google Places (public endpoint).
+     */
+    public function searchPlaces(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'query' => 'required|string|min:2|max:100',
+            'location' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'البحث غير صالح',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $query = $request->input('query');
+        $location = $request->input('location');
+
+        $result = $this->placesService->searchRestaurants($query, $location);
+
+        if (!$result['success']) {
+            return response()->json([
+                'success' => false,
+                'message' => 'فشل في البحث. يرجى المحاولة مرة أخرى.',
+                'results' => [],
+            ], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+            'results' => $result['results'],
+            'count' => $result['count'],
+        ]);
     }
 
     /**

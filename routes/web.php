@@ -154,6 +154,11 @@ Route::get('/super-admin/return', function () {
 
 // Free Report API Routes
 Route::prefix('api/free-report')->name('free-report.')->group(function () {
+    // Google Places Search (public)
+    Route::get('/places/search', [FreeReportController::class, 'searchPlaces'])
+        ->name('places.search')
+        ->middleware('throttle:60,1');
+
     // OTP verification
     Route::post('/request-otp', [FreeReportController::class, 'requestOtp'])
         ->name('request-otp')
@@ -184,14 +189,14 @@ Route::prefix('api/free-report')->name('free-report.')->group(function () {
 
 // Free Report Public Pages (No Auth Required)
 Route::prefix('free-report')->name('free-report.page.')->group(function () {
-    // Main report page
-    Route::get('{token}', [FreeReportPageController::class, 'show'])
-        ->name('show');
-
-    // Request access (for returning users)
+    // Request access (for returning users) - must be defined before {token}
     Route::get('access', [FreeReportPageController::class, 'accessForm'])
         ->name('access');
 
     Route::post('access', [FreeReportPageController::class, 'requestAccess'])
         ->name('request-access');
+
+    // Main report page (catch-all, must be last)
+    Route::get('{token}', [FreeReportPageController::class, 'show'])
+        ->name('show');
 });

@@ -406,7 +406,7 @@
                 this.searchError = '';
 
                 try {
-                    const response = await fetch(`{{ route("competition.places.search") }}?query=${encodeURIComponent(this.searchQuery)}`, {
+                    const response = await fetch(`{{ route("free-report.places.search") }}?query=${encodeURIComponent(this.searchQuery)}`, {
                         headers: { 'Accept': 'application/json' },
                     });
 
@@ -440,28 +440,29 @@
                 this.loading = true;
                 this.error = '';
 
+                // Format phone with country code
+                const fullPhone = '+966' + this.phone.replace(/^0+/, '');
+
                 try {
-                    const response = await fetch('{{ route("competition.send-otp") }}', {
+                    const response = await fetch('{{ route("free-report.request-otp") }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                             'Accept': 'application/json',
                         },
-                        body: JSON.stringify({ phone: this.phone }),
+                        body: JSON.stringify({ phone: fullPhone }),
                     });
 
                     const data = await response.json();
 
                     if (data.success) {
-                        this.phoneMasked = data.data.phone_masked;
+                        // Create masked phone display
+                        this.phoneMasked = '+966 ' + this.phone.slice(0, 2) + '***' + this.phone.slice(-2);
                         this.step = 3;
                         this.startResendCountdown(60);
                     } else {
                         this.error = data.message;
-                        if (data.data?.retry_after) {
-                            this.error += ` (${data.data.retry_after} ثانية)`;
-                        }
                     }
                 } catch (e) {
                     this.error = 'حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.';
@@ -528,8 +529,11 @@
                 this.loading = true;
                 this.error = '';
 
+                const fullPhone = '+966' + this.phone.replace(/^0+/, '');
+
                 try {
-                    const response = await fetch('{{ route("competition.verify-otp") }}', {
+                    // First verify the OTP
+                    const verifyResponse = await fetch('{{ route("free-report.verify-otp") }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -537,21 +541,44 @@
                             'Accept': 'application/json',
                         },
                         body: JSON.stringify({
-                            phone: this.phone,
-                            code: this.otpCode,
+                            phone: fullPhone,
+                            otp: this.otpCode,
                         }),
                     });
 
-                    const data = await response.json();
+                    const verifyData = await verifyResponse.json();
 
-                    if (data.success) {
-                        // TODO: Trigger report generation here
+                    if (!verifyData.success) {
+                        this.error = verifyData.message;
+                        return;
+                    }
+
+                    // OTP verified - now create the report
+                    const createResponse = await fetch('{{ route("free-report.create") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            phone: fullPhone,
+                            place_id: this.selectedPlace.place_id,
+                            business_name: this.selectedPlace.name,
+                            business_address: this.selectedPlace.address,
+                        }),
+                    });
+
+                    const createData = await createResponse.json();
+
+                    if (createData.success) {
                         this.step = 4;
                     } else {
-                        this.error = data.message;
+                        this.error = createData.message || 'فشل في إنشاء التقرير';
                     }
                 } catch (e) {
                     this.error = 'حدث خطأ في التحقق. يرجى المحاولة مرة أخرى.';
+                    console.error('Verify error:', e);
                 } finally {
                     this.loading = false;
                 }
@@ -564,15 +591,17 @@
                 this.error = '';
                 this.resetOtp();
 
+                const fullPhone = '+966' + this.phone.replace(/^0+/, '');
+
                 try {
-                    const response = await fetch('{{ route("competition.resend-otp") }}', {
+                    const response = await fetch('{{ route("free-report.request-otp") }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                             'Accept': 'application/json',
                         },
-                        body: JSON.stringify({ phone: this.phone }),
+                        body: JSON.stringify({ phone: fullPhone }),
                     });
 
                     const data = await response.json();
