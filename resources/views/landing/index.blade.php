@@ -29,8 +29,17 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
+        :root {
+            --header-height: 67px;
+        }
+
         body {
             font-family: 'Tajawal', sans-serif;
+        }
+
+        /* Main content offset for fixed header */
+        main {
+            padding-top: var(--header-height);
         }
 
         /* Hide elements with x-cloak until Alpine initializes */
@@ -190,7 +199,7 @@
     @include('landing.partials.header')
 
     {{-- Main Content --}}
-    <main class="pt-16 sm:pt-20">
+    <main>
         {{-- Hero Section --}}
         @include('landing.partials.hero')
 
