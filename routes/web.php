@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\FreeReportController;
+use App\Http\Controllers\FreeReportPageController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Competition\CompetitionAuthController;
 use App\Http\Controllers\Competition\CompetitionController;
@@ -181,7 +182,16 @@ Route::prefix('api/free-report')->name('free-report.')->group(function () {
         ->name('view');
 });
 
-// Free Report View Page (for rendering the report UI)
-Route::get('/free-report/{token}', function (string $token) {
-    return view('landing.free-report', ['token' => $token]);
-})->name('free-report.page');
+// Free Report Public Pages (No Auth Required)
+Route::prefix('free-report')->name('free-report.page.')->group(function () {
+    // Main report page
+    Route::get('{token}', [FreeReportPageController::class, 'show'])
+        ->name('show');
+
+    // Request access (for returning users)
+    Route::get('access', [FreeReportPageController::class, 'accessForm'])
+        ->name('access');
+
+    Route::post('access', [FreeReportPageController::class, 'requestAccess'])
+        ->name('request-access');
+});
