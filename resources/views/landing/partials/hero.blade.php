@@ -11,7 +11,7 @@
         <div class="absolute inset-0 bg-grid-pattern opacity-[0.02]"></div>
     </div>
 
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-16 relative z-10">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 pb-16 relative z-10">
         <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
             {{-- Left Content --}}

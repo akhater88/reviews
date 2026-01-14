@@ -190,7 +190,7 @@
     @include('landing.partials.header')
 
     {{-- Main Content --}}
-    <main>
+    <main class="pt-16 sm:pt-20">
         {{-- Hero Section --}}
         @include('landing.partials.hero')
 
