@@ -278,17 +278,28 @@ class FreeReportController extends Controller
             ], 404);
         }
 
+        $data = [
+            'report_id' => $report->id,
+            'status' => $report->status,
+            'is_completed' => $report->isCompleted(),
+            'is_processing' => $report->isProcessing(),
+            'has_failed' => $report->hasFailed(),
+            'error_message' => $report->error_message,
+            'created_at' => $report->created_at->toIso8601String(),
+        ];
+
+        // Include magic link token when report is completed
+        if ($report->isCompleted()) {
+            // Generate token if not exists
+            if (!$report->magic_link_token) {
+                $report->generateMagicLinkToken();
+            }
+            $data['token'] = $report->magic_link_token;
+        }
+
         return response()->json([
             'success' => true,
-            'data' => [
-                'report_id' => $report->id,
-                'status' => $report->status,
-                'is_completed' => $report->isCompleted(),
-                'is_processing' => $report->isProcessing(),
-                'has_failed' => $report->hasFailed(),
-                'error_message' => $report->error_message,
-                'created_at' => $report->created_at->toIso8601String(),
-            ],
+            'data' => $data,
         ]);
     }
 
