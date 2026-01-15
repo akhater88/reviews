@@ -180,6 +180,33 @@ class FreeReportController extends Controller
             ], 422);
         }
 
+        // Check for existing completed report by phone number
+        $existingReport = $this->freeReportService->findExistingReportByPhone($request->phone);
+
+        if ($existingReport) {
+            // Regenerate magic link token for the existing report
+            $existingReport->generateMagicLinkToken();
+
+            Log::info('FreeReportController: Duplicate report attempt', [
+                'phone' => $request->phone,
+                'existing_report_id' => $existingReport->id,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error_code' => 'DUPLICATE_REPORT',
+                'message' => 'لقد قمت بإنشاء تقرير مجاني مسبقاً',
+                'data' => [
+                    'report_id' => $existingReport->id,
+                    'business_name' => $existingReport->business_name,
+                    'business_address' => $existingReport->business_address,
+                    'created_at' => $existingReport->created_at->toIso8601String(),
+                    'created_at_formatted' => $existingReport->created_at->format('Y-m-d'),
+                    'magic_link_token' => $existingReport->magic_link_token,
+                ],
+            ], 409);
+        }
+
         try {
             $report = $this->freeReportService->createReport(
                 phone: $request->phone,
