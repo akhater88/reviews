@@ -13,6 +13,7 @@
     <SuccessState
       v-else-if="isComplete"
       :report-data="reportData"
+      :report-token="reportToken"
       @view-report="handleViewReport"
     />
 
