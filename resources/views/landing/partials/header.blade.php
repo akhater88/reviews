@@ -59,16 +59,15 @@
 
             {{-- Right Side Actions --}}
             <div class="flex items-center gap-3 sm:gap-4">
-                {{-- Subscribe Button (Desktop) --}}
+                {{-- Login Button (Desktop) --}}
                 <a
-                    href="#pricing"
-                    @click.prevent="document.getElementById('pricing').scrollIntoView({ behavior: 'smooth', block: 'start' })"
+                    href="/restaurant-owners/login"
                     class="hidden sm:inline-flex items-center gap-2 text-gray-300 hover:text-white font-medium transition-colors text-sm"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
                     </svg>
-                    {{ __('app.navSubscribe') }}
+                    تسجيل الدخول
                 </a>
 
                 {{-- CTA Button --}}
@@ -216,20 +215,20 @@
             {{-- Divider --}}
             <hr class="my-6 border-gray-800" />
 
-            {{-- Subscribe Link --}}
+            {{-- Login Link --}}
             <a
-                href="#pricing"
-                @click="mobileMenuOpen = false; setTimeout(() => document.getElementById('pricing').scrollIntoView({ behavior: 'smooth', block: 'start' }), 150)"
+                href="/restaurant-owners/login"
+                @click="mobileMenuOpen = false"
                 class="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-800 transition-colors group"
             >
-                <div class="w-10 h-10 bg-gray-700 rounded-xl flex items-center justify-center group-hover:bg-gray-600 transition-colors">
-                    <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                <div class="w-10 h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center group-hover:bg-indigo-500/30 transition-colors">
+                    <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
                     </svg>
                 </div>
                 <div>
-                    <p class="font-semibold text-white">{{ __('app.navSubscribe') }}</p>
-                    <p class="text-sm text-gray-400">سجل للحصول على التحديثات</p>
+                    <p class="font-semibold text-white">تسجيل الدخول</p>
+                    <p class="text-sm text-gray-400">الدخول لحسابك</p>
                 </div>
             </a>
 
