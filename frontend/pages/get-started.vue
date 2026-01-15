@@ -78,6 +78,17 @@
           @error="handleError"
           @retry="retryProcessing"
         />
+
+        <!-- Step 5: Existing Report Found -->
+        <WizardExistingReportStep
+          v-else-if="currentStep === 5 && existingReportData"
+          :business-name="existingReportData.businessName"
+          :business-address="existingReportData.businessAddress"
+          :created-at="existingReportData.createdAt"
+          :created-at-formatted="existingReportData.createdAtFormatted"
+          :magic-link-token="existingReportData.magicLinkToken"
+          @back="handleExistingReportBack"
+        />
       </Transition>
     </main>
   </div>
@@ -88,10 +99,19 @@ import type { Place } from '~/composables/useFreeReportApi'
 
 const router = useRouter()
 const wizard = useWizard()
-const { createFreeReport } = useFreeReportApi()
+const { createFreeReport, checkExistingReport } = useFreeReportApi()
 
 const showWelcome = ref(true)
 const currentStep = ref(1)
+
+// Existing report data
+const existingReportData = ref<{
+  businessName: string
+  businessAddress?: string
+  createdAt: string
+  createdAtFormatted: string
+  magicLinkToken: string
+} | null>(null)
 
 // Check for saved state on mount
 onMounted(() => {
@@ -134,6 +154,28 @@ const handleContactSubmitted = (data: { name: string; phone: string; email?: str
 
 const handleVerified = async () => {
   wizard.setVerified(true)
+
+  // Check for existing report before creating a new one
+  try {
+    const existingResult = await checkExistingReport(wizard.phone)
+
+    if (existingResult.success && existingResult.has_existing_report && existingResult.data) {
+      // Show existing report step
+      existingReportData.value = {
+        businessName: existingResult.data.business_name,
+        businessAddress: existingResult.data.business_address,
+        createdAt: existingResult.data.created_at,
+        createdAtFormatted: existingResult.data.created_at_formatted,
+        magicLinkToken: existingResult.data.magic_link_token,
+      }
+      currentStep.value = 5 // Step 5 is the existing report step
+      return
+    }
+  } catch (error) {
+    console.error('Failed to check existing report:', error)
+  }
+
+  // No existing report, proceed with creating a new one
   currentStep.value = 4
 
   // Start report creation
@@ -164,5 +206,12 @@ const handleError = () => {
 const retryProcessing = () => {
   // Retry the report creation
   handleVerified()
+}
+
+const handleExistingReportBack = () => {
+  // Clear existing report data and go back to step 1
+  existingReportData.value = null
+  wizard.reset()
+  currentStep.value = 1
 }
 </script>
