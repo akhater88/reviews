@@ -89,8 +89,25 @@
       </button>
     </div>
 
+    <!-- Report Link Section -->
+    <div class="mt-6 bg-white rounded-xl border border-gray-200 p-4 max-w-md mx-auto animate-fade-up" style="animation-delay: 0.4s">
+      <div class="flex items-center justify-between gap-3 mb-3">
+        <button
+          @click="copyLink"
+          class="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-sm"
+        >
+          <Icon :name="copied ? 'lucide:check' : 'lucide:copy'" class="w-4 h-4" :class="copied ? 'text-green-600' : 'text-gray-600'" />
+          <span :class="copied ? 'text-green-600' : 'text-gray-600'">{{ copied ? $t('success.linkCopied') : $t('success.copyLink') }}</span>
+        </button>
+        <span class="text-sm text-gray-500">{{ $t('success.reportLink') }}</span>
+      </div>
+      <div class="bg-gray-50 rounded-lg p-3">
+        <p class="text-sm text-gray-700 break-all font-mono text-left" dir="ltr">{{ reportUrl }}</p>
+      </div>
+    </div>
+
     <!-- WhatsApp Delivery Notice -->
-    <div class="mt-8 p-4 bg-green-50 rounded-xl max-w-md mx-auto animate-fade-up" style="animation-delay: 0.4s">
+    <div class="mt-4 p-4 bg-green-50 rounded-xl max-w-md mx-auto animate-fade-up" style="animation-delay: 0.5s">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
           <Icon name="lucide:message-circle" class="w-5 h-5 text-white" />
@@ -105,6 +122,10 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue'
+
+const { t } = useI18n()
+
 interface ReportData {
   restaurantName: string
   reviewsCount: number
@@ -113,11 +134,31 @@ interface ReportData {
   insights: number
 }
 
-defineProps<{
+const props = defineProps<{
   reportData?: ReportData
+  reportToken?: string
 }>()
 
 defineEmits(['viewReport'])
+
+const copied = ref(false)
+
+const reportUrl = computed(() => {
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+  return `${baseUrl}/report/${props.reportToken}`
+})
+
+const copyLink = async () => {
+  try {
+    await navigator.clipboard.writeText(reportUrl.value)
+    copied.value = true
+    setTimeout(() => {
+      copied.value = false
+    }, 2000)
+  } catch (err) {
+    console.error('Failed to copy:', err)
+  }
+}
 
 const confettiColors = [
   'bg-yellow-400',

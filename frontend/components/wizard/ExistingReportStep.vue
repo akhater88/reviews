@@ -43,6 +43,23 @@
       </div>
     </div>
 
+    <!-- Report Link Section -->
+    <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+      <div class="flex items-center justify-between gap-3 mb-3">
+        <button
+          @click="copyLink"
+          class="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-sm"
+        >
+          <Icon :name="copied ? 'lucide:check' : 'lucide:copy'" class="w-4 h-4" :class="copied ? 'text-green-600' : 'text-gray-600'" />
+          <span :class="copied ? 'text-green-600' : 'text-gray-600'">{{ copied ? $t('existingReport.linkCopied') : $t('existingReport.copyLink') }}</span>
+        </button>
+        <span class="text-sm text-gray-500">{{ $t('existingReport.reportLink') }}</span>
+      </div>
+      <div class="bg-gray-50 rounded-lg p-3">
+        <p class="text-sm text-gray-700 break-all font-mono text-left" dir="ltr">{{ reportUrl }}</p>
+      </div>
+    </div>
+
     <!-- View Report Button -->
     <button
       @click="handleViewReport"
@@ -64,9 +81,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const router = useRouter()
+const runtimeConfig = useRuntimeConfig()
 
 const props = defineProps<{
   businessName: string
@@ -80,6 +98,8 @@ const emit = defineEmits<{
   back: []
 }>()
 
+const copied = ref(false)
+
 const formattedDate = computed(() => {
   try {
     const date = new Date(props.createdAt)
@@ -92,6 +112,23 @@ const formattedDate = computed(() => {
     return props.createdAtFormatted
   }
 })
+
+const reportUrl = computed(() => {
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+  return `${baseUrl}/report/${props.magicLinkToken}`
+})
+
+const copyLink = async () => {
+  try {
+    await navigator.clipboard.writeText(reportUrl.value)
+    copied.value = true
+    setTimeout(() => {
+      copied.value = false
+    }, 2000)
+  } catch (err) {
+    console.error('Failed to copy:', err)
+  }
+}
 
 const handleViewReport = () => {
   router.push(`/report/${props.magicLinkToken}`)
