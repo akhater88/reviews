@@ -4,13 +4,10 @@ namespace App\Horizon;
 
 use Illuminate\Support\Collection;
 use Laravel\Horizon\Contracts\MasterSupervisorRepository;
-use Laravel\Horizon\RedisHelpers;
 use Illuminate\Contracts\Redis\Factory as RedisFactory;
 
 class SafeRedisMasterSupervisorRepository implements MasterSupervisorRepository
 {
-    use RedisHelpers;
-
     /**
      * The Redis connection instance.
      *
@@ -27,6 +24,16 @@ class SafeRedisMasterSupervisorRepository implements MasterSupervisorRepository
     public function __construct(RedisFactory $redis)
     {
         $this->redis = $redis;
+    }
+
+    /**
+     * Get the Redis connection instance.
+     *
+     * @return \Illuminate\Redis\Connections\Connection
+     */
+    public function connection()
+    {
+        return $this->redis->connection(config('horizon.use'));
     }
 
     /**
