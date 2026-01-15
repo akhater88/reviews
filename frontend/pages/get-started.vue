@@ -171,7 +171,12 @@ const handleVerified = async () => {
     console.error('Failed to create report:', error)
 
     // Check if this is a duplicate report error (409 status)
-    if (error.response?.status === 409 || error.data?.error_code === 'DUPLICATE_REPORT') {
+    // For $fetch errors: error.statusCode and error.data
+    const isDuplicate = error.statusCode === 409 ||
+                        error.data?.error_code === 'DUPLICATE_REPORT' ||
+                        error.response?.status === 409
+
+    if (isDuplicate) {
       const data = error.data?.data || error.response?.data?.data
       if (data) {
         existingReportData.value = {
