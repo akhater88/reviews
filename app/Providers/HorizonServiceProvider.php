@@ -6,9 +6,22 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Horizon\Horizon;
 use Laravel\Horizon\HorizonApplicationServiceProvider;
+use Laravel\Horizon\Contracts\MasterSupervisorRepository;
+use App\Horizon\SafeRedisMasterSupervisorRepository;
 
 class HorizonServiceProvider extends HorizonApplicationServiceProvider
 {
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        parent::register();
+
+        // Override the MasterSupervisorRepository to handle corrupted Redis data
+        $this->app->singleton(MasterSupervisorRepository::class, SafeRedisMasterSupervisorRepository::class);
+    }
+
     /**
      * Bootstrap any application services.
      */
