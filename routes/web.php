@@ -168,6 +168,11 @@ Route::prefix('api/free-report')->name('free-report.')->group(function () {
         ->name('verify-otp')
         ->middleware('throttle:free-report-verify');
 
+    // Check for existing report by phone
+    Route::get('/check-existing', [FreeReportController::class, 'checkExistingReport'])
+        ->name('check-existing')
+        ->middleware('throttle:60,1');
+
     // Report creation
     Route::post('/create', [FreeReportController::class, 'createReport'])
         ->name('create')

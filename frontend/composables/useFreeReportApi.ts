@@ -30,6 +30,19 @@ interface ReportStatusResponse {
   }
 }
 
+interface ExistingReportResponse {
+  success: boolean
+  has_existing_report: boolean
+  data?: {
+    report_id: number
+    business_name: string
+    business_address?: string
+    created_at: string
+    created_at_formatted: string
+    magic_link_token: string
+  }
+}
+
 export function useFreeReportApi() {
   const config = useRuntimeConfig()
   const apiBase = config.public.apiBase || ''
@@ -160,6 +173,22 @@ export function useFreeReportApi() {
     }
   }
 
+  // Check for existing report by phone
+  const checkExistingReport = async (phone: string): Promise<ExistingReportResponse> => {
+    try {
+      const response = await $fetch<ExistingReportResponse>(`${apiBase}/api/free-report/check-existing`, {
+        params: { phone },
+      })
+
+      return response
+    } catch (error: any) {
+      return {
+        success: false,
+        has_existing_report: false,
+      }
+    }
+  }
+
   return {
     isLoading,
     searchPlaces,
@@ -168,5 +197,6 @@ export function useFreeReportApi() {
     resendOtp,
     createFreeReport,
     checkReportStatus,
+    checkExistingReport,
   }
 }

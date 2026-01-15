@@ -217,9 +217,23 @@ class FreeReportService
     }
 
     /**
+     * Find an existing completed report by phone number.
+     * Returns the most recent completed report for the given phone.
+     */
+    public function findExistingReportByPhone(string $phone): ?FreeReport
+    {
+        $normalizedPhone = $this->normalizePhone($phone);
+
+        return FreeReport::where('phone', $normalizedPhone)
+            ->where('status', FreeReport::STATUS_COMPLETED)
+            ->latest()
+            ->first();
+    }
+
+    /**
      * Normalize phone number.
      */
-    protected function normalizePhone(string $phone): string
+    public function normalizePhone(string $phone): string
     {
         $phone = preg_replace('/[\s\-\(\)]/', '', $phone);
 

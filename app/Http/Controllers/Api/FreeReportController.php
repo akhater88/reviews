@@ -29,6 +29,49 @@ class FreeReportController extends Controller
     }
 
     /**
+     * Check if a phone number has an existing completed report.
+     */
+    public function checkExistingReport(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'phone' => 'required|string|min:9|max:15',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'رقم الهاتف غير صالح',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $existingReport = $this->freeReportService->findExistingReportByPhone($request->phone);
+
+        if (!$existingReport) {
+            return response()->json([
+                'success' => true,
+                'has_existing_report' => false,
+            ]);
+        }
+
+        // Regenerate magic link token for the existing report
+        $existingReport->generateMagicLinkToken();
+
+        return response()->json([
+            'success' => true,
+            'has_existing_report' => true,
+            'data' => [
+                'report_id' => $existingReport->id,
+                'business_name' => $existingReport->business_name,
+                'business_address' => $existingReport->business_address,
+                'created_at' => $existingReport->created_at->toIso8601String(),
+                'created_at_formatted' => $existingReport->created_at->format('Y-m-d'),
+                'magic_link_token' => $existingReport->magic_link_token,
+            ],
+        ]);
+    }
+
+    /**
      * Search for restaurants via Google Places (public endpoint).
      */
     public function searchPlaces(Request $request): JsonResponse
