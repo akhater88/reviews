@@ -105,6 +105,39 @@ class SafeRedisMasterSupervisorRepository implements MasterSupervisorRepository
     }
 
     /**
+     * Get information on the given master supervisors.
+     *
+     * @param  array  $names
+     * @return Collection
+     */
+    public function get(array $names)
+    {
+        $records = $this->connection()->pipeline(function ($pipe) use ($names) {
+            foreach ($names as $name) {
+                $pipe->hmget('master:'.$name, ['name', 'pid', 'status', 'started_at', 'environment']);
+            }
+        });
+
+        return collect($records)
+            ->map(function ($record) {
+                // FIX: Handle the case where $record is not an array (corrupted data)
+                if (!is_array($record)) {
+                    return null;
+                }
+
+                $record = array_values($record);
+
+                return ! $record[0] ? null : (object) [
+                    'name' => $record[0],
+                    'pid' => $record[1],
+                    'status' => $record[2],
+                    'started_at' => $record[3],
+                    'environment' => $record[4],
+                ];
+            })->filter()->values();
+    }
+
+    /**
      * Update the given master supervisor process with the given information.
      *
      * @param  \Laravel\Horizon\MasterSupervisor  $master
