@@ -44,7 +44,7 @@
     </div>
 
     <!-- Report Link Section -->
-    <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+    <div v-if="magicLinkToken" class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
       <div class="flex items-center justify-between gap-3 mb-3">
         <button
           @click="copyLink"

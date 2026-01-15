@@ -55,7 +55,7 @@ class FreeReportController extends Controller
         }
 
         // Regenerate magic link token for the existing report
-        $existingReport->generateMagicLinkToken();
+        $token = $existingReport->generateMagicLinkToken();
 
         return response()->json([
             'success' => true,
@@ -66,7 +66,7 @@ class FreeReportController extends Controller
                 'business_address' => $existingReport->business_address,
                 'created_at' => $existingReport->created_at->toIso8601String(),
                 'created_at_formatted' => $existingReport->created_at->format('Y-m-d'),
-                'magic_link_token' => $existingReport->magic_link_token,
+                'magic_link_token' => $token,
             ],
         ]);
     }
@@ -185,7 +185,7 @@ class FreeReportController extends Controller
 
         if ($existingReport) {
             // Regenerate magic link token for the existing report
-            $existingReport->generateMagicLinkToken();
+            $token = $existingReport->generateMagicLinkToken();
 
             Log::info('FreeReportController: Duplicate report attempt', [
                 'phone' => $request->phone,
@@ -202,7 +202,7 @@ class FreeReportController extends Controller
                     'business_address' => $existingReport->business_address,
                     'created_at' => $existingReport->created_at->toIso8601String(),
                     'created_at_formatted' => $existingReport->created_at->format('Y-m-d'),
-                    'magic_link_token' => $existingReport->magic_link_token,
+                    'magic_link_token' => $token,
                 ],
             ], 409);
         }
