@@ -6,10 +6,29 @@
     <meta name="description" content="{{ $settings['hero_subtitle'] }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $settings['hero_title'] }} | TABsense</title>
+    <title>{{ $settings['hero_title'] }} | سُمعة</title>
 
     <!-- Favicon -->
-    <link rel="icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" href="{{ asset('images/sumaa-favicon.ico') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/sumaa-logo-icon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/sumaa-apple-touch-icon.png') }}">
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="سُمعة - Sumaa">
+    <meta property="og:title" content="{{ $settings['hero_title'] }} | سُمعة">
+    <meta property="og:description" content="{{ $settings['hero_subtitle'] }}">
+    <meta property="og:image" content="{{ asset('images/sumaa-og-image.png') }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:locale" content="ar_SA">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $settings['hero_title'] }} | سُمعة">
+    <meta name="twitter:description" content="{{ $settings['hero_subtitle'] }}">
+    <meta name="twitter:image" content="{{ asset('images/sumaa-og-image.png') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

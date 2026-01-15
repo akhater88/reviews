@@ -1,0 +1,85 @@
+<!-- Open Graph Social Sharing Image: 1200x630 -->
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="50%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+    <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#E0E7FF"/>
+    </linearGradient>
+    <!-- Decorative circles pattern -->
+    <pattern id="dots" width="60" height="60" patternUnits="userSpaceOnUse">
+      <circle cx="30" cy="30" r="3" fill="rgba(255,255,255,0.1)"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg-gradient)"/>
+
+  <!-- Decorative pattern overlay -->
+  <rect width="1200" height="630" fill="url(#dots)" opacity="0.5"/>
+
+  <!-- Decorative elements -->
+  <circle cx="100" cy="100" r="200" fill="rgba(255,255,255,0.05)"/>
+  <circle cx="1100" cy="530" r="250" fill="rgba(255,255,255,0.05)"/>
+  <circle cx="900" cy="100" r="150" fill="rgba(255,255,255,0.03)"/>
+
+  <!-- Logo container -->
+  <rect x="460" y="140" width="280" height="140" rx="35" fill="rgba(255,255,255,0.15)"/>
+  <rect x="470" y="150" width="260" height="120" rx="30" fill="rgba(255,255,255,0.95)"/>
+
+  <!-- Arabic Logo Text: سُمعة -->
+  <text x="600" y="215"
+        font-family="IBM Plex Sans Arabic, Tajawal, system-ui, -apple-system, sans-serif"
+        font-size="52"
+        font-weight="700"
+        fill="#6366F1"
+        text-anchor="middle"
+        direction="rtl">سُمعة</text>
+
+  <!-- English subtitle -->
+  <text x="600" y="255"
+        font-family="Plus Jakarta Sans, system-ui, -apple-system, sans-serif"
+        font-size="18"
+        font-weight="600"
+        fill="#8B5CF6"
+        text-anchor="middle"
+        letter-spacing="6">SUMAA</text>
+
+  <!-- Tagline in Arabic -->
+  <text x="600" y="360"
+        font-family="IBM Plex Sans Arabic, Tajawal, system-ui, -apple-system, sans-serif"
+        font-size="42"
+        font-weight="600"
+        fill="white"
+        text-anchor="middle"
+        direction="rtl">منصة إدارة التقييمات الذكية</text>
+
+  <!-- Subtitle description -->
+  <text x="600" y="420"
+        font-family="IBM Plex Sans Arabic, Tajawal, system-ui, -apple-system, sans-serif"
+        font-size="26"
+        font-weight="400"
+        fill="rgba(255,255,255,0.9)"
+        text-anchor="middle"
+        direction="rtl">حوّل تقييمات عملائك إلى رؤى قابلة للتنفيذ</text>
+
+  <!-- Website URL -->
+  <text x="600" y="530"
+        font-family="Plus Jakarta Sans, system-ui, -apple-system, sans-serif"
+        font-size="22"
+        font-weight="500"
+        fill="rgba(255,255,255,0.7)"
+        text-anchor="middle">getsumaa.app</text>
+
+  <!-- Star decorations -->
+  <g fill="rgba(255,255,255,0.3)">
+    <polygon points="150,300 155,315 170,315 158,325 163,340 150,330 137,340 142,325 130,315 145,315" />
+    <polygon points="1050,200 1055,215 1070,215 1058,225 1063,240 1050,230 1037,240 1042,225 1030,215 1045,215" />
+    <polygon points="200,500 205,515 220,515 208,525 213,540 200,530 187,540 192,525 180,515 195,515" />
+    <polygon points="1000,450 1005,465 1020,465 1008,475 1013,490 1000,480 987,490 992,475 980,465 995,465" />
+  </g>
+</svg>

@@ -4,8 +4,31 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="حوّل تقييمات عملائك إلى رؤى قابلة للتنفيذ">
 
-    <title>{{ $title ?? 'الدفع' }} - {{ config('app.name', 'TABsense') }}</title>
+    <title>{{ $title ?? 'الدفع' }} - {{ config('app.name', 'سُمعة') }}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('images/sumaa-favicon.ico') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/sumaa-logo-icon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/sumaa-apple-touch-icon.png') }}">
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="سُمعة - Sumaa">
+    <meta property="og:title" content="{{ $title ?? 'الدفع' }} - سُمعة">
+    <meta property="og:description" content="حوّل تقييمات عملائك إلى رؤى قابلة للتنفيذ">
+    <meta property="og:image" content="{{ asset('images/sumaa-og-image.png') }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:locale" content="ar_SA">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $title ?? 'الدفع' }} - سُمعة">
+    <meta name="twitter:description" content="حوّل تقييمات عملائك إلى رؤى قابلة للتنفيذ">
+    <meta name="twitter:image" content="{{ asset('images/sumaa-og-image.png') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
