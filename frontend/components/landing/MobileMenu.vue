@@ -29,11 +29,8 @@
         >
           <!-- Header -->
           <div class="flex items-center justify-between p-4 border-b border-gray-100">
-            <NuxtLink to="/" class="flex items-center gap-2" @click="$emit('close')">
-              <div class="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <Icon name="lucide:bar-chart-3" class="w-4 h-4 text-white" />
-              </div>
-              <span class="text-lg font-bold text-gray-900">TABsense</span>
+            <NuxtLink to="/" class="flex items-center" @click="$emit('close')">
+              <SumaaLogo class="h-10" />
             </NuxtLink>
             <button
               @click="$emit('close')"

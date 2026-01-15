@@ -71,7 +71,7 @@ return [
     'invoice' => [
         'prefix' => 'INV-',
         'tax_rate' => 15, // VAT percentage
-        'company_name' => 'TABsense',
+        'company_name' => 'سُمعة',
         'company_address' => 'Riyadh, Saudi Arabia',
         'company_tax_number' => '',
     ],

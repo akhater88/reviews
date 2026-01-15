@@ -22,7 +22,7 @@ class SubscriptionExpiringMail extends Mailable
         $days = $this->subscription->daysUntilExpiry();
 
         return new Envelope(
-            subject: "تنبيه: اشتراكك في TABsense سينتهي خلال {$days} يوم",
+            subject: "تنبيه: اشتراكك في سُمعة سينتهي خلال {$days} يوم",
         );
     }
 

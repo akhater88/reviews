@@ -6,13 +6,15 @@
     <meta name="description" content="{{ __('app.heroSubtitle') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>TABsense - منصة إدارة تقييمات Google للمطاعم</title>
+    <title>سُمعة - منصة إدارة التقييمات الذكية</title>
 
     {{-- Favicon --}}
-    <link rel="icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" href="{{ asset('images/sumaa-favicon.ico') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/sumaa-logo-icon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/sumaa-apple-touch-icon.png') }}">
 
     {{-- Open Graph / Social Media --}}
-    <meta property="og:title" content="TABsense - منصة إدارة تقييمات Google للمطاعم">
+    <meta property="og:title" content="سُمعة - منصة إدارة التقييمات الذكية">
     <meta property="og:description" content="{{ __('app.heroSubtitle') }}">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
@@ -20,7 +22,7 @@
     {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 
     {{-- Tailwind CSS --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])

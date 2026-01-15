@@ -1,9 +1,9 @@
 {{-- Enhanced Hero Section --}}
-<section class="relative min-h-[90vh] overflow-hidden bg-gradient-to-br from-blue-50/80 via-white to-purple-50/50">
+<section class="relative min-h-[90vh] overflow-hidden bg-gradient-to-br from-indigo-50/80 via-white to-purple-50/50">
     {{-- Animated Background Elements --}}
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
         {{-- Floating Shapes --}}
-        <div class="absolute top-20 right-10 w-72 h-72 bg-blue-200/30 rounded-full blur-3xl animate-float-slow"></div>
+        <div class="absolute top-20 right-10 w-72 h-72 bg-indigo-200/30 rounded-full blur-3xl animate-float-slow"></div>
         <div class="absolute bottom-20 left-10 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl animate-float-slower"></div>
         <div class="absolute top-1/2 left-1/3 w-64 h-64 bg-red-200/20 rounded-full blur-3xl animate-float"></div>
 
@@ -17,7 +17,7 @@
             {{-- Left Content --}}
             <div class="text-center lg:text-right order-2 lg:order-1">
                 {{-- Badge --}}
-                <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-blue-100 rounded-full shadow-sm mb-6">
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-indigo-100 rounded-full shadow-sm mb-6">
                     <span class="relative flex h-2 w-2">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
@@ -121,7 +121,7 @@
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                                     </svg>
-                                    <span dir="ltr">app.tabsense.net</span>
+                                    <span dir="ltr">app.getsumaa.app</span>
                                 </div>
                             </div>
                         </div>
@@ -131,13 +131,13 @@
                             {{-- Header --}}
                             <div class="flex items-center justify-between mb-6">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                                    <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
                                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                         </svg>
                                     </div>
                                     <div>
-                                        <p class="font-bold text-gray-900 text-sm">لوحة تحكم TABsense</p>
+                                        <p class="font-bold text-gray-900 text-sm">لوحة تحكم سُمعة</p>
                                         <p class="text-xs text-gray-500">مطعم الشرق</p>
                                     </div>
                                 </div>

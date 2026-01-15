@@ -17,7 +17,7 @@ return [
 
         'manual' => [
             'bank_name' => env('BANK_NAME', 'البنك الأهلي السعودي'),
-            'account_name' => env('BANK_ACCOUNT_NAME', 'TABsense LLC'),
+            'account_name' => env('BANK_ACCOUNT_NAME', 'Sumaa LLC'),
             'account_number' => env('BANK_ACCOUNT_NUMBER'),
             'iban' => env('BANK_IBAN'),
             'swift_code' => env('BANK_SWIFT'),

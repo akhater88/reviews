@@ -148,8 +148,8 @@ const shareReport = async () => {
   if (navigator.share) {
     try {
       await navigator.share({
-        title: 'تقرير TABsense',
-        text: 'شاهد تحليل مطعمي على TABsense',
+        title: 'تقرير سُمعة',
+        text: 'شاهد تحليل مطعمي على سُمعة',
         url: window.location.href,
       })
     } catch (err) {

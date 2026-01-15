@@ -4,11 +4,8 @@
     <header class="bg-white/80 backdrop-blur-lg border-b border-gray-100 sticky top-0 z-40">
       <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
         <!-- Logo -->
-        <NuxtLink to="/" class="flex items-center gap-2">
-          <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-            <Icon name="lucide:bar-chart-3" class="w-5 h-5 text-white" />
-          </div>
-          <span class="text-xl font-bold text-gray-900">TABsense</span>
+        <NuxtLink to="/" class="flex items-center">
+          <SumaaLogo class="h-10" />
         </NuxtLink>
 
         <!-- Step Progress -->
