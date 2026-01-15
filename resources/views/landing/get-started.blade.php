@@ -694,6 +694,42 @@
                             </div>
                         </div>
 
+                        {{-- Report Link Section --}}
+                        <div x-show="magicLinkToken" class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+                            <div class="flex items-center justify-between gap-3 mb-3">
+                                <button
+                                    @click="copyReportLink()"
+                                    class="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-sm"
+                                >
+                                    <svg x-show="!linkCopied" class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <svg x-show="linkCopied" class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span x-text="linkCopied ? 'تم النسخ' : 'نسخ الرابط'" :class="linkCopied ? 'text-green-600' : 'text-gray-600'"></span>
+                                </button>
+                                <span class="text-sm text-gray-500">رابط التقرير</span>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <p class="text-sm text-gray-700 break-all font-mono text-left" dir="ltr" x-text="reportUrl"></p>
+                            </div>
+                        </div>
+
+                        {{-- View Report Button --}}
+                        <a
+                            :href="reportUrl"
+                            x-show="magicLinkToken"
+                            class="block w-full text-center bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-green-500/30 transition-all mb-4"
+                        >
+                            <span class="flex items-center justify-center gap-2">
+                                <span>عرض التقرير</span>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                </svg>
+                            </span>
+                        </a>
+
                         {{-- WhatsApp Delivery Notice --}}
                         <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
                             <div class="flex items-center gap-3">
@@ -711,7 +747,7 @@
 
                         <a
                             href="{{ route('landing') }}"
-                            class="block w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-blue-500/30 transition-all"
+                            class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 rounded-xl font-medium text-lg transition-all text-center"
                         >
                             العودة للرئيسية
                         </a>
@@ -721,6 +757,99 @@
                             <a href="https://www.tabsense.ai/ar/social-landing-pages/google-review-tool" target="_blank" class="text-blue-600 hover:underline">اشترك الآن</a>
                         </p>
                     </div>
+                </div>
+
+                {{-- Step 6: Existing Report Found --}}
+                <div x-show="step === 6" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-x-4" x-transition:enter-end="opacity-100 transform translate-x-0">
+                    <div class="text-center mb-6">
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl shadow-lg shadow-amber-500/30 mb-4">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">لديك تقرير سابق</h2>
+                        <p class="text-gray-500 mt-2">تم إنشاء تقرير مجاني لهذا الرقم مسبقاً</p>
+                    </div>
+
+                    {{-- Report Info Card --}}
+                    <div class="bg-white rounded-2xl border-2 border-amber-200 shadow-lg p-6 mb-6" x-show="existingReportData">
+                        <div class="flex items-start gap-4 mb-4">
+                            <div class="w-12 h-12 bg-gradient-to-br from-amber-100 to-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1 text-right">
+                                <h3 class="font-bold text-lg text-gray-900" x-text="existingReportData?.business_name"></h3>
+                                <p class="text-sm text-gray-500 mt-1" x-text="existingReportData?.business_address"></p>
+                            </div>
+                        </div>
+                        <div class="border-t border-gray-100 pt-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-500 text-sm">تاريخ الإنشاء</span>
+                                <span class="font-medium text-gray-900" x-text="existingReportData?.created_at_formatted"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Info Message --}}
+                    <div class="p-4 bg-amber-50 border border-amber-100 rounded-xl mb-6">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p class="text-sm text-amber-800 text-right">
+                                التقرير المجاني متاح مرة واحدة فقط لكل رقم جوال. يمكنك الاطلاع على تقريرك السابق.
+                            </p>
+                        </div>
+                    </div>
+
+                    {{-- Report Link Section --}}
+                    <div x-show="magicLinkToken" class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+                        <div class="flex items-center justify-between gap-3 mb-3">
+                            <button
+                                @click="copyReportLink()"
+                                class="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-sm"
+                            >
+                                <svg x-show="!linkCopied" class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                                <svg x-show="linkCopied" class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span x-text="linkCopied ? 'تم النسخ' : 'نسخ الرابط'" :class="linkCopied ? 'text-green-600' : 'text-gray-600'"></span>
+                            </button>
+                            <span class="text-sm text-gray-500">رابط التقرير</span>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <p class="text-sm text-gray-700 break-all font-mono text-left" dir="ltr" x-text="reportUrl"></p>
+                        </div>
+                    </div>
+
+                    {{-- View Report Button --}}
+                    <a
+                        :href="reportUrl"
+                        x-show="magicLinkToken"
+                        class="block w-full text-center bg-gradient-to-r from-amber-500 to-orange-600 text-white py-4 rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-amber-500/30 transition-all mb-4"
+                    >
+                        <span class="flex items-center justify-center gap-2">
+                            <span>عرض التقرير السابق</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                        </span>
+                    </a>
+
+                    {{-- Back Button --}}
+                    <button
+                        @click="step = 1; selectedPlace = null; existingReportData = null; magicLinkToken = ''; phone = ''; resetOtp();"
+                        class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                        <span>العودة للبداية</span>
+                    </button>
                 </div>
 
             </div>
@@ -760,6 +889,11 @@
             currentTipIndex: 0,
             tipTimer: null,
 
+            // Report data
+            magicLinkToken: '',
+            existingReportData: null,
+            linkCopied: false,
+
             tips: [
                 'تقييمات العملاء هي أفضل طريقة لفهم نقاط القوة والضعف',
                 'التقارير التفصيلية تساعدك على اتخاذ قرارات أفضل',
@@ -782,7 +916,13 @@
             },
 
             get progressWidth() {
-                return (this.step / 5 * 100) + '%';
+                const totalSteps = this.step === 6 ? 6 : 5;
+                return (Math.min(this.step, 5) / 5 * 100) + '%';
+            },
+
+            get reportUrl() {
+                if (!this.magicLinkToken) return '';
+                return window.location.origin + '/report/' + this.magicLinkToken;
             },
 
             get otpCode() {
@@ -978,6 +1118,11 @@
                         // Move to processing step
                         this.step = 4;
                         this.startProcessing(fullPhone);
+                    } else if (createData.error_code === 'DUPLICATE_REPORT' && createData.data) {
+                        // Existing report found - show the link
+                        this.existingReportData = createData.data;
+                        this.magicLinkToken = createData.data.magic_link_token;
+                        this.step = 6; // Existing report step
                     } else {
                         this.error = createData.message || 'فشل في إنشاء التقرير';
                     }
@@ -1036,6 +1181,10 @@
                             case 'completed':
                                 this.processingProgress = 100;
                                 this.processingStage = 3;
+                                // Store the magic link token
+                                if (data.data.token) {
+                                    this.magicLinkToken = data.data.token;
+                                }
                                 this.stopProcessing();
                                 setTimeout(() => {
                                     this.step = 5;
@@ -1094,6 +1243,19 @@
                     this.error = 'فشل في إعادة الإرسال. يرجى المحاولة مرة أخرى.';
                 } finally {
                     this.resendLoading = false;
+                }
+            },
+
+            async copyReportLink() {
+                if (!this.reportUrl) return;
+                try {
+                    await navigator.clipboard.writeText(this.reportUrl);
+                    this.linkCopied = true;
+                    setTimeout(() => {
+                        this.linkCopied = false;
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy:', err);
                 }
             },
         }
