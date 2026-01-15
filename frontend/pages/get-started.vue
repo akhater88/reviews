@@ -99,7 +99,7 @@ import type { Place } from '~/composables/useFreeReportApi'
 
 const router = useRouter()
 const wizard = useWizard()
-const { createFreeReport, checkExistingReport } = useFreeReportApi()
+const { createFreeReport } = useFreeReportApi()
 
 const showWelcome = ref(true)
 const currentStep = ref(1)
@@ -155,27 +155,7 @@ const handleContactSubmitted = (data: { name: string; phone: string; email?: str
 const handleVerified = async () => {
   wizard.setVerified(true)
 
-  // Check for existing report before creating a new one
-  try {
-    const existingResult = await checkExistingReport(wizard.phone)
-
-    if (existingResult.success && existingResult.has_existing_report && existingResult.data) {
-      // Show existing report step
-      existingReportData.value = {
-        businessName: existingResult.data.business_name,
-        businessAddress: existingResult.data.business_address,
-        createdAt: existingResult.data.created_at,
-        createdAtFormatted: existingResult.data.created_at_formatted,
-        magicLinkToken: existingResult.data.magic_link_token,
-      }
-      currentStep.value = 5 // Step 5 is the existing report step
-      return
-    }
-  } catch (error) {
-    console.error('Failed to check existing report:', error)
-  }
-
-  // No existing report, proceed with creating a new one
+  // Proceed with creating a new report
   currentStep.value = 4
 
   // Start report creation
@@ -187,8 +167,23 @@ const handleVerified = async () => {
       name: wizard.name,
       email: wizard.email,
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to create report:', error)
+
+    // Check if this is a duplicate report error (409 status)
+    if (error.response?.status === 409 || error.data?.error_code === 'DUPLICATE_REPORT') {
+      const data = error.data?.data || error.response?.data?.data
+      if (data) {
+        existingReportData.value = {
+          businessName: data.business_name,
+          businessAddress: data.business_address,
+          createdAt: data.created_at,
+          createdAtFormatted: data.created_at_formatted,
+          magicLinkToken: data.magic_link_token,
+        }
+        currentStep.value = 5 // Step 5 is the existing report step
+      }
+    }
   }
 }
 
