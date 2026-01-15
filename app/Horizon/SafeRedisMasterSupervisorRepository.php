@@ -95,12 +95,14 @@ class SafeRedisMasterSupervisorRepository implements MasterSupervisorRepository
             return null;
         }
 
-        return ! $record['name'] ? null : (object) [
-            'name' => $record['name'],
-            'pid' => $record['pid'],
-            'status' => $record['status'],
-            'started_at' => $record['started_at'],
-            'environment' => $record['environment'],
+        $record = array_values($record);
+
+        return ! $record[0] ? null : (object) [
+            'name' => $record[0],
+            'pid' => $record[1],
+            'status' => $record[2],
+            'started_at' => $record[3],
+            'environment' => $record[4],
         ];
     }
 
