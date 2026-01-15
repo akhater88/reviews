@@ -90,7 +90,7 @@
     </div>
 
     <!-- Report Link Section -->
-    <div class="mt-6 bg-white rounded-xl border border-gray-200 p-4 max-w-md mx-auto animate-fade-up" style="animation-delay: 0.4s">
+    <div v-if="reportToken" class="mt-6 bg-white rounded-xl border border-gray-200 p-4 max-w-md mx-auto animate-fade-up" style="animation-delay: 0.4s">
       <div class="flex items-center justify-between gap-3 mb-3">
         <button
           @click="copyLink"
