@@ -922,7 +922,7 @@
 
             get reportUrl() {
                 if (!this.magicLinkToken) return '';
-                return window.location.origin + '/report/' + this.magicLinkToken;
+                return window.location.origin + '/free-report/' + this.magicLinkToken;
             },
 
             get otpCode() {
