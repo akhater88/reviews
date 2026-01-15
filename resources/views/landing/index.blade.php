@@ -14,10 +14,23 @@
     <link rel="apple-touch-icon" href="{{ asset('images/sumaa-apple-touch-icon.png') }}">
 
     {{-- Open Graph / Social Media --}}
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="سُمعة - Sumaa">
     <meta property="og:title" content="سُمعة - منصة إدارة التقييمات الذكية">
     <meta property="og:description" content="{{ __('app.heroSubtitle') }}">
-    <meta property="og:type" content="website">
+    <meta property="og:image" content="{{ asset('images/sumaa-og-image.png') }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="سُمعة - منصة إدارة التقييمات الذكية">
+    <meta property="og:url" content="{{ url('/') }}">
+    <meta property="og:locale" content="ar_SA">
+
+    {{-- Twitter Card --}}
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="سُمعة - منصة إدارة التقييمات الذكية">
+    <meta name="twitter:description" content="{{ __('app.heroSubtitle') }}">
+    <meta name="twitter:image" content="{{ asset('images/sumaa-og-image.png') }}">
+    <meta name="twitter:image:alt" content="سُمعة - منصة إدارة التقييمات الذكية">
 
     {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
