@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الوصول لتقريرك - TABsense</title>
+    <title>الوصول لتقريرك - سُمعة</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css'])
     <style>body { font-family: 'Tajawal', sans-serif; }</style>
@@ -12,7 +12,7 @@
     <div class="w-full max-w-md">
         <div class="bg-white rounded-2xl shadow-lg p-8">
             <div class="text-center mb-8">
-                <img src="{{ asset('images/logo.png') }}" alt="TABsense" class="h-10 mx-auto mb-4">
+                <img src="{{ asset('images/sumaa-logo-primary.svg') }}" alt="سُمعة" class="h-10 mx-auto mb-4">
                 <h1 class="text-2xl font-bold text-gray-900">الوصول لتقريرك</h1>
                 <p class="text-gray-600 mt-2">أدخل رقم الجوال للحصول على رابط تقريرك</p>
             </div>

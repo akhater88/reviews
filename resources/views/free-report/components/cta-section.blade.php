@@ -14,7 +14,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
             </svg>
         </a>
-        <a href="mailto:sales@tabsense.net"
+        <a href="mailto:sales@getsumaa.app"
            class="text-white/80 hover:text-white transition-colors">
             أو تواصل معنا للاستفسارات
         </a>
