@@ -26,15 +26,15 @@
                 </div>
 
                 {{-- Main Heading --}}
-                <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-gray-900 leading-tight mb-6">
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-gray-900 leading-normal sm:leading-relaxed mb-6">
                     <span class="block">حوّل تقييمات عملائك</span>
-                    <span class="block mt-2">
+                    <span class="block mt-3">
                         إلى
-                        <span class="relative">
-                            <span class="relative z-10 text-transparent bg-clip-text bg-gradient-to-l from-blue-600 to-purple-600">
+                        <span class="relative inline-block py-1">
+                            <span class="relative z-10 text-transparent bg-clip-text bg-gradient-to-l from-indigo-600 to-purple-600">
                                 رؤى قابلة للتنفيذ
                             </span>
-                            <span class="absolute bottom-2 right-0 left-0 h-3 bg-blue-200/50 -z-10 transform -skew-x-3"></span>
+                            <span class="absolute bottom-1 sm:bottom-2 right-0 left-0 h-3 sm:h-4 bg-indigo-200/50 -z-10 transform -skew-x-3"></span>
                         </span>
                     </span>
                 </h1>

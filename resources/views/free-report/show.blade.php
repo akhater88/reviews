@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تقرير {{ $report->business_name }} - TABsense</title>
+    <title>تقرير {{ $report->business_name }} - سُمعة</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -80,9 +80,9 @@
         <!-- Footer -->
         <footer class="bg-gray-900 text-white py-8 mt-12">
             <div class="container mx-auto px-4 text-center">
-                <img src="{{ asset('images/logo.png') }}" alt="TABsense" class="h-8 mx-auto mb-4 brightness-0 invert">
+                <img src="{{ asset('images/sumaa-logo-white.svg') }}" alt="سُمعة" class="h-8 mx-auto mb-4">
                 <p class="text-gray-400 text-sm">
-                    {{ date('Y') }} TABsense. جميع الحقوق محفوظة.
+                    {{ date('Y') }} سُمعة. جميع الحقوق محفوظة.
                 </p>
             </div>
         </footer>

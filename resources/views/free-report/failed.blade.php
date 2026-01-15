@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>فشل إنشاء التقرير - TABsense</title>
+    <title>فشل إنشاء التقرير - سُمعة</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css'])
     <style>body { font-family: 'Tajawal', sans-serif; }</style>
@@ -32,7 +32,7 @@
             <a href="/get-started" class="block w-full bg-blue-600 text-white py-3 rounded-full font-semibold hover:bg-blue-700 transition-colors">
                 حاول مرة أخرى
             </a>
-            <a href="mailto:support@tabsense.net" class="block w-full bg-gray-200 text-gray-700 py-3 rounded-full font-semibold hover:bg-gray-300 transition-colors">
+            <a href="mailto:support@getsumaa.app" class="block w-full bg-gray-200 text-gray-700 py-3 rounded-full font-semibold hover:bg-gray-300 transition-colors">
                 تواصل مع الدعم
             </a>
         </div>
