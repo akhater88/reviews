@@ -147,12 +147,15 @@ class SafeRedisMasterSupervisorRepository implements MasterSupervisorRepository
      */
     public function update($master)
     {
+        // Handle different property names across Horizon versions
+        $startedAt = $master->startTime ?? $master->startedAt ?? now()->timestamp;
+
         $this->connection()->hmset(
             'master:'.$master->name, [
                 'name' => $master->name,
                 'pid' => $master->pid(),
                 'status' => $master->working ? 'running' : 'paused',
-                'started_at' => (string) $master->startedAt,
+                'started_at' => (string) $startedAt,
                 'environment' => $master->environment,
             ]
         );
