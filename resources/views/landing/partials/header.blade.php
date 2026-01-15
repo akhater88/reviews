@@ -15,9 +15,9 @@
             {{-- Logo --}}
             <a href="{{ route('landing') }}" class="flex items-center gap-2 sm:gap-3 group">
                 <img
-                    src="{{ asset('images/logo.png') }}"
-                    alt="TABsense Logo"
-                    class="h-8 sm:h-10 w-auto brightness-0 invert transition-transform group-hover:scale-105"
+                    src="{{ asset('images/sumaa-logo-white.svg') }}"
+                    alt="سُمعة Logo"
+                    class="h-8 sm:h-10 w-auto transition-transform group-hover:scale-105"
                 />
             </a>
 
@@ -128,9 +128,9 @@
         <div class="sticky top-0 bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
             <a href="{{ route('landing') }}" class="flex items-center gap-2">
                 <img
-                    src="{{ asset('images/logo.png') }}"
-                    alt="TABsense Logo"
-                    class="h-8 w-auto brightness-0 invert"
+                    src="{{ asset('images/sumaa-logo-white.svg') }}"
+                    alt="سُمعة Logo"
+                    class="h-8 w-auto"
                 />
             </a>
             <button
@@ -251,7 +251,7 @@
             <div class="mt-8 pt-6 border-t border-gray-800">
                 <p class="text-sm text-gray-500 text-center">
                     تحتاج مساعدة؟
-                    <a href="mailto:support@tabsense.ai" class="text-blue-400 hover:underline">تواصل معنا</a>
+                    <a href="mailto:support@getsumaa.app" class="text-blue-400 hover:underline">تواصل معنا</a>
                 </p>
             </div>
         </div>

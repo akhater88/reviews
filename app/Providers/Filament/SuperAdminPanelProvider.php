@@ -37,18 +37,31 @@ class SuperAdminPanelProvider extends PanelProvider
             ->login(Login::class)
             ->passwordReset()
             ->colors([
-                'primary' => Color::Indigo,
+                'primary' => [
+                    50 => '#EEF2FF',
+                    100 => '#E0E7FF',
+                    200 => '#C7D2FE',
+                    300 => '#A5B4FC',
+                    400 => '#818CF8',
+                    500 => '#6366F1',
+                    600 => '#4F46E5',
+                    700 => '#4338CA',
+                    800 => '#3730A3',
+                    900 => '#312E81',
+                    950 => '#1E1B4B',
+                ],
                 'danger' => Color::Rose,
                 'gray' => Color::Slate,
                 'info' => Color::Sky,
                 'success' => Color::Emerald,
                 'warning' => Color::Amber,
             ])
-            ->font('Cairo')
-            ->brandName('TABsense Admin')
-            ->brandLogo(asset('images/admin-logo.png'))
-            ->brandLogoHeight('2rem')
-            ->favicon(asset('favicon.ico'))
+            ->font('IBM Plex Sans Arabic')
+            ->brandName('سُمعة Admin')
+            ->brandLogo(asset('images/sumaa-logo-primary.svg'))
+            ->darkModeBrandLogo(asset('images/sumaa-logo-white.svg'))
+            ->brandLogoHeight('3rem')
+            ->favicon(asset('images/sumaa-favicon.ico'))
             ->darkMode(true)
             ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth('full')

@@ -29,18 +29,31 @@ class AdminPanelProvider extends PanelProvider
             ->path('restaurant-owners')
             ->login(\App\Filament\Pages\Auth\Login::class)
             ->colors([
-                'primary' => Color::Blue,
+                'primary' => [
+                    50 => '#EEF2FF',
+                    100 => '#E0E7FF',
+                    200 => '#C7D2FE',
+                    300 => '#A5B4FC',
+                    400 => '#818CF8',
+                    500 => '#6366F1',
+                    600 => '#4F46E5',
+                    700 => '#4338CA',
+                    800 => '#3730A3',
+                    900 => '#312E81',
+                    950 => '#1E1B4B',
+                ],
                 'danger' => Color::Rose,
                 'gray' => Color::Slate,
                 'info' => Color::Sky,
                 'success' => Color::Emerald,
                 'warning' => Color::Amber,
             ])
-            ->font('Cairo')
-            ->brandName('TABsense')
-            ->brandLogo(asset('images/logo.png'))
-            ->brandLogoHeight('2.5rem')
-            ->favicon(asset('images/favicon.ico'))
+            ->font('IBM Plex Sans Arabic')
+            ->brandName('سُمعة')
+            ->brandLogo(asset('images/sumaa-logo-primary.svg'))
+            ->darkModeBrandLogo(asset('images/sumaa-logo-white.svg'))
+            ->brandLogoHeight('3rem')
+            ->favicon(asset('images/sumaa-favicon.ico'))
             ->darkMode(false)
             ->sidebarCollapsibleOnDesktop()
             ->sidebarFullyCollapsibleOnDesktop()

@@ -26,8 +26,8 @@ class TenantCredentialsMail extends Mailable
     {
         return new Envelope(
             subject: $this->isReset
-                ? 'TABsense - تم إعادة تعيين كلمة المرور'
-                : 'TABsense - بيانات الدخول الخاصة بك',
+                ? 'سُمعة - تم إعادة تعيين كلمة المرور'
+                : 'سُمعة - بيانات الدخول الخاصة بك',
         );
     }
 

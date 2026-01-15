@@ -18,7 +18,7 @@ class PaymentConfirmationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'TABsense - تأكيد الدفع #'.$this->payment->invoice->invoice_number,
+            subject: 'سُمعة - تأكيد الدفع #'.$this->payment->invoice->invoice_number,
         );
     }
 

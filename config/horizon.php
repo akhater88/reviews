@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'name' => env('HORIZON_NAME', 'TABsense'),
+    'name' => env('HORIZON_NAME', 'Sumaa'),
 
     /*
     |--------------------------------------------------------------------------
@@ -69,7 +69,7 @@ return [
 
     'prefix' => env(
         'HORIZON_PREFIX',
-        Str::slug(env('APP_NAME', 'tabsense'), '_').'_horizon:'
+        Str::slug(env('APP_NAME', 'sumaa'), '_').'_horizon:'
     ),
 
     /*

@@ -4,7 +4,7 @@
         <div class="grid md:grid-cols-4 gap-8 sm:gap-12">
             {{-- Brand --}}
             <div class="md:col-span-1">
-                <img src="{{ asset('images/logo.png') }}" alt="TABsense" class="h-10 mb-4 brightness-0 invert" />
+                <img src="{{ asset('images/sumaa-logo-white.svg') }}" alt="سُمعة" class="h-10 mb-4" />
                 <p class="text-gray-400 text-sm leading-relaxed">
                     {{ __('app.footerAbout') }}
                 </p>
@@ -37,7 +37,7 @@
                 <h4 class="font-bold text-lg mb-4">{{ __('app.footerSupportTitle') }}</h4>
                 <ul class="space-y-2">
                     <li>
-                        <a href="mailto:support@tabsense.net" class="text-gray-400 hover:text-white transition-colors text-sm">
+                        <a href="mailto:support@getsumaa.app" class="text-gray-400 hover:text-white transition-colors text-sm">
                             {{ __('app.footerContactUs') }}
                         </a>
                     </li>

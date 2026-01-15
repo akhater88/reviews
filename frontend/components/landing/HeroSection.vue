@@ -1,9 +1,9 @@
 <template>
-  <section class="relative min-h-[90vh] overflow-hidden bg-gradient-to-br from-blue-50/80 via-white to-purple-50/50">
+  <section class="relative min-h-[90vh] overflow-hidden bg-gradient-to-br from-sumaa-50/80 via-white to-purple-50/50">
     <!-- Animated Background Elements -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
       <!-- Floating Shapes -->
-      <div class="absolute top-20 right-10 w-72 h-72 bg-blue-200/30 rounded-full blur-3xl animate-float-slow"></div>
+      <div class="absolute top-20 right-10 w-72 h-72 bg-sumaa-200/30 rounded-full blur-3xl animate-float-slow"></div>
       <div class="absolute bottom-20 left-10 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl animate-float-slower"></div>
       <div class="absolute top-1/2 left-1/3 w-64 h-64 bg-coral-200/20 rounded-full blur-3xl animate-float"></div>
 
@@ -17,7 +17,7 @@
         <!-- Left Content -->
         <div class="text-center lg:text-right order-2 lg:order-1">
           <!-- Badge -->
-          <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-blue-100 rounded-full shadow-sm mb-6">
+          <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-sumaa-100 rounded-full shadow-sm mb-6">
             <span class="relative flex h-2 w-2">
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
               <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
@@ -31,10 +31,10 @@
             <span class="block mt-2">
               {{ $t('hero.title2') }}
               <span class="relative">
-                <span class="relative z-10 text-transparent bg-clip-text bg-gradient-to-l from-blue-600 to-purple-600">
+                <span class="relative z-10 text-transparent bg-clip-text bg-sumaa-gradient">
                   {{ $t('hero.titleHighlight') }}
                 </span>
-                <span class="absolute bottom-2 right-0 left-0 h-3 bg-blue-200/50 -z-10 transform -skew-x-3"></span>
+                <span class="absolute bottom-2 right-0 left-0 h-3 bg-sumaa-200/50 -z-10 transform -skew-x-3"></span>
               </span>
             </span>
           </h1>
@@ -60,10 +60,10 @@
             <!-- Secondary CTA -->
             <button
               @click="openVideoModal"
-              class="group inline-flex items-center justify-center gap-3 px-6 py-4 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-2xl hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-300"
+              class="group inline-flex items-center justify-center gap-3 px-6 py-4 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-2xl hover:border-sumaa-300 hover:bg-sumaa-50/50 transition-all duration-300"
             >
-              <span class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                <Icon name="lucide:play" class="w-5 h-5 text-blue-600 mr-[-2px]" />
+              <span class="w-10 h-10 bg-sumaa-100 rounded-full flex items-center justify-center group-hover:bg-sumaa-200 transition-colors">
+                <Icon name="lucide:play" class="w-5 h-5 text-sumaa-600 mr-[-2px]" />
               </span>
               <span>{{ $t('hero.ctaSecondary') }}</span>
             </button>
@@ -107,7 +107,7 @@
                 <div class="flex-1 mx-4">
                   <div class="bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-400 flex items-center gap-2">
                     <Icon name="lucide:lock" class="w-3 h-3" />
-                    <span dir="ltr">app.tabsense.net</span>
+                    <span dir="ltr">app.getsumaa.app</span>
                   </div>
                 </div>
               </div>
@@ -117,7 +117,7 @@
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-6">
                   <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                    <div class="w-10 h-10 bg-gradient-to-br from-sumaa-500 to-purple-500 rounded-xl flex items-center justify-center">
                       <Icon name="lucide:bar-chart-3" class="w-5 h-5 text-white" />
                     </div>
                     <div>
@@ -140,9 +140,9 @@
 
                 <!-- Stats Grid -->
                 <div class="grid grid-cols-3 gap-3 mb-6">
-                  <div class="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-3 text-center">
-                    <p class="text-2xl font-bold text-blue-600">847</p>
-                    <p class="text-xs text-blue-700/70">{{ $t('hero.dashboard.reviews') }}</p>
+                  <div class="bg-gradient-to-br from-sumaa-50 to-sumaa-100/50 rounded-xl p-3 text-center">
+                    <p class="text-2xl font-bold text-sumaa-600">847</p>
+                    <p class="text-xs text-sumaa-700/70">{{ $t('hero.dashboard.reviews') }}</p>
                   </div>
                   <div class="bg-gradient-to-br from-green-50 to-green-100/50 rounded-xl p-3 text-center">
                     <p class="text-2xl font-bold text-green-600">92%</p>
@@ -163,14 +163,14 @@
                   <div class="h-16 flex items-end gap-1">
                     <div v-for="(height, i) in chartBars" :key="i"
                          class="flex-1 rounded-t transition-all duration-500"
-                         :class="i === chartBars.length - 1 ? 'bg-blue-500' : 'bg-blue-200'"
+                         :class="i === chartBars.length - 1 ? 'bg-sumaa-500' : 'bg-sumaa-200'"
                          :style="{ height: `${height}%` }">
                     </div>
                   </div>
                 </div>
 
                 <!-- AI Recommendation Preview -->
-                <div class="bg-gradient-to-l from-purple-50 to-blue-50 border border-purple-100 rounded-xl p-3">
+                <div class="bg-gradient-to-l from-purple-50 to-sumaa-50 border border-purple-100 rounded-xl p-3">
                   <div class="flex items-start gap-2">
                     <div class="w-6 h-6 bg-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Icon name="lucide:sparkles" class="w-3 h-3 text-white" />

@@ -62,13 +62,13 @@
             class="relative text-center"
           >
             <!-- Step Number -->
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 text-white text-2xl font-bold mb-6 shadow-lg">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-sumaa-500 to-purple-500 text-white text-2xl font-bold mb-6 shadow-lg">
               {{ index + 1 }}
             </div>
             <!-- Connector Line -->
             <div
               v-if="index < steps.length - 1"
-              class="hidden md:block absolute top-8 right-0 w-full h-0.5 bg-gradient-to-l from-blue-200 to-purple-200"
+              class="hidden md:block absolute top-8 right-0 w-full h-0.5 bg-gradient-to-l from-sumaa-200 to-purple-200"
               style="right: -50%; width: 100%;"
             ></div>
             <h3 class="text-xl font-bold text-gray-900 mb-2">{{ step.title }}</h3>
@@ -79,7 +79,7 @@
     </section>
 
     <!-- Pricing Section -->
-    <section id="pricing" class="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
+    <section id="pricing" class="py-20 bg-gradient-to-br from-sumaa-50 to-purple-50">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
           <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -170,11 +170,8 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col md:flex-row items-center justify-between gap-6">
           <!-- Logo -->
-          <div class="flex items-center gap-2">
-            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <Icon name="lucide:bar-chart-3" class="w-5 h-5 text-white" />
-            </div>
-            <span class="text-xl font-bold">TABsense</span>
+          <div class="flex items-center">
+            <SumaaLogoWhite class="h-12" />
           </div>
 
           <!-- Links -->
@@ -219,8 +216,8 @@ const features = computed(() => [
     icon: 'lucide:globe',
     title: t('features.arabic.title'),
     description: t('features.arabic.description'),
-    bgColor: 'bg-blue-100',
-    iconColor: 'text-blue-600',
+    bgColor: 'bg-sumaa-100',
+    iconColor: 'text-sumaa-600',
   },
   {
     icon: 'lucide:zap',

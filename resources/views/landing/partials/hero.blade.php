@@ -1,9 +1,9 @@
 {{-- Enhanced Hero Section --}}
-<section class="relative min-h-[90vh] overflow-hidden bg-gradient-to-br from-blue-50/80 via-white to-purple-50/50">
+<section class="relative min-h-[90vh] overflow-hidden bg-gradient-to-br from-indigo-50/80 via-white to-purple-50/50">
     {{-- Animated Background Elements --}}
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
         {{-- Floating Shapes --}}
-        <div class="absolute top-20 right-10 w-72 h-72 bg-blue-200/30 rounded-full blur-3xl animate-float-slow"></div>
+        <div class="absolute top-20 right-10 w-72 h-72 bg-indigo-200/30 rounded-full blur-3xl animate-float-slow"></div>
         <div class="absolute bottom-20 left-10 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl animate-float-slower"></div>
         <div class="absolute top-1/2 left-1/3 w-64 h-64 bg-red-200/20 rounded-full blur-3xl animate-float"></div>
 
@@ -17,7 +17,7 @@
             {{-- Left Content --}}
             <div class="text-center lg:text-right order-2 lg:order-1">
                 {{-- Badge --}}
-                <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-blue-100 rounded-full shadow-sm mb-6">
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-indigo-100 rounded-full shadow-sm mb-6">
                     <span class="relative flex h-2 w-2">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>

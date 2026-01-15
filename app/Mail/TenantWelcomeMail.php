@@ -24,7 +24,7 @@ class TenantWelcomeMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'TABsense - بيانات الدخول',
+            subject: 'سُمعة - بيانات الدخول',
         );
     }
 

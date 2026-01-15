@@ -7,11 +7,8 @@
       <div class="flex items-center justify-between h-16 lg:h-20">
 
         <!-- Logo -->
-        <NuxtLink to="/" class="flex items-center gap-2">
-          <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-            <Icon name="lucide:bar-chart-3" class="w-6 h-6 text-white" />
-          </div>
-          <span class="text-xl font-bold text-gray-900">TABsense</span>
+        <NuxtLink to="/" class="flex items-center">
+          <SumaaLogo class="h-10 lg:h-12" />
         </NuxtLink>
 
         <!-- Desktop Navigation -->
@@ -20,7 +17,7 @@
             v-for="item in navItems"
             :key="item.id"
             :href="item.href"
-            class="px-4 py-2 text-gray-600 hover:text-blue-600 font-medium rounded-lg hover:bg-blue-50/50 transition-all duration-200"
+            class="px-4 py-2 text-gray-600 hover:text-sumaa-600 font-medium rounded-lg hover:bg-sumaa-50/50 transition-all duration-200"
           >
             {{ item.label }}
           </a>
@@ -30,7 +27,7 @@
         <div class="hidden lg:flex items-center gap-3">
           <NuxtLink
             to="/login"
-            class="px-4 py-2 text-gray-600 hover:text-blue-600 font-medium transition-colors"
+            class="px-4 py-2 text-gray-600 hover:text-sumaa-600 font-medium transition-colors"
           >
             {{ $t('nav.login') }}
           </NuxtLink>

@@ -17,8 +17,8 @@ return [
     |--------------------------------------------------------------------------
     */
     'templates' => [
-        'magic_link' => env('INFOBIP_TEMPLATE_MAGIC_LINK', 'tabsense_free_report_link'),
-        'report_ready' => env('INFOBIP_TEMPLATE_REPORT_READY', 'tabsense_report_ready'),
+        'magic_link' => env('INFOBIP_TEMPLATE_MAGIC_LINK', 'sumaa_free_report_link'),
+        'report_ready' => env('INFOBIP_TEMPLATE_REPORT_READY', 'sumaa_report_ready'),
     ],
 
     /*
